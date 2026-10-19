@@ -1,0 +1,5 @@
+import {NextRequest,NextResponse} from 'next/server';
+import {Webhook} from 'standardwebhooks';
+import {reconcilePayment} from '@/lib/fulfillment';
+export const runtime='nodejs';
+export async function POST(req:NextRequest){const secret=process.env.DODO_PAYMENTS_WEBHOOK_KEY;if(!secret)return NextResponse.json({error:'Webhook not configured'},{status:503});const raw=await req.text();if(raw.length>1000000)return new NextResponse(null,{status:413});let event:{type?:string,data?:{payment_id?:string}};try{event=new Webhook(secret).verify(raw,{'webhook-id':req.headers.get('webhook-id')||'','webhook-timestamp':req.headers.get('webhook-timestamp')||'','webhook-signature':req.headers.get('webhook-signature')||''}) as typeof event;}catch{return NextResponse.json({error:'Invalid signature'},{status:401});}if(!event.type||!event.data?.payment_id)return NextResponse.json({received:true});if(!/^(payment|refund|dispute)\./.test(event.type))return NextResponse.json({received:true});try{await reconcilePayment(event.data.payment_id);return NextResponse.json({received:true});}catch{return NextResponse.json({error:'Unable to record event; retry required'},{status:503});}}

@@ -1,0 +1,11 @@
+# Local credentials and generated files
+.env*
+!.env.example
+**/node_modules/
+**/.next/
+**/.vercel/
+*.tsbuildinfo
+*.log
+
+# Original account analytics and social research stay local
+/research/
