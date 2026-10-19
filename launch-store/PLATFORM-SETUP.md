@@ -69,3 +69,7 @@ Official documentation:
 - https://supabase.com/docs/guides/auth/server-side/creating-a-client
 - https://docs.dodopayments.com/developer-resources/checkout-session
 - https://docs.dodopayments.com/developer-resources/webhooks
+
+## Site URL validation
+
+For this deployment set `NEXT_PUBLIC_SITE_URL=https://build-hamza.vercel.app` as a plain value, without Markdown link syntax or the variable name. The shared origin resolver trims quotes/whitespace and adds HTTPS for a bare domain. Invalid values fall back to Vercel's `VERCEL_PROJECT_PRODUCTION_URL`, then the known Build Hamza production domain on Vercel. Localhost is ignored on Vercel. Request Host/Origin headers never determine the trusted origin. Metadata, auth, checkout and workspace saves use the same resolver.
