@@ -5,7 +5,7 @@
 - First Product Fieldguide: **$5 USD**, separate one-time purchase, read inside the account.
 - Launchpad Studio: **$19 USD**, separate one-time purchase, used inside the account.
 - No public free-PDF URL or downloadable Studio HTML/ZIP is served by the website.
-- Supabase email-link sign-in, per-account library and cloud-saved workspace.
+- Supabase email/password sign-in, per-account library and cloud-saved workspace.
 - Dodo checkout is tied to a server-created checkout attempt and signed-in user.
 - Payment confirmation is verified with Dodo and persisted in Supabase.
 - Signed webhooks reconcile payments, refunds and disputes. Revocation is terminal for that payment; another valid purchase can restore access.
@@ -31,7 +31,7 @@ SUPPORT_EMAIL=your-real-support-email
 
 ## Supabase Auth
 
-In Authentication → URL Configuration, set Site URL to the exact deployed origin and add `https://your-domain.example/auth/callback` to the redirect allowlist. For local development, add `http://localhost:3000/auth/callback`. Enable email sign-in and configure production SMTP before promoting the site. The default email service has delivery/rate limits and is suitable for initial testing, not an assumed production mail service. Test a real sign-in link to your own email in the deployed environment.
+In Authentication → URL Configuration, set Site URL to the exact deployed origin and add `https://your-domain.example/auth/callback` to the redirect allowlist. For local development, add `http://localhost:3000/auth/callback`. Enable email/password sign-in and keep Confirm email disabled for immediate signup. Configure production SMTP for password reset emails. The default email service has delivery/rate limits and is suitable for initial testing, not an assumed production mail service. Normal signup and sign-in use email/password and do not send verification emails. Test password recovery separately using your own email in the deployed environment.
 
 ## Dodo product setup
 
@@ -73,3 +73,9 @@ Official documentation:
 ## Site URL validation
 
 For this deployment set `NEXT_PUBLIC_SITE_URL=https://build-hamza.vercel.app` as a plain value, without Markdown link syntax or the variable name. The shared origin resolver trims quotes/whitespace and adds HTTPS for a bare domain. Invalid values fall back to Vercel's `VERCEL_PROJECT_PRODUCTION_URL`, then the known Build Hamza production domain on Vercel. Localhost is ignored on Vercel. Request Host/Origin headers never determine the trusted origin. Metadata, auth, checkout and workspace saves use the same resolver.
+
+## Password account flow
+
+`/login` defaults to Create account; existing customers can switch to Sign in. The server uses Supabase `signUp` / `signInWithPassword` with session cookies. Keep Confirm email OFF (the current project reports auto-confirm enabled). No service-role key is used to grant signup sessions. Existing magic-link users keep the same account and purchases; use Set or reset password with that email once. Recovery alone uses email and returns through `/auth/callback` to `/account/password`.
+
+Verification: `node tests/password-auth.mjs` uses a disposable synthetic account with confirmation disabled; verifies instant signup, authenticated library, wrong-password rejection, logout, safe return URLs, setting a password and paid-access isolation. It sends no emails or charges, and deletes its test account.

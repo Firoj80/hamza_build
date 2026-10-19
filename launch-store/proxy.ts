@@ -8,4 +8,4 @@ export async function proxy(request:NextRequest){
  response.headers.set('Cache-Control','private, no-store, max-age=0');
  return response;
 }
-export const config={matcher:['/library/:path*','/studio/:path*','/fieldguide/:path*','/login','/auth/:path*','/api/workspace/:path*','/api/workspace-state','/api/fieldguide','/api/checkout','/order']};
+export const config={matcher:['/account/:path*','/library/:path*','/studio/:path*','/fieldguide/:path*','/login','/auth/:path*','/api/workspace/:path*','/api/workspace-state','/api/fieldguide','/api/checkout','/order']};
