@@ -28,7 +28,11 @@ DODO_STUDIO_PRODUCT_ID=your-19-dollar-product-id
 DODO_PAYMENTS_WEBHOOK_KEY=your-webhook-signing-secret
 SUPPORT_EMAIL=your-real-support-email
 SALES_DASHBOARD_ADMIN_EMAIL=alamtech9@gmail.com
+NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=your-posthog-project-token
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 ```
+
+PostHog is optional and starts collecting only after the project token is set. In PostHog, open Project settings and copy the **project API key/token** (the public `phc_...` token, never a personal `phx_...` key). Add it in `.env.local` and in Vercel as `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`; set `NEXT_PUBLIC_POSTHOG_HOST` to the ingestion host shown by your PostHog region, then redeploy. This integration records page views, product detail views, and checkout attempts; automatic click/form capture and session replay are disabled. The existing first-party visitor counter remains available independently.
 
 The owner-only sales dashboard is available at `/sales` after signing in. `alamtech9@gmail.com` is the configured owner email; the authenticated Supabase account must use this address. It reports privacy-friendly unique visitor estimates, verified Dodo payment totals and product counts; the free Fieldguide is shown as account access rather than a paid sale. Amounts include tax and exclude processor fees. Visitor analytics stores a daily HMAC token instead of raw IP addresses or user agents.
 
