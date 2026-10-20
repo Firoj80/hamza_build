@@ -27,10 +27,10 @@ DODO_FIELDGUIDE_PRODUCT_ID=your-5-dollar-product-id
 DODO_STUDIO_PRODUCT_ID=your-19-dollar-product-id
 DODO_PAYMENTS_WEBHOOK_KEY=your-webhook-signing-secret
 SUPPORT_EMAIL=your-real-support-email
-SALES_DASHBOARD_ADMIN_EMAIL=your-supabase-login-email
+SALES_DASHBOARD_ADMIN_EMAIL=alamtech9@gmail.com
 ```
 
-The owner-only sales dashboard is available at `/sales` after signing in. Set `SALES_DASHBOARD_ADMIN_EMAIL` to the exact email used for the owner's Supabase account in both `.env.local` and Vercel. It reports verified Dodo payment totals and product counts; the free Fieldguide is shown as account access rather than a paid sale. Amounts include tax and exclude processor fees.
+The owner-only sales dashboard is available at `/sales` after signing in. `alamtech9@gmail.com` is the configured owner email; the authenticated Supabase account must use this address. It reports privacy-friendly unique visitor estimates, verified Dodo payment totals and product counts; the free Fieldguide is shown as account access rather than a paid sale. Amounts include tax and exclude processor fees. Visitor analytics stores a daily HMAC token instead of raw IP addresses or user agents.
 
 ## Supabase Auth
 
