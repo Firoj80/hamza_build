@@ -2,7 +2,7 @@
 
 ## What changed
 
-- First Product Fieldguide: **$5 USD**, separate one-time purchase, read inside the account.
+- Idea-to-Income Fieldguide: **Free**, separate one-time purchase, read inside the account.
 - Launchpad Studio: **$19 USD**, separate one-time purchase, used inside the account.
 - No public free-PDF URL or downloadable Studio HTML/ZIP is served by the website.
 - Supabase email/password sign-in, per-account library and cloud-saved workspace.
@@ -27,7 +27,10 @@ DODO_FIELDGUIDE_PRODUCT_ID=your-5-dollar-product-id
 DODO_STUDIO_PRODUCT_ID=your-19-dollar-product-id
 DODO_PAYMENTS_WEBHOOK_KEY=your-webhook-signing-secret
 SUPPORT_EMAIL=your-real-support-email
+SALES_DASHBOARD_ADMIN_EMAIL=your-supabase-login-email
 ```
+
+The owner-only sales dashboard is available at `/sales` after signing in. Set `SALES_DASHBOARD_ADMIN_EMAIL` to the exact email used for the owner's Supabase account in both `.env.local` and Vercel. It reports verified Dodo payment totals and product counts; the free Fieldguide is shown as account access rather than a paid sale. Amounts include tax and exclude processor fees.
 
 ## Supabase Auth
 
@@ -37,7 +40,7 @@ In Authentication → URL Configuration, set Site URL to the exact deployed orig
 
 Create two **one-time**, fixed-price USD products in test mode:
 
-1. First Product Fieldguide: 500 cents ($5).
+1. Idea-to-Income Fieldguide: free account access; no Dodo product is required.
 2. Launchpad Studio: 1900 cents ($19).
 
 Do not attach digital-file entitlements or the old Studio ZIP to these products. Account access is fulfilled by this platform. If you already attached files to a previous Dodo product, detach them or create fresh platform products before live sales. This project does not silently modify existing Dodo settings.

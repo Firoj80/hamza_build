@@ -9,13 +9,13 @@ export async function POST(request:NextRequest){try{
  const origin=configuredSiteOrigin();
  if(request.headers.get('origin')!==origin)return NextResponse.json({error:'Please start checkout from this website.'},{status:403});
  const body=await request.json().catch(()=>({}));const key=body.product;
- if(key!=='studio'&&key!=='fieldguide')return NextResponse.json({error:'Unknown product'},{status:400});
+ if(key!=='studio')return NextResponse.json({error:'Unknown product'},{status:400});
  const user=await currentUser();if(!user)return NextResponse.json({loginUrl:'/login?next='+encodeURIComponent('/library?buy='+key)},{status:401});
  const db=await authClient();const {data:owned,error:accessError}=await db.from('platform_purchases').select('payment_id').eq('user_id',user.id).eq('product_key',key).eq('access_status','active').limit(1);
  if(accessError)throw new Error('Access lookup failed');if(owned?.length)return NextResponse.json({libraryUrl:'/library'});
- const productId=key==='studio'?process.env.DODO_STUDIO_PRODUCT_ID:process.env.DODO_FIELDGUIDE_PRODUCT_ID;
+ const productId=process.env.DODO_STUDIO_PRODUCT_ID;
  if(!productId)throw new Error('Missing product');
- const {client}=paymentConfig();const product=await client.products.retrieve(productId);const cents=key==='studio'?1900:500;
+ const {client}=paymentConfig();const product=await client.products.retrieve(productId);const cents=1900;
  if(product.price.type!=='one_time_price'||product.price.currency!=='USD'||product.price.price!==cents||product.price.pay_what_you_want)throw new Error('Offer mismatch');
  const admin=adminClient();const since=new Date(Date.now()-60*1000).toISOString();const {count,error:limitError}=await admin.from('platform_checkout_attempts').select('id',{count:'exact',head:true}).eq('user_id',user.id).gte('created_at',since);
  if(limitError)throw new Error('Checkout service unavailable');if((count||0)>=5)return NextResponse.json({error:'Please wait a minute before opening another checkout.'},{status:429});

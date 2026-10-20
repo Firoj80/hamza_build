@@ -15,6 +15,8 @@ create table public.platform_purchases (
  product_key text not null check(product_key in ('studio','fieldguide')),
  access_status text not null check(access_status in ('active','pending','revoked')),
  provider_status text not null,
+ amount_cents integer not null default 0 check(amount_cents>=0),
+ currency text not null default 'USD' check(currency ~ '^[A-Z]{3}$'),
  updated_at timestamptz not null default now()
 );
 create index platform_purchases_access on public.platform_purchases(user_id,product_key,access_status);
@@ -35,15 +37,16 @@ create policy "Read own purchases" on public.platform_purchases for select to au
 create policy "Read own paid workspace" on public.platform_workspace for select to authenticated using((select auth.uid())=user_id and exists(select 1 from public.platform_purchases p where p.user_id=(select auth.uid()) and p.product_key='studio' and p.access_status='active'));
 create policy "Insert own paid workspace" on public.platform_workspace for insert to authenticated with check((select auth.uid())=user_id and exists(select 1 from public.platform_purchases p where p.user_id=(select auth.uid()) and p.product_key='studio' and p.access_status='active'));
 create policy "Update own paid workspace" on public.platform_workspace for update to authenticated using((select auth.uid())=user_id and exists(select 1 from public.platform_purchases p where p.user_id=(select auth.uid()) and p.product_key='studio' and p.access_status='active')) with check((select auth.uid())=user_id and exists(select 1 from public.platform_purchases p where p.user_id=(select auth.uid()) and p.product_key='studio' and p.access_status='active'));
-create function public.platform_record_payment(p_attempt_id uuid,p_payment_id text,p_access_status text,p_provider_status text) returns void language plpgsql security invoker set search_path='' as $$
+create function public.platform_record_payment(p_attempt_id uuid,p_payment_id text,p_access_status text,p_provider_status text,p_amount_cents integer,p_currency text) returns void language plpgsql security invoker set search_path='' as $$
 declare a public.platform_checkout_attempts%rowtype;
 begin
+ if p_amount_cents < 0 or p_currency !~ '^[A-Z]{3}$' then raise exception 'Invalid payment amount or currency'; end if;
  select * into strict a from public.platform_checkout_attempts where id=p_attempt_id for update;
- insert into public.platform_purchases(payment_id,attempt_id,user_id,product_key,access_status,provider_status)
- values(p_payment_id,a.id,a.user_id,a.product_key,p_access_status,p_provider_status)
- on conflict(payment_id) do update set access_status=case when public.platform_purchases.access_status='revoked' then 'revoked' when public.platform_purchases.access_status='active' and excluded.access_status='pending' then 'active' else excluded.access_status end,provider_status=excluded.provider_status,updated_at=now()
+ insert into public.platform_purchases(payment_id,attempt_id,user_id,product_key,access_status,provider_status,amount_cents,currency)
+ values(p_payment_id,a.id,a.user_id,a.product_key,p_access_status,p_provider_status,p_amount_cents,p_currency)
+ on conflict(payment_id) do update set access_status=case when public.platform_purchases.access_status='revoked' then 'revoked' when public.platform_purchases.access_status='active' and excluded.access_status='pending' then 'active' else excluded.access_status end,provider_status=excluded.provider_status,amount_cents=excluded.amount_cents,currency=excluded.currency,updated_at=now()
  where public.platform_purchases.attempt_id=excluded.attempt_id;
 end; $$;
-revoke all on function public.platform_record_payment(uuid,text,text,text) from public,anon,authenticated;
-grant execute on function public.platform_record_payment(uuid,text,text,text) to service_role;
+revoke all on function public.platform_record_payment(uuid,text,text,text,integer,text) from public,anon,authenticated;
+grant execute on function public.platform_record_payment(uuid,text,text,text,integer,text) to service_role;
 commit;
