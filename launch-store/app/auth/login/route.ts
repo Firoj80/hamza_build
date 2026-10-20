@@ -1,7 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {authClient} from '@/lib/supabase/server';
 import {configuredSiteOrigin} from '@/lib/payment-policy.mjs';
-import {safeNext} from '@/lib/platform-policy.mjs';
+import {postAuthRedirect} from '@/lib/platform-policy.mjs';
 export async function POST(req:NextRequest){try{
  const origin=configuredSiteOrigin();if(req.headers.get('origin')!==origin)return NextResponse.json({error:'Invalid request'},{status:403});
  const input=await req.json();
@@ -18,5 +18,5 @@ export async function POST(req:NextRequest){try{
  const {data,error}=input.mode==='signup'?await db.auth.signUp(credentials):await db.auth.signInWithPassword(credentials);
  if(error){const limited=error.status===429;return NextResponse.json({error:limited?'Too many attempts. Please wait before trying again.':input.mode==='signup'?'Could not create this account. It may already exist; try signing in or setting a password.':'Email or password is incorrect. Try again or reset your password.'},{status:limited?429:400,headers});}
  if(!data.session)return NextResponse.json({error:'Account created, but immediate sign-in is unavailable. Contact support to check account settings.'},{status:409,headers});
- return NextResponse.json({url:safeNext(input.next)},{headers});
+ return NextResponse.json({url:postAuthRedirect(data.user?.email,input.next)},{headers});
  }catch{return NextResponse.json({error:'Sign-in is temporarily unavailable. Please try again.'},{status:503});}}

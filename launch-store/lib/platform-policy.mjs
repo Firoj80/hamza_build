@@ -1,4 +1,6 @@
 export function safeNext(value){return typeof value==='string'&&value.startsWith('/')&&!value.startsWith('//')&&!value.includes('\\')&&!/[\r\n]/.test(value)?value:'/library';}
+export function isSalesAdmin(email,configured='alamtech9@gmail.com'){if(typeof email!=='string')return false;const admins=String(configured||'alamtech9@gmail.com').split(',').map(value=>value.trim().toLowerCase()).filter(Boolean);return admins.includes(email.trim().toLowerCase());}
+export function postAuthRedirect(email,next,configured='alamtech9@gmail.com'){return isSalesAdmin(email,configured)?'/sales':safeNext(next);}
 export function paymentAccessStatus(payment){if(payment.refund_status||payment.refunds?.some(r=>r.status==='succeeded')||payment.disputes?.length)return 'revoked';return payment.status==='succeeded'?'active':'pending';}
 export function cleanWorkspace(input){
  if(!input||typeof input!=='object'||Array.isArray(input))throw new Error('Invalid workspace');

@@ -6,6 +6,7 @@ import {currentUser} from '@/lib/supabase/server';
 import {adminClient} from '@/lib/supabase/admin';
 import {guide,studio} from '@/lib/catalog';
 import ShareSnapshot from './share-snapshot';
+import {isSalesAdmin} from '@/lib/platform-policy.mjs';
 import styles from './sales.module.css';
 
 export const dynamic='force-dynamic';
@@ -21,8 +22,7 @@ function date(value:string){return new Intl.DateTimeFormat('en-IN',{dateStyle:'m
 export default async function Sales(){
  const user=await currentUser();
  if(!user)redirect('/login?next=%2Fsales');
- const ownerEmails=(process.env.SALES_DASHBOARD_ADMIN_EMAIL||'alamtech9@gmail.com').split(',').map(email=>email.trim().toLowerCase()).filter(Boolean);
- if(!user.email||!ownerEmails.includes(user.email.trim().toLowerCase()))notFound();
+ if(!isSalesAdmin(user.email,process.env.SALES_DASHBOARD_ADMIN_EMAIL))notFound();
  const db=adminClient();
  const [{data,error},{data:analyticsData,error:analyticsError},{data:salesData,error:salesError}]=await Promise.all([
   db.from('platform_purchases').select('payment_id,product_key,access_status,provider_status,amount_cents,currency,updated_at').order('updated_at',{ascending:false}).limit(500),
