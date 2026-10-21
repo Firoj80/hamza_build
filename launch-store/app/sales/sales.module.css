@@ -45,5 +45,26 @@
 .funnelFill{height:100%;background:#173b31;border-radius:999px}
 .abandoned{background:#f7efe8;color:#8a4b29}
 .recovered{background:#e8f0f8;color:#2b547e}
-@media(max-width:860px){.funnelGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:520px){.funnelGrid{grid-template-columns:1fr}}
+.trendSection{margin-top:34px}
+.trendCard{background:#fff;border:1px solid #e4e8e1;border-radius:14px;padding:22px;box-shadow:0 8px 30px #203c2908}
+.trendKpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #edf0eb}
+.trendKpi{display:flex;flex-direction:column;gap:4px}
+.trendKpi span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#738276;font-weight:700}
+.trendKpi strong{font-size:22px;letter-spacing:-.03em;color:#1d2925}
+.trendKpi small{font-size:12px;color:#79847d}
+.chartGrid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:8px;align-items:end;height:168px;padding:18px 4px 6px}
+.barCol{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;min-width:0}
+.barValue{font-size:10px;color:#627067;font-weight:600;line-height:1;white-space:nowrap}
+.barSaleTag{background:#e7f3ea;color:#285934;font-size:10px;font-weight:700;padding:2px 5px;border-radius:999px;line-height:1;white-space:nowrap}
+.barTrack{width:100%;max-width:34px;height:108px;background:#f2f4ef;border-radius:6px;display:flex;align-items:flex-end;overflow:hidden;padding:2px}
+.barFill{width:100%;background:#173b31;border-radius:4px;transition:height .2s ease}
+.barFillSale{background:#2d6a4f}
+.barLabel{font-size:10px;color:#79847d;white-space:nowrap;letter-spacing:-.02em}
+.routeGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid #edf0eb}
+.routeCard{background:#f8f9f5;border:1px solid #e6eae2;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:5px}
+.routeCard span{font-size:11px;font-weight:700;color:#627067;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.routeCard strong{font-size:20px;letter-spacing:-.03em;color:#1d2925}
+.routeCard small{font-size:11px;color:#79847d}
+@media(max-width:860px){.funnelGrid,.trendKpis{grid-template-columns:repeat(2,minmax(0,1fr))}.routeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.chartGrid{gap:4px}}
+@media(max-width:520px){.funnelGrid,.trendKpis,.routeGrid{grid-template-columns:1fr}.barLabel{font-size:9px}}
+

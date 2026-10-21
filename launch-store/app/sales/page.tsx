@@ -14,6 +14,7 @@ export const metadata={title:'Sales dashboard — Hamza Idrishi',robots:{index:f
 
 type Purchase={payment_id:string;attempt_id:string;user_id:string;product_key:'studio'|'fieldguide';access_status:'active'|'pending'|'revoked';provider_status:string;amount_cents:number;currency:string;updated_at:string};
 type CheckoutAttempt={id:string;user_id:string;product_key:'studio'|'fieldguide';provider_product_id:string;expected_cents:number;created_at:string};
+type PageviewRow={viewed_on:string;path:'/'|'/products/first-product-fieldguide'|'/products/launchpad-studio'|'/fieldguide'|'/studio';visitor_hash:string};
 type Analytics={total_visitors:number;today_visitors:number;by_product:{fieldguide:number;studio:number}};
 type ProductSales={paid_sales?:number;accesses?:number;pending_sales?:number;revoked_sales?:number;unknown_amount_sales?:number;amounts?:Record<string,number>};
 type SalesSummary={studio:Required<Omit<ProductSales,'accesses'>>;fieldguide:ProductSales};
@@ -21,7 +22,9 @@ const products={studio:studio.name,fieldguide:guide.name};
 function money(cents:number,currency:string){try{return new Intl.NumberFormat('en-US',{style:'currency',currency}).format(cents/100)}catch{return `${(cents/100).toFixed(2)} ${currency}`} }
 function formatAmounts(amounts:Record<string,number>){return Object.entries(amounts).map(([currency,cents])=>money(cents,currency)).join(' · ')||money(0,'USD');}
 function date(value:string){return new Intl.DateTimeFormat('en-IN',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kolkata'}).format(new Date(value))}
+function shortDay(isoDate:string){const [y,m,d]=isoDate.split('-').map(Number);return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(y,m-1,d)));}
 function pct(numerator:number,denominator:number){if(denominator<=0)return '0.0%';const val=(numerator/denominator)*100;return `${val>=10?val.toFixed(1):val.toFixed(1)}%`;}
+function deltaLabel(curr:number,prev:number,unit:string){if(prev===0)return curr>0?`+${curr} vs prior 7d`:`0 ${unit} prior 7d`;const diff=curr-prev;const sign=diff>0?'+':'';return `${sign}${diff} vs prior 7d (${prev})`;}
 function shortUser(userId:string,emailMap:Map<string,string>){return emailMap.get(userId)||`user_${userId.slice(0,8)}`;}
 
 export default async function Sales(){
@@ -29,15 +32,27 @@ export default async function Sales(){
  if(!user)redirect('/login?next=%2Fsales');
  if(!isSalesAdmin(user.email,process.env.SALES_DASHBOARD_ADMIN_EMAIL))notFound();
  const db=adminClient();
+
+ const now=new Date();
+ const days14:string[]=[];
+ for(let i=13;i>=0;i--){
+  const d=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()-i));
+  days14.push(d.toISOString().slice(0,10));
+ }
+ const start14Date=days14[0];
+ const todayUtc=days14[days14.length-1];
+
  const [
   {data,error},
   {data:attemptsData,error:attemptsError},
+  {data:pageviewsData,error:pageviewsError},
   {data:analyticsData,error:analyticsError},
   {data:salesData,error:salesError},
   usersResult
  ]=await Promise.all([
   db.from('platform_purchases').select('payment_id,attempt_id,user_id,product_key,access_status,provider_status,amount_cents,currency,updated_at').order('updated_at',{ascending:false}).limit(500),
   db.from('platform_checkout_attempts').select('id,user_id,product_key,provider_product_id,expected_cents,created_at').order('created_at',{ascending:false}).limit(500),
+  db.from('site_pageviews').select('viewed_on,path,visitor_hash').gte('viewed_on',start14Date).limit(5000),
   db.rpc('get_site_analytics'),
   db.rpc('get_product_sales_summary'),
   db.auth.admin.listUsers({page:1,perPage:1000}).catch(()=>({data:{users:[]},error:null}))
@@ -47,6 +62,7 @@ export default async function Sales(){
  const summary=salesData as SalesSummary;
  const rows=(data||[]) as Purchase[];
  const attempts=(attemptsError?[]:attemptsData||[]) as CheckoutAttempt[];
+ const pageviews=(pageviewsError?[]:pageviewsData||[]) as PageviewRow[];
  const emailMap=new Map<string,string>();
  for(const u of usersResult?.data?.users||[]){if(u.id&&u.email)emailMap.set(u.id,u.email);}
 
@@ -103,11 +119,75 @@ export default async function Sales(){
  const overallCheckoutCompletion=pct(totalPaid,totalAttempts);
  const overallDropoffRate=totalAttempts>0?pct(abandonedAttempts.length,totalAttempts):'0.0%';
 
+ // 14-Day Daily Traffic & Revenue Time-Series calculations
+ const dailyVisitorsMap=new Map<string,Set<string>>();
+ const dailyAttemptsMap=new Map<string,number>();
+ const dailySalesMap=new Map<string,number>();
+ const dailyAmountsMap=new Map<string,Record<string,number>>();
+ for(const d of days14){
+  dailyVisitorsMap.set(d,new Set());
+  dailyAttemptsMap.set(d,0);
+  dailySalesMap.set(d,0);
+  dailyAmountsMap.set(d,{});
+ }
+ for(const pv of pageviews){
+  const bucket=dailyVisitorsMap.get(pv.viewed_on);
+  if(bucket)bucket.add(pv.visitor_hash);
+ }
+ for(const a of attempts){
+  const d=a.created_at?.slice(0,10);
+  if(d&&dailyAttemptsMap.has(d))dailyAttemptsMap.set(d,(dailyAttemptsMap.get(d)||0)+1);
+ }
+ for(const r of rows){
+  if(r.access_status!=='active')continue;
+  const d=r.updated_at?.slice(0,10);
+  if(d&&dailySalesMap.has(d)){
+   dailySalesMap.set(d,(dailySalesMap.get(d)||0)+1);
+   if(r.amount_cents>0){
+    const amt=dailyAmountsMap.get(d)!;
+    amt[r.currency]=(amt[r.currency]||0)+r.amount_cents;
+   }
+  }
+ }
+ const dailySeries=days14.map(d=>({
+  date:d,
+  label:shortDay(d),
+  visitors:dailyVisitorsMap.get(d)?.size||0,
+  attempts:dailyAttemptsMap.get(d)||0,
+  sales:dailySalesMap.get(d)||0,
+  amounts:dailyAmountsMap.get(d)||{}
+ }));
+ const maxDailyVisitors=Math.max(...dailySeries.map(d=>d.visitors),1);
+ const prev7=dailySeries.slice(0,7);
+ const last7=dailySeries.slice(7,14);
+ const visitorsLast7=new Set(pageviews.filter(p=>p.viewed_on>=days14[7]).map(p=>p.visitor_hash)).size;
+ const visitorsPrev7=new Set(pageviews.filter(p=>p.viewed_on<days14[7]).map(p=>p.visitor_hash)).size;
+ const attemptsLast7=last7.reduce((s,d)=>s+d.attempts,0);
+ const attemptsPrev7=prev7.reduce((s,d)=>s+d.attempts,0);
+ const salesLast7=last7.reduce((s,d)=>s+d.sales,0);
+ const salesPrev7=prev7.reduce((s,d)=>s+d.sales,0);
+ const amountsLast7:Record<string,number>={};
+ for(const d of last7){for(const [c,v] of Object.entries(d.amounts))amountsLast7[c]=(amountsLast7[c]||0)+v;}
+
+ const routeDefs:{path:PageviewRow['path'];title:string;kind:string}[]=[
+  {path:'/',title:'Storefront /',kind:'Landing page'},
+  {path:'/products/launchpad-studio',title:'Studio detail',kind:'Product page'},
+  {path:'/products/first-product-fieldguide',title:'Fieldguide detail',kind:'Product page'},
+  {path:'/studio',title:'Studio workspace',kind:'Buyer usage'},
+  {path:'/fieldguide',title:'Fieldguide reader',kind:'Buyer usage'}
+ ];
+ const routeStats=routeDefs.map(def=>{
+  const matching=pageviews.filter(p=>p.path===def.path);
+  const visitors14d=new Set(matching.map(p=>p.visitor_hash)).size;
+  const visitorsToday=new Set(matching.filter(p=>p.viewed_on===todayUtc).map(p=>p.visitor_hash)).size;
+  return {...def,visitors14d,visitorsToday};
+ });
+
  const shareText=`My product progress so far:\n${analytics.total_visitors.toLocaleString()} unique visitors\n${studio.name}: ${studioPaid} sales (${studioRevenue} collected)\n${guide.name}: ${fgPaid} sales (${fgRevenue} collected)\nBuilding in public, one useful step at a time.`;
  return <main className={styles.page}>
   <header className={styles.header}><BrandMark href="/" className="wordmark" icon/><Link className={styles.back} href="/"><ArrowLeft size={16}/> Landing page</Link></header>
   <section className={styles.content}>
-   <div className={styles.heading}><div><div className={styles.eyebrow}>PRIVATE · OWNER VIEW</div><h1>Sales overview</h1><p>Verified Dodo payments, conversion funnel, and checkout drop-off analytics.</p></div><Link className={styles.refresh} href="/sales"><RefreshCw size={15}/> Refresh</Link></div>
+   <div className={styles.heading}><div><div className={styles.eyebrow}>PRIVATE · OWNER VIEW</div><h1>Sales overview</h1><p>Verified Dodo payments, conversion funnel, and 14-day traffic & revenue trends.</p></div><Link className={styles.refresh} href="/sales"><RefreshCw size={15}/> Refresh</Link></div>
    {analyticsError&&<p className={styles.note}>Visitor analytics could not be loaded right now. Refresh to try again.</p>}
    <div className={styles.stats}>
     <article className={styles.stat}><span><TrendingUp size={17}/> Total visitors</span><strong>{analytics.total_visitors.toLocaleString()}</strong><small>{analytics.today_visitors.toLocaleString()} today · unique visitors</small></article>
@@ -145,6 +225,57 @@ export default async function Sales(){
       <small>{abandonedAttempts.length} abandoned ({uniqueAbandonedUsers} unrecovered user{uniqueAbandonedUsers===1?'':'s'}){recoveredAttempts.length>0?` · ${recoveredAttempts.length} retry recovered`:''}</small>
       <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:`${Math.min(100,Math.max(4,Math.round((totalPaid/topBase)*100)))}%`}}/></div>
      </article>
+    </div>
+   </section>
+
+   <section className={styles.trendSection}>
+    <div className={styles.sectionTitle}>
+     <div><div className={styles.eyebrow}>DAILY TRAFFIC & REVENUE TRENDS</div><h2>Last 14 days activity</h2></div>
+     <span>{shortDay(days14[0])} – {shortDay(todayUtc)} (UTC)</span>
+    </div>
+    <div className={styles.trendCard}>
+     <div className={styles.trendKpis}>
+      <div className={styles.trendKpi}>
+       <span>7-day visitors</span>
+       <strong>{visitorsLast7.toLocaleString()}</strong>
+       <small>{deltaLabel(visitorsLast7,visitorsPrev7,'visitors')}</small>
+      </div>
+      <div className={styles.trendKpi}>
+       <span>7-day checkouts</span>
+       <strong>{attemptsLast7.toLocaleString()}</strong>
+       <small>{deltaLabel(attemptsLast7,attemptsPrev7,'attempts')}</small>
+      </div>
+      <div className={styles.trendKpi}>
+       <span>7-day paid sales</span>
+       <strong>{salesLast7.toLocaleString()}</strong>
+       <small>{deltaLabel(salesLast7,salesPrev7,'sales')}</small>
+      </div>
+      <div className={styles.trendKpi}>
+       <span>7-day collected</span>
+       <strong>{formatAmounts(amountsLast7)}</strong>
+       <small>{pct(salesLast7,attemptsLast7)} 7d checkout completion</small>
+      </div>
+     </div>
+     <div className={styles.chartGrid} role="img" aria-label="14-day daily visitors and sales bar chart">
+      {dailySeries.map(day=>{
+       const heightPct=day.visitors>0?Math.max(10,Math.round((day.visitors/maxDailyVisitors)*100)):4;
+       const dayRev=formatAmounts(day.amounts);
+       return <div key={day.date} className={styles.barCol} title={`${day.label}: ${day.visitors} unique visitors, ${day.attempts} checkout attempts, ${day.sales} paid sales (${dayRev})`}>
+        {day.sales>0?<span className={styles.barSaleTag}>+{day.sales}</span>:<span className={styles.barValue}>{day.visitors}</span>}
+        <div className={styles.barTrack}>
+         <div className={`${styles.barFill} ${day.sales>0?styles.barFillSale:''}`} style={{height:`${heightPct}%`}}/>
+        </div>
+        <span className={styles.barLabel}>{day.label.replace(' ','\u00A0')}</span>
+       </div>;
+      })}
+     </div>
+     <div className={styles.routeGrid}>
+      {routeStats.map(r=><div key={r.path} className={styles.routeCard}>
+       <span>{r.title}</span>
+       <strong>{r.visitors14d.toLocaleString()}</strong>
+       <small>{r.visitorsToday} today · {r.kind}</small>
+      </div>)}
+     </div>
     </div>
    </section>
 
