@@ -65,6 +65,41 @@
 .routeCard span{font-size:11px;font-weight:700;color:#627067;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .routeCard strong{font-size:20px;letter-spacing:-.03em;color:#1d2925}
 .routeCard small{font-size:11px;color:#79847d}
-@media(max-width:860px){.funnelGrid,.trendKpis{grid-template-columns:repeat(2,minmax(0,1fr))}.routeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.chartGrid{gap:4px}}
-@media(max-width:520px){.funnelGrid,.trendKpis,.routeGrid{grid-template-columns:1fr}.barLabel{font-size:9px}}
+.customerSection{margin-top:34px}
+.customerGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.customerCard{background:#fff;border:1px solid #e4e8e1;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:7px}
+.customerCard span{font-size:11px;font-weight:700;letter-spacing:.08em;color:#738276;text-transform:uppercase}
+.customerCard strong{font-size:26px;letter-spacing:-.03em;color:#1d2925}
+.customerCard small{font-size:12px;color:#79847d;line-height:1.4}
+.cellSub{display:block;font-size:11px;color:#79847d;margin-top:3px;font-weight:400}
+.bundle{background:#e3efe7;color:#173b31}
+.upgrade{background:#eef3d8;color:#4a5d23}
+.neutral{background:#eef0ec;color:#5c6760}
+.adminWrap{display:flex;flex-direction:column;gap:12px}
+.adminToolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.searchBox{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #d8e0d6;border-radius:8px;padding:7px 11px;min-width:240px;flex:1;max-width:340px;color:#68736d}
+.searchBox input{border:0;outline:0;background:transparent;font:13px 'DM Sans',sans-serif;color:#1d2925;width:100%}
+.segmentTabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.segmentTabs button{border:1px solid #dde3da;background:#fff;color:#526058;border-radius:999px;padding:6px 11px;font:600 11px 'DM Sans',sans-serif;cursor:pointer}
+.segmentTabs button:hover{background:#f2f5ee}
+.segActive{background:#173b31!important;color:#f6f5e9!important;border-color:#173b31!important}
+.exportActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grantBar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#fff;border:1px solid #e4e8e1;border-radius:11px;padding:11px 14px}
+.grantLabel{font-size:12px;font-weight:700;color:#46534d}
+.grantInput,.grantSelect{border:1px solid #d5ddd2;border-radius:7px;padding:7px 10px;font:13px 'DM Sans',sans-serif;background:#fafbf8;color:#1d2925}
+.grantInput{min-width:210px;flex:1;max-width:290px}
+.grantBtn{display:inline-flex;align-items:center;gap:6px;background:#173b31;color:#fffefa;border:0;border-radius:7px;padding:8px 13px;font:600 12px 'DM Sans',sans-serif;cursor:pointer}
+.grantBtn:hover{background:#245243}
+.msgOk{font-size:12px;font-weight:600;color:#285934}
+.msgErr{font-size:12px;font-weight:600;color:#9b4239}
+.rowActions{display:flex;align-items:center;gap:6px}
+.actionGrant,.actionRevoke{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:5px 9px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;border:1px solid transparent}
+.actionGrant{background:#eef4ea;color:#234d32;border-color:#cfe0c7}
+.actionGrant:hover{background:#dfece0}
+.actionRevoke{background:#fdf0ed;color:#8e3930;border-color:#f0cfc9}
+.actionRevoke:hover{background:#f9e1dc}
+@media(max-width:860px){.funnelGrid,.trendKpis,.customerGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.routeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.chartGrid{gap:4px}}
+@media(max-width:520px){.funnelGrid,.trendKpis,.routeGrid,.customerGrid{grid-template-columns:1fr}.barLabel{font-size:9px}}
+
+
 

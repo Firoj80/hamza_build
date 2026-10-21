@@ -6,6 +6,7 @@ import {currentUser} from '@/lib/supabase/server';
 import {adminClient} from '@/lib/supabase/admin';
 import {guide,studio} from '@/lib/catalog';
 import ShareSnapshot from './share-snapshot';
+import CustomerAdmin,{type CustomerRecord,type PaymentExportRow} from './customer-admin';
 import {isSalesAdmin} from '@/lib/platform-policy.mjs';
 import styles from './sales.module.css';
 
@@ -15,6 +16,7 @@ export const metadata={title:'Sales dashboard — Hamza Idrishi',robots:{index:f
 type Purchase={payment_id:string;attempt_id:string;user_id:string;product_key:'studio'|'fieldguide';access_status:'active'|'pending'|'revoked';provider_status:string;amount_cents:number;currency:string;updated_at:string};
 type CheckoutAttempt={id:string;user_id:string;product_key:'studio'|'fieldguide';provider_product_id:string;expected_cents:number;created_at:string};
 type PageviewRow={viewed_on:string;path:'/'|'/products/first-product-fieldguide'|'/products/launchpad-studio'|'/fieldguide'|'/studio';visitor_hash:string};
+type WorkspaceRow={user_id:string;state:Record<string,unknown>;updated_at:string};
 type Analytics={total_visitors:number;today_visitors:number;by_product:{fieldguide:number;studio:number}};
 type ProductSales={paid_sales?:number;accesses?:number;pending_sales?:number;revoked_sales?:number;unknown_amount_sales?:number;amounts?:Record<string,number>};
 type SalesSummary={studio:Required<Omit<ProductSales,'accesses'>>;fieldguide:ProductSales};
@@ -46,6 +48,7 @@ export default async function Sales(){
   {data,error},
   {data:attemptsData,error:attemptsError},
   {data:pageviewsData,error:pageviewsError},
+  {data:workspaceData,error:workspaceError},
   {data:analyticsData,error:analyticsError},
   {data:salesData,error:salesError},
   usersResult
@@ -53,6 +56,7 @@ export default async function Sales(){
   db.from('platform_purchases').select('payment_id,attempt_id,user_id,product_key,access_status,provider_status,amount_cents,currency,updated_at').order('updated_at',{ascending:false}).limit(500),
   db.from('platform_checkout_attempts').select('id,user_id,product_key,provider_product_id,expected_cents,created_at').order('created_at',{ascending:false}).limit(500),
   db.from('site_pageviews').select('viewed_on,path,visitor_hash').gte('viewed_on',start14Date).limit(5000),
+  db.from('platform_workspace').select('user_id,state,updated_at').order('updated_at',{ascending:false}).limit(500),
   db.rpc('get_site_analytics'),
   db.rpc('get_product_sales_summary'),
   db.auth.admin.listUsers({page:1,perPage:1000}).catch(()=>({data:{users:[]},error:null}))
@@ -63,8 +67,10 @@ export default async function Sales(){
  const rows=(data||[]) as Purchase[];
  const attempts=(attemptsError?[]:attemptsData||[]) as CheckoutAttempt[];
  const pageviews=(pageviewsError?[]:pageviewsData||[]) as PageviewRow[];
+ const workspaces=(workspaceError?[]:workspaceData||[]) as WorkspaceRow[];
+ const authUsers=usersResult?.data?.users||[];
  const emailMap=new Map<string,string>();
- for(const u of usersResult?.data?.users||[]){if(u.id&&u.email)emailMap.set(u.id,u.email);}
+ for(const u of authUsers){if(u.id&&u.email)emailMap.set(u.id,u.email);}
 
  const fgRows=rows.filter(r=>r.product_key==='fieldguide');
  const fgPaid=summary.fieldguide.paid_sales??summary.fieldguide.accesses??fgRows.filter(r=>r.access_status==='active').length;
@@ -183,11 +189,69 @@ export default async function Sales(){
   return {...def,visitors14d,visitorsToday};
  });
 
+ // #3 Customer Directory, Cross-Sell & Workspace Usage calculations
+ const workspaceByUser=new Map<string,{keys:number;updatedAt:string}>();
+ for(const w of workspaces){
+  const keys=w.state&&typeof w.state==='object'?Object.keys(w.state).length:0;
+  workspaceByUser.set(w.user_id,{keys,updatedAt:w.updated_at});
+ }
+ const allUserIds=new Set<string>();
+ for(const u of authUsers){if(u.id)allUserIds.add(u.id);}
+ for(const r of rows){if(r.user_id)allUserIds.add(r.user_id);}
+ for(const a of attempts){if(a.user_id)allUserIds.add(a.user_id);}
+ for(const w of workspaces){if(w.user_id)allUserIds.add(w.user_id);}
+
+ const authUserMap=new Map<string,{created_at?:string;last_sign_in_at?:string}>();
+ for(const u of authUsers){if(u.id)authUserMap.set(u.id,u);}
+
+ const customerProfiles=Array.from(allUserIds).map(uid=>{
+  const au=authUserMap.get(uid);
+  const userPurchases=rows.filter(r=>r.user_id===uid&&r.access_status==='active');
+  const userAttempts=attempts.filter(a=>a.user_id===uid);
+  const ownsStudio=userPurchases.some(p=>p.product_key==='studio');
+  const ownsFieldguide=userPurchases.some(p=>p.product_key==='fieldguide');
+  const triedStudio=userAttempts.filter(a=>a.product_key==='studio').length;
+  const triedFieldguide=userAttempts.filter(a=>a.product_key==='fieldguide').length;
+  const ws=workspaceByUser.get(uid);
+  const spent:Record<string,number>={};
+  for(const p of userPurchases){if(p.amount_cents>0)spent[p.currency]=(spent[p.currency]||0)+p.amount_cents;}
+  const dates=[
+   au?.last_sign_in_at,
+   au?.created_at,
+   ws?.updatedAt,
+   ...userPurchases.map(p=>p.updated_at),
+   ...userAttempts.map(a=>a.created_at)
+  ].filter((x):x is string=>Boolean(x)).sort();
+  const lastActivity=dates[dates.length-1]||new Date(0).toISOString();
+  return {
+   userId:uid,
+   email:shortUser(uid,emailMap),
+   ownsStudio,
+   ownsFieldguide,
+   triedStudio,
+   triedFieldguide,
+   workspaceKeys:ws?.keys||0,
+   workspaceUpdatedAt:ws?.updatedAt||null,
+   spent,
+   hasPaid:ownsStudio||ownsFieldguide,
+   lastActivity
+  };
+ }).sort((a,b)=>Number(b.hasPaid)-Number(a.hasPaid)||b.lastActivity.localeCompare(a.lastActivity));
+
+ const bothOwners=customerProfiles.filter(c=>c.ownsStudio&&c.ownsFieldguide).length;
+ const fgOnlyOwners=customerProfiles.filter(c=>c.ownsFieldguide&&!c.ownsStudio).length;
+ const studioOnlyOwners=customerProfiles.filter(c=>c.ownsStudio&&!c.ownsFieldguide).length;
+ const totalFgOwners=bothOwners+fgOnlyOwners;
+ const totalStudioOwners=bothOwners+studioOnlyOwners;
+ const activeStudioWorkspaces=customerProfiles.filter(c=>c.ownsStudio&&c.workspaceKeys>0).length;
+ const fgOwnersTriedStudio=customerProfiles.filter(c=>c.ownsFieldguide&&!c.ownsStudio&&c.triedStudio>0).length;
+ const unconvertedAccounts=customerProfiles.filter(c=>!c.hasPaid).length;
+
  const shareText=`My product progress so far:\n${analytics.total_visitors.toLocaleString()} unique visitors\n${studio.name}: ${studioPaid} sales (${studioRevenue} collected)\n${guide.name}: ${fgPaid} sales (${fgRevenue} collected)\nBuilding in public, one useful step at a time.`;
  return <main className={styles.page}>
   <header className={styles.header}><BrandMark href="/" className="wordmark" icon/><Link className={styles.back} href="/"><ArrowLeft size={16}/> Landing page</Link></header>
   <section className={styles.content}>
-   <div className={styles.heading}><div><div className={styles.eyebrow}>PRIVATE · OWNER VIEW</div><h1>Sales overview</h1><p>Verified Dodo payments, conversion funnel, and 14-day traffic & revenue trends.</p></div><Link className={styles.refresh} href="/sales"><RefreshCw size={15}/> Refresh</Link></div>
+   <div className={styles.heading}><div><div className={styles.eyebrow}>PRIVATE · OWNER VIEW</div><h1>Sales overview</h1><p>Verified Dodo payments, conversion funnel, 14-day trends, and customer workspace insights.</p></div><Link className={styles.refresh} href="/sales"><RefreshCw size={15}/> Refresh</Link></div>
    {analyticsError&&<p className={styles.note}>Visitor analytics could not be loaded right now. Refresh to try again.</p>}
    <div className={styles.stats}>
     <article className={styles.stat}><span><TrendingUp size={17}/> Total visitors</span><strong>{analytics.total_visitors.toLocaleString()}</strong><small>{analytics.today_visitors.toLocaleString()} today · unique visitors</small></article>
@@ -303,6 +367,71 @@ export default async function Sales(){
     </tbody><tfoot><tr><td><strong>Total</strong></td><td>{analytics.total_visitors.toLocaleString()}</td><td>{totalAttempts} attempts</td><td>{totalPaid} paid sales</td><td>{overallCheckoutCompletion}</td><td>{uniqueAbandonedUsers} user{uniqueAbandonedUsers===1?'':'s'}</td><td>{revenue}{amountUnknown>0&&<span className={styles.unknown}>*</span>}</td></tr></tfoot></table></div>
    </section>
 
+   <section className={styles.customerSection}>
+    <div className={styles.sectionTitle}>
+     <div><div className={styles.eyebrow}>CUSTOMER JOURNEY & WORKSPACE USAGE</div><h2>Cross-sell, buyer engagement & access control</h2></div>
+     <span>{customerProfiles.length} total account{customerProfiles.length===1?'':'s'}</span>
+    </div>
+    <div className={styles.customerGrid}>
+     <article className={styles.customerCard}>
+      <span>Registered accounts</span>
+      <strong>{customerProfiles.length.toLocaleString()}</strong>
+      <small>{uniquePaidUsers} paid buyer{uniquePaidUsers===1?'':'s'} · {unconvertedAccounts} unpaid account{unconvertedAccounts===1?'':'s'}</small>
+     </article>
+     <article className={styles.customerCard}>
+      <span>Both products owned</span>
+      <strong>{bothOwners.toLocaleString()}</strong>
+      <small>{fgOnlyOwners} Fieldguide-only · {studioOnlyOwners} Studio-only</small>
+     </article>
+     <article className={styles.customerCard}>
+      <span>Fieldguide → Studio upgrade</span>
+      <strong>{pct(bothOwners,totalFgOwners)}</strong>
+      <small>{fgOnlyOwners} upgrade candidate{fgOnlyOwners===1?'':'s'}{fgOwnersTriedStudio>0?` (${fgOwnersTriedStudio} tried checkout)`:''}</small>
+     </article>
+     <article className={styles.customerCard}>
+      <span>Studio workspace active</span>
+      <strong>{activeStudioWorkspaces}/{totalStudioOwners}</strong>
+      <small>{pct(activeStudioWorkspaces,totalStudioOwners)} of Studio buyers saved cloud state</small>
+     </article>
+    </div>
+    <CustomerAdmin
+     customers={customerProfiles.map<CustomerRecord>(c=>({
+      userId:c.userId,
+      email:c.email,
+      ownsStudio:c.ownsStudio,
+      ownsFieldguide:c.ownsFieldguide,
+      triedStudio:c.triedStudio,
+      triedFieldguide:c.triedFieldguide,
+      workspaceKeys:c.workspaceKeys,
+      workspaceUpdatedAtFormatted:c.workspaceUpdatedAt?date(c.workspaceUpdatedAt):null,
+      spentFormatted:formatAmounts(c.spent),
+      hasPaid:c.hasPaid,
+      lastActivityFormatted:date(c.lastActivity),
+      lastActivityIso:c.lastActivity
+     }))}
+     paymentExportRows={[
+      ...rows.map<PaymentExportRow>(r=>({
+       type:'payment',
+       id:r.payment_id,
+       customer:shortUser(r.user_id,emailMap),
+       product:products[r.product_key],
+       status:r.access_status,
+       amount:money(r.amount_cents,r.currency),
+       dateIso:r.updated_at
+      })),
+      ...classifiedAttempts.map<PaymentExportRow>(a=>({
+       type:'checkout_attempt',
+       id:a.id,
+       customer:shortUser(a.user_id,emailMap),
+       product:products[a.product_key],
+       status:a.outcome,
+       amount:money(a.expected_cents,'USD'),
+       dateIso:a.created_at
+      }))
+     ]}
+    />
+   </section>
+
    <section className={styles.recent}>
     <div className={styles.sectionTitle}>
      <div><div className={styles.eyebrow}>CHECKOUT INTENT & DROP-OFF LOG</div><h2>Recent checkout attempts</h2></div>
@@ -322,8 +451,9 @@ export default async function Sales(){
    </section>
 
    <section className={styles.recent}><div className={styles.sectionTitle}><h2>Recent verified payments</h2><span>Latest {Math.min(rows.length,20)}</span></div>{rows.length===0?<p className={styles.empty}>No payments recorded yet. Completed Dodo checkouts will appear here.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Product</th><th>Date</th><th>Status</th><th>Amount charged</th></tr></thead><tbody>{rows.slice(0,20).map(row=><tr key={row.payment_id}><td><strong>{shortUser(row.user_id,emailMap)}</strong></td><td>{products[row.product_key]}</td><td>{date(row.updated_at)}</td><td><span className={`${styles.badge} ${styles[row.access_status]}`}>{row.access_status==='active'?'Paid':row.access_status==='pending'?'Pending':'Revoked'}</span></td><td>{money(row.amount_cents,row.currency)}</td></tr>)}</tbody></table></div>}</section>
-   <p className={styles.note}>Visitor counts deduplicate a browser/IP and product per day using a one-way token; they are estimates and can undercount shared networks or repeat devices. Checkout attempts track every initiated Dodo session in <code>platform_checkout_attempts</code> and match against verified <code>platform_purchases</code> to distinguish true checkout drop-offs from users who completed payment on a subsequent retry.{amountUnknown>0?' * '+amountUnknown+' legacy paid purchase(s) with unavailable amounts are excluded from collected totals.':''}</p>
+   <p className={styles.note}>Visitor counts deduplicate a browser/IP and product per day using a one-way token; they are estimates and can undercount shared networks or repeat devices. Checkout attempts track every initiated Dodo session in <code>platform_checkout_attempts</code>, workspace activity reads cloud-synced progress from <code>platform_workspace</code>, and verified payments read from <code>platform_purchases</code>.{amountUnknown>0?' * '+amountUnknown+' legacy paid purchase(s) with unavailable amounts are excluded from collected totals.':''}</p>
   </section>
  </main>;
 }
+
 
