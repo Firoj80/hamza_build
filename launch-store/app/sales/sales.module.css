@@ -34,3 +34,16 @@
 @media(max-width:700px){.page{padding:0 16px 40px}.content{margin-top:35px}.stats{grid-template-columns:1fr;gap:10px}.stat{padding:17px}.stat strong{font-size:27px}.heading{align-items:flex-start;gap:16px}.heading p{max-width:250px}.refresh{font-size:0;padding:11px}.sectionTitle{align-items:flex-start;gap:10px;flex-direction:column}.tableWrap{margin:0 -1px}.table th,.table td{padding:12px 13px}}
 
 .copyButton{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #d8e0d6;border-radius:8px;padding:9px 12px;background:#fff;color:#284739;font:600 12px 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}.copyButton:hover{background:#eef3e8;border-color:#c3d0bf}
+.funnelSection{margin-top:34px}
+.funnelGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.funnelStep{background:#fff;border:1px solid #e4e8e1;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:8px;position:relative}
+.funnelStepTop{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.08em;color:#738276;text-transform:uppercase}
+.funnelRate{background:#eef3e8;color:#284739;padding:3px 7px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none}
+.funnelStep strong{font-size:26px;letter-spacing:-.03em;color:#1d2925}
+.funnelStep small{font-size:12px;color:#79847d;line-height:1.4}
+.funnelBar{height:6px;background:#edf0eb;border-radius:999px;overflow:hidden;margin-top:4px}
+.funnelFill{height:100%;background:#173b31;border-radius:999px}
+.abandoned{background:#f7efe8;color:#8a4b29}
+.recovered{background:#e8f0f8;color:#2b547e}
+@media(max-width:860px){.funnelGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.funnelGrid{grid-template-columns:1fr}}
