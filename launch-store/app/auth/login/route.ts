@@ -1,9 +1,9 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {authClient} from '@/lib/supabase/server';
-import {configuredSiteOrigin} from '@/lib/payment-policy.mjs';
+import {trustedRequestOrigin} from '@/lib/payment-policy.mjs';
 import {postAuthRedirect} from '@/lib/platform-policy.mjs';
 export async function POST(req:NextRequest){try{
- const origin=configuredSiteOrigin();if(req.headers.get('origin')!==origin)return NextResponse.json({error:'Invalid request'},{status:403});
+ const origin=trustedRequestOrigin(req);if(!origin)return NextResponse.json({error:'Invalid request'},{status:403});
  const input=await req.json();
  if(typeof input.email!=='string'||input.email.length>254||!/^\S+@\S+\.\S+$/.test(input.email.trim()))return NextResponse.json({error:'Enter a valid email address.'},{status:400});
  const email=input.email.trim();const db=await authClient();const headers={'Cache-Control':'no-store'};

@@ -3,11 +3,11 @@ import {randomUUID} from 'node:crypto';
 import {paymentConfig} from '@/lib/dodo';
 import {currentUser,authClient} from '@/lib/supabase/server';
 import {adminClient} from '@/lib/supabase/admin';
-import {configuredSiteOrigin,allowedCheckoutUrl} from '@/lib/payment-policy.mjs';
+import {configuredSiteOrigin,trustedRequestOrigin,allowedCheckoutUrl} from '@/lib/payment-policy.mjs';
 export const runtime='nodejs';
 export async function POST(request:NextRequest){try{
- const origin=configuredSiteOrigin();
- if(request.headers.get('origin')!==origin)return NextResponse.json({error:'Please start checkout from this website.'},{status:403});
+ const origin=trustedRequestOrigin(request);
+ if(!origin)return NextResponse.json({error:'Please start checkout from this website.'},{status:403});
  const body=await request.json().catch(()=>({}));const key=body.product;
  if(key!=='studio'&&key!=='fieldguide')return NextResponse.json({error:'Unknown product'},{status:400});
  const user=await currentUser();if(!user)return NextResponse.json({loginUrl:'/login?next='+encodeURIComponent('/library?buy='+key)},{status:401});
