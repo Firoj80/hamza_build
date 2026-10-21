@@ -3,7 +3,7 @@
 ## What changed
 
 - Idea-to-Income Fieldguide: **$5 USD**, separate one-time purchase, read inside the account.
-- Launchpad Studio: **$19 USD**, separate one-time purchase, used inside the account.
+- Launchpad Studio: **$9 USD**, separate one-time purchase, used inside the account.
 - No public PDF URL or downloadable Studio HTML/ZIP is served by the website.
 - Supabase email/password sign-in, per-account library and cloud-saved workspace.
 - Dodo checkout is tied to a server-created checkout attempt and signed-in user.
@@ -45,7 +45,7 @@ In Authentication → URL Configuration, set Site URL to the exact deployed orig
 Create two **one-time**, fixed-price USD products in test mode:
 
 1. Idea-to-Income Fieldguide: 500 cents ($5).
-2. Launchpad Studio: 1900 cents ($19).
+2. Launchpad Studio: 900 cents ($9).
 
 Do not attach digital-file entitlements or the old Studio ZIP to these products. Account access is fulfilled by this platform. If you already attached files to a previous Dodo product, detach them or create fresh platform products before live sales. This project does not silently modify existing Dodo settings.
 

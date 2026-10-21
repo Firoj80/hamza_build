@@ -4,7 +4,7 @@ create table public.platform_checkout_attempts (
  user_id uuid not null references auth.users(id) on delete cascade,
  product_key text not null check(product_key in ('studio','fieldguide')),
  provider_product_id text not null,
- expected_cents integer not null check(expected_cents in (500,1900)),
+ expected_cents integer not null check(expected_cents in (500,900,1900)),
  created_at timestamptz not null default now()
 );
 create index platform_attempts_user_created on public.platform_checkout_attempts(user_id,created_at desc);

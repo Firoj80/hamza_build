@@ -1,4 +1,4 @@
-export const studio = { name: 'Launchpad Studio', price: 19, currency: 'USD', slug: 'launchpad-studio', href: '/products/launchpad-studio' } as const;
+export const studio = { name: 'Launchpad Studio', price: 9, currency: 'USD', slug: 'launchpad-studio', href: '/products/launchpad-studio' } as const;
 export const guide = { name: 'Idea-to-Income Fieldguide', price: 5, currency: 'USD', slug:'first-product-fieldguide', href: '/products/first-product-fieldguide', readerHref: '/fieldguide' } as const;
 export const social = { threads: 'https://www.threads.com/@build_hamza', x: 'https://x.com/hamza_build' };
 
@@ -27,7 +27,7 @@ export const productDetails = {
     ],
     access: 'Private seven-page reader in your Hamza Idrishi account. One-time payment of $5 USD. Read online through your library.',
     limitation: 'The guide provides prompts and a plan; it does not validate demand, run AI, publish for you, or promise sales.',
-    nextStep: 'Finished the guide and ready to organise prompts, product copy and launch tasks in one place? Launchpad Studio is a separate $19 one-time purchase.',
+    nextStep: 'Finished the guide and ready to organise prompts, product copy and launch tasks in one place? Launchpad Studio is a separate $9 one-time purchase.',
     nextHref: studio.href,
   },
   'launchpad-studio': {
@@ -52,7 +52,7 @@ export const productDetails = {
       { title: 'Turn your context into useful drafts', body: 'Add your audience, problem and evidence once. Use them in editable AI prompts, post starters and listing copy, then replace every placeholder with your own verified details.' },
       { title: 'Keep your plan in your account', body: 'Save research notes and launch progress in your private workspace. Return through your library whenever you are ready to continue.' },
     ],
-    access: 'Private online workspace in your Hamza Idrishi account. One-time payment of $19 USD. No app ZIP or HTML download.',
+    access: 'Private online workspace in your Hamza Idrishi account. One-time payment of $9 USD. No app ZIP or HTML download.',
     limitation: 'Studio prepares editable templates and arithmetic scenarios. It does not run an AI model, publish posts, validate demand or forecast earnings.',
     nextStep: 'Want a guided seven-page foundation before opening the workspace? Start with the $5 Idea-to-Income Fieldguide.',
     nextHref: guide.href,

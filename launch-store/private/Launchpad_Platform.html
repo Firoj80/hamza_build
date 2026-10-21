@@ -36,9 +36,9 @@ const CATALOG = {
             {
               badge: "★ Idea 1 (Easiest to Start)",
               freeTitle: "Idea-to-Income Fieldguide",
-              freeDesc: "A free seven-page guide to investigate one useful problem and plan a small first launch.",
+              freeDesc: "A seven-page guide to investigate one useful problem and plan a small first launch. One-time purchase: $5.",
               paidTitle: "Launchpad Studio",
-              paidDesc: "A private online workspace with guided research, editable prompts, listing and post drafts, and launch progress. One-time purchase: $19."
+              paidDesc: "A private online workspace with guided research, editable prompts, listing and post drafts, and launch progress. One-time purchase: $9."
             },
             {
               badge: "Idea 2 (Prompt Cheat Sheet)",
@@ -263,7 +263,7 @@ const CATALOG = {
 const outcomes={ai_hustle:'Choose one problem and prepare a resource outline for review',focus_habits:'Plan a small daily routine and track whether it helps',prompt_mastery:'Prepare clear AI instructions and review the resulting draft',threads_growth:'Draft useful Threads posts and measure relevant responses',job_resume:'Draft a clearer resume summary using verified experience',simple_budget:'Organise income and expenses into a simple monthly plan',meal_prep:'Plan a short grocery list and a few meals for your own budget',budget_travel:'Prepare a packing list and compare estimated trip costs'};
 Object.entries(outcomes).forEach(([k,v])=>CATALOG[k].quickWin=v);
 const KEY='threads_launch_planner_v2';
-const defaults={niche:'ai_hustle',offer:0,audience:'',problem:'',freeTitle:'',paidTitle:'',price:19,evidence:'',job:'outline',human:true,freeUrl:'',paidUrl:'',deliverables:'',views:0,clickRate:0,downloadRate:0,buyRate:0,feeRate:0,fixedFee:0,results:'',day:0,posts:{},checks:{}};
+const defaults={niche:'ai_hustle',offer:0,audience:'',problem:'',freeTitle:'',paidTitle:'',price:9,evidence:'',job:'outline',human:true,freeUrl:'',paidUrl:'',deliverables:'',views:0,clickRate:0,downloadRate:0,buyRate:0,feeRate:0,fixedFee:0,results:'',day:0,posts:{},checks:{}};
 let state={...defaults,...PLATFORM_INITIAL_STATE};let storageWorks=true;
 
 const $=id=>document.getElementById(id);

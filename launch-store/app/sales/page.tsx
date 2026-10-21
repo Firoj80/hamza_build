@@ -65,7 +65,7 @@ export default async function Sales(){
    <section className={styles.products}>
     <div className={styles.sectionTitle}><div><div className={styles.eyebrow}>SHAREABLE SNAPSHOT</div><h2>Product performance</h2></div><ShareSnapshot text={shareText}/></div>
     <div className={styles.tableWrap}><table className={`${styles.table} ${styles.shareTable}`}><thead><tr><th>Product</th><th>Visitors</th><th>Sales</th><th>Collected</th></tr></thead><tbody>
-     <tr><td><strong>{studio.name}</strong><small>$19 · one-time</small></td><td>{analytics.by_product.studio.toLocaleString()}</td><td>{studioPaid} sales</td><td>{studioRevenue}{studioUnknown>0&&<span className={styles.unknown}>*</span>}</td></tr>
+     <tr><td><strong>{studio.name}</strong><small>$9 · one-time</small></td><td>{analytics.by_product.studio.toLocaleString()}</td><td>{studioPaid} sales</td><td>{studioRevenue}{studioUnknown>0&&<span className={styles.unknown}>*</span>}</td></tr>
      <tr><td><strong>{guide.name}</strong><small>$5 · one-time</small></td><td>{analytics.by_product.fieldguide.toLocaleString()}</td><td>{fgPaid} sales</td><td>{fgRevenue}{fgUnknown>0&&<span className={styles.unknown}>*</span>}</td></tr>
     </tbody><tfoot><tr><td><strong>Total</strong></td><td>{analytics.total_visitors.toLocaleString()}</td><td>{totalPaid} paid sales</td><td>{revenue}{amountUnknown>0&&<span className={styles.unknown}>*</span>}</td></tr></tfoot></table></div>
    </section>
