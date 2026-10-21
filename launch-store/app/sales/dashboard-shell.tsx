@@ -8,7 +8,10 @@ import {
  Users,
  Layers,
  ArrowLeft,
- RefreshCw
+ RefreshCw,
+ PanelLeftOpen,
+ PanelLeftClose,
+ X
 } from 'lucide-react';
 import BrandMark from '../brand-mark';
 import styles from './sales.module.css';
@@ -17,7 +20,6 @@ export type NavTab='overview'|'funnel'|'trends'|'customers'|'workspace';
 
 export default function DashboardShell({
  counts,
- kpiBanner,
  overview,
  funnel,
  trends,
@@ -31,7 +33,6 @@ export default function DashboardShell({
   customersCount:number;
   activeWorkspaces:number;
  };
- kpiBanner:ReactNode;
  overview:ReactNode;
  funnel:ReactNode;
  trends:ReactNode;
@@ -39,9 +40,11 @@ export default function DashboardShell({
  workspace:ReactNode;
 }){
  const [activeTab,setActiveTab]=useState<NavTab>('overview');
+ const [drawerOpen,setDrawerOpen]=useState(false);
 
  const navItems:{
   id:NavTab;
+  shortLabel:string;
   label:string;
   sub:string;
   badge:string|number;
@@ -49,13 +52,15 @@ export default function DashboardShell({
  }[]=[
   {
    id:'overview',
-   label:'Overview',
-   sub:'Key KPIs & sales',
+   shortLabel:'KPIs',
+   label:'Overview & KPIs',
+   sub:'Core metrics & recent sales',
    badge:counts.paidSales,
    icon:LayoutDashboard
   },
   {
    id:'funnel',
+   shortLabel:'Funnel',
    label:'Conversion Funnel',
    sub:'Drop-offs & price cohorts',
    badge:counts.abandonedCount>0?`${counts.abandonedCount} drop`:'0',
@@ -63,6 +68,7 @@ export default function DashboardShell({
   },
   {
    id:'trends',
+   shortLabel:'Trends',
    label:'14-Day Trends',
    sub:'Daily traffic & routes',
    badge:`${counts.visitors7d} (7d)`,
@@ -70,6 +76,7 @@ export default function DashboardShell({
   },
   {
    id:'customers',
+   shortLabel:'Users',
    label:'Customers & Access',
    sub:'Directory, grant & CSV',
    badge:counts.customersCount,
@@ -77,6 +84,7 @@ export default function DashboardShell({
   },
   {
    id:'workspace',
+   shortLabel:'Studio',
    label:'Studio Progress',
    sub:'5-stage buyer usage',
    badge:counts.activeWorkspaces,
@@ -86,63 +94,102 @@ export default function DashboardShell({
 
  const currentItem=navItems.find(i=>i.id===activeTab)||navItems[0];
 
- return <div className={styles.shell}>
-  <aside className={styles.sidebar} aria-label="Sales dashboard navigation">
-   <div className={styles.sidebarTop}>
-    <BrandMark href="/" className="wordmark" icon/>
-    <span className={styles.ownerBadge}>OWNER ADMIN</span>
-   </div>
+ function selectTab(id:NavTab){
+  setActiveTab(id);
+  setDrawerOpen(false);
+ }
 
-   <nav className={styles.sideNav}>
-    <span className={styles.sideNavLabel}>ANALYTICS & TOOLS</span>
-    {navItems.map(item=>{
-     const Icon=item.icon;
-     const isActive=activeTab===item.id;
-     return <button
-      key={item.id}
-      type="button"
-      onClick={()=>setActiveTab(item.id)}
-      className={`${styles.sideNavBtn} ${isActive?styles.sideNavActive:''}`}
-      aria-current={isActive?'page':undefined}
-     >
-      <Icon size={17} className={styles.sideNavIcon}/>
-      <span className={styles.sideNavText}>
-       <strong>{item.label}</strong>
-       <small>{item.sub}</small>
-      </span>
-      <span className={styles.sideNavCount}>{item.badge}</span>
-     </button>;
-    })}
-   </nav>
+ return <div className={styles.page}>
+  <div className={styles.shell}>
+   {drawerOpen&&<div className={styles.backdrop} onClick={()=>setDrawerOpen(false)} aria-hidden="true"/>}
 
-   <div className={styles.sidebarFooter}>
-    <Link className={styles.sideFooterLink} href="/sales"><RefreshCw size={14}/> Refresh live data</Link>
-    <Link className={styles.sideFooterLink} href="/"><ArrowLeft size={14}/> Back to storefront</Link>
-   </div>
-  </aside>
-
-  <main className={styles.mainPane}>
-   <header className={styles.mainHeader}>
-    <div>
-     <div className={styles.eyebrow}>PRIVATE · OWNER VIEW</div>
-     <h1>{currentItem.label}</h1>
-     <p>{currentItem.sub}</p>
+   <aside className={`${styles.sidebar} ${drawerOpen?styles.sidebarOpen:''}`} aria-label="Sales dashboard left sidebar">
+    <div className={styles.sidebarTop}>
+     <div className={styles.sidebarBrandRow}>
+      <div className={styles.brandFull}>
+       <BrandMark href="/" className="wordmark" icon/>
+      </div>
+      <button
+       type="button"
+       className={styles.railToggleBtn}
+       onClick={()=>setDrawerOpen(prev=>!prev)}
+       aria-label={drawerOpen?'Collapse left sidebar':'Expand left sidebar'}
+       title={drawerOpen?'Collapse sidebar':'Expand sidebar'}
+      >
+       {drawerOpen?<X size={18}/>:<PanelLeftOpen size={18}/>}
+      </button>
+     </div>
+     <span className={styles.ownerBadge}>OWNER ADMIN</span>
     </div>
-    <div className={styles.headerActions}>
-     <Link className={styles.refresh} href="/sales"><RefreshCw size={15}/> Refresh</Link>
-     <Link className={styles.back} href="/"><ArrowLeft size={15}/> Storefront</Link>
+
+    <nav className={styles.sideNav}>
+     <span className={styles.sideNavLabel}>DASHBOARD VIEWS</span>
+     {navItems.map(item=>{
+      const Icon=item.icon;
+      const isActive=activeTab===item.id;
+      return <button
+       key={item.id}
+       type="button"
+       onClick={()=>selectTab(item.id)}
+       className={`${styles.sideNavBtn} ${isActive?styles.sideNavActive:''}`}
+       aria-current={isActive?'page':undefined}
+       title={`${item.label} — ${item.sub}`}
+      >
+       <Icon size={18} className={styles.sideNavIcon}/>
+       <span className={styles.sideNavShort}>{item.shortLabel}</span>
+       <span className={styles.sideNavText}>
+        <strong>{item.label}</strong>
+        <small>{item.sub}</small>
+       </span>
+       <span className={styles.sideNavCount}>{item.badge}</span>
+      </button>;
+     })}
+    </nav>
+
+    <div className={styles.sidebarFooter}>
+     <Link className={styles.sideFooterLink} href="/sales" title="Refresh live data">
+      <RefreshCw size={15}/>
+      <span>Refresh live data</span>
+     </Link>
+     <Link className={styles.sideFooterLink} href="/" title="Back to storefront">
+      <ArrowLeft size={15}/>
+      <span>Back to storefront</span>
+     </Link>
     </div>
-   </header>
+   </aside>
 
-   {kpiBanner}
+   <main className={styles.mainPane}>
+    <header className={styles.mainHeader}>
+     <div className={styles.headerLeft}>
+      <button
+       type="button"
+       className={styles.menuBtn}
+       onClick={()=>setDrawerOpen(prev=>!prev)}
+       aria-label="Toggle full left sidebar"
+      >
+       {drawerOpen?<PanelLeftClose size={17}/>:<PanelLeftOpen size={17}/>}
+       <span>Sections</span>
+      </button>
+      <div>
+       <div className={styles.eyebrow}>PRIVATE · OWNER VIEW</div>
+       <h1>{currentItem.label}</h1>
+       <p>{currentItem.sub}</p>
+      </div>
+     </div>
+     <div className={styles.headerActions}>
+      <Link className={styles.refresh} href="/sales"><RefreshCw size={14}/> Refresh</Link>
+      <Link className={styles.back} href="/"><ArrowLeft size={14}/> Storefront</Link>
+     </div>
+    </header>
 
-   <div className={styles.tabContent}>
-    {activeTab==='overview'&&overview}
-    {activeTab==='funnel'&&funnel}
-    {activeTab==='trends'&&trends}
-    {activeTab==='customers'&&customers}
-    {activeTab==='workspace'&&workspace}
-   </div>
-  </main>
+    <div className={styles.tabContent}>
+     {activeTab==='overview'&&overview}
+     {activeTab==='funnel'&&funnel}
+     {activeTab==='trends'&&trends}
+     {activeTab==='customers'&&customers}
+     {activeTab==='workspace'&&workspace}
+    </div>
+   </main>
+  </div>
  </div>;
 }

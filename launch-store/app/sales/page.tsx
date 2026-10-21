@@ -1,7 +1,5 @@
 import {notFound,redirect} from 'next/navigation';
-import Link from 'next/link';
-import {ArrowLeft,RefreshCw,TrendingUp,ShoppingBag,Clock3,Filter} from 'lucide-react';
-import BrandMark from '../brand-mark';
+import {TrendingUp,ShoppingBag,Clock3,Filter} from 'lucide-react';
 import {currentUser} from '@/lib/supabase/server';
 import {adminClient} from '@/lib/supabase/admin';
 import {guide,studio} from '@/lib/catalog';
@@ -341,282 +339,325 @@ export default async function Sales(){
   funnel:`Store funnel snapshot:\n• ${analytics.total_visitors.toLocaleString()} unique visitors\n• ${productVisitors.toLocaleString()} product page views\n• ${totalAttempts} checkouts started\n• ${totalPaid} paid sales (${overallCheckoutCompletion} checkout completion)\n• ${revenue} collected so far.`,
   weekly:`Last 7 days building in public:\n• ${visitorsLast7.toLocaleString()} unique visitors\n• ${attemptsLast7} checkout attempts\n• ${salesLast7} paid sales (${formatAmounts(amountsLast7)} collected)\n• ${activeStudioWorkspaces} builders actively using Launchpad Studio.`
  };
- return <main className={styles.page}>
-  <header className={styles.header}><BrandMark href="/" className="wordmark" icon/><Link className={styles.back} href="/"><ArrowLeft size={16}/> Landing page</Link></header>
-  <section className={styles.content}>
-   <div className={styles.heading}><div><div className={styles.eyebrow}>PRIVATE · OWNER VIEW</div><h1>Sales overview</h1><p>Verified Dodo payments, conversion funnel, 14-day trends, and customer workspace insights.</p></div><Link className={styles.refresh} href="/sales"><RefreshCw size={15}/> Refresh</Link></div>
-   {analyticsError&&<p className={styles.note}>Visitor analytics could not be loaded right now. Refresh to try again.</p>}
-   <div className={styles.stats}>
-    <article className={styles.stat}><span><TrendingUp size={17}/> Total visitors</span><strong>{analytics.total_visitors.toLocaleString()}</strong><small>{analytics.today_visitors.toLocaleString()} today · unique visitors</small></article>
-    <article className={styles.stat}><span><ShoppingBag size={17}/> Collected</span><strong>{revenue}{amountUnknown>0&&<span className={styles.unknown}>*</span>}</strong><small>{amountUnknown>0?`Excludes ${amountUnknown} older payment${amountUnknown===1?'':'s'} with unavailable charge amount`:'Active verified payments · includes tax'}</small></article>
-    <article className={styles.stat}><span><Clock3 size={17}/> Paid sales</span><strong>{totalPaid}</strong><small>{totalPending} pending / {totalRevoked} revoked · {uniquePaidUsers} buyer{uniquePaidUsers===1?'':'s'}</small></article>
+ const overviewView=<>
+  {analyticsError&&<p className={styles.note}>Visitor analytics could not be loaded right now. Refresh to try again.</p>}
+  <div className={styles.stats}>
+   <article className={styles.stat}>
+    <span><ShoppingBag size={17}/> Collected revenue</span>
+    <strong>{revenue}{amountUnknown>0&&<span className={styles.unknown}>*</span>}</strong>
+    <small>{amountUnknown>0?`Excludes ${amountUnknown} legacy $0 row${amountUnknown===1?'':'s'}`:`Avg order ${avgOrderUsd} · includes tax`}</small>
+   </article>
+   <article className={styles.stat}>
+    <span><Clock3 size={17}/> Paid sales</span>
+    <strong>{totalPaid}</strong>
+    <small>{uniquePaidUsers} buyer{uniquePaidUsers===1?'':'s'} · {totalPending} pending / {totalRevoked} revoked</small>
+   </article>
+   <article className={styles.stat}>
+    <span><TrendingUp size={17}/> Total visitors</span>
+    <strong>{analytics.total_visitors.toLocaleString()}</strong>
+    <small>{analytics.today_visitors.toLocaleString()} today · {visitorsLast7.toLocaleString()} last 7d</small>
+   </article>
+   <article className={styles.stat}>
+    <span><Filter size={17}/> Checkout conversion</span>
+    <strong>{overallCheckoutCompletion}</strong>
+    <small>{totalPaid}/{totalAttempts} checkouts paid · {abandonedAttempts.length} dropped</small>
+   </article>
+  </div>
+
+  <section className={styles.products}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>SHAREABLE SNAPSHOT</div><h2>Product performance & funnel</h2></div>
+    <ShareSnapshot text={shareText} templates={shareTemplates}/>
    </div>
-
-   <section className={styles.funnelSection}>
-    <div className={styles.sectionTitle}>
-     <div><div className={styles.eyebrow}>CONVERSION FUNNEL & DROP-OFF</div><h2>Visitor to paid checkout flow</h2></div>
-     <span>{overallCheckoutCompletion} checkout completion · {overallDropoffRate} unrecovered drop-off</span>
-    </div>
-    <div className={styles.funnelGrid}>
-     <article className={styles.funnelStep}>
-      <div className={styles.funnelStepTop}><span>1. Store visitors</span><span className={styles.funnelRate}>100%</span></div>
-      <strong>{analytics.total_visitors.toLocaleString()}</strong>
-      <small>{analytics.today_visitors.toLocaleString()} active today across all pages</small>
-      <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:'100%'}}/></div>
-     </article>
-     <article className={styles.funnelStep}>
-      <div className={styles.funnelStepTop}><span>2. Product views</span><span className={styles.funnelRate}>{pct(productVisitors,analytics.total_visitors)}</span></div>
-      <strong>{productVisitors.toLocaleString()}</strong>
-      <small>{analytics.by_product.studio.toLocaleString()} Studio · {analytics.by_product.fieldguide.toLocaleString()} Fieldguide</small>
-      <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:`${Math.min(100,Math.max(4,Math.round((productVisitors/topBase)*100)))}%`}}/></div>
-     </article>
-     <article className={styles.funnelStep}>
-      <div className={styles.funnelStepTop}><span>3. Checkout started</span><span className={styles.funnelRate}>{pct(totalAttempts,Math.max(productVisitors,analytics.total_visitors))}</span></div>
-      <strong>{totalAttempts.toLocaleString()}</strong>
-      <small>{uniqueAttemptUsers} user{uniqueAttemptUsers===1?'':'s'} · {studioAttempts.length} Studio, {fgAttempts.length} Guide</small>
-      <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:`${Math.min(100,Math.max(4,Math.round((totalAttempts/topBase)*100)))}%`}}/></div>
-     </article>
-     <article className={styles.funnelStep}>
-      <div className={styles.funnelStepTop}><span>4. Paid & unlocked</span><span className={styles.funnelRate}>{overallCheckoutCompletion} of checkouts</span></div>
-      <strong>{totalPaid.toLocaleString()}</strong>
-      <small>{abandonedAttempts.length} abandoned ({uniqueAbandonedUsers} unrecovered user{uniqueAbandonedUsers===1?'':'s'}){recoveredAttempts.length>0?` · ${recoveredAttempts.length} retry recovered`:''}</small>
-      <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:`${Math.min(100,Math.max(4,Math.round((totalPaid/topBase)*100)))}%`}}/></div>
-     </article>
-    </div>
-   </section>
-
-   <section className={styles.trendSection}>
-    <div className={styles.sectionTitle}>
-     <div><div className={styles.eyebrow}>DAILY TRAFFIC & REVENUE TRENDS</div><h2>Last 14 days activity</h2></div>
-     <span>{shortDay(days14[0])} – {shortDay(todayUtc)} (UTC)</span>
-    </div>
-    <div className={styles.trendCard}>
-     <div className={styles.trendKpis}>
-      <div className={styles.trendKpi}>
-       <span>7-day visitors</span>
-       <strong>{visitorsLast7.toLocaleString()}</strong>
-       <small>{deltaLabel(visitorsLast7,visitorsPrev7,'visitors')}</small>
-      </div>
-      <div className={styles.trendKpi}>
-       <span>7-day checkouts</span>
-       <strong>{attemptsLast7.toLocaleString()}</strong>
-       <small>{deltaLabel(attemptsLast7,attemptsPrev7,'attempts')}</small>
-      </div>
-      <div className={styles.trendKpi}>
-       <span>7-day paid sales</span>
-       <strong>{salesLast7.toLocaleString()}</strong>
-       <small>{deltaLabel(salesLast7,salesPrev7,'sales')}</small>
-      </div>
-      <div className={styles.trendKpi}>
-       <span>7-day collected</span>
-       <strong>{formatAmounts(amountsLast7)}</strong>
-       <small>{pct(salesLast7,attemptsLast7)} 7d checkout completion</small>
-      </div>
-     </div>
-     <div className={styles.chartGrid} role="img" aria-label="14-day daily visitors and sales bar chart">
-      {dailySeries.map(day=>{
-       const heightPct=day.visitors>0?Math.max(10,Math.round((day.visitors/maxDailyVisitors)*100)):4;
-       const dayRev=formatAmounts(day.amounts);
-       return <div key={day.date} className={styles.barCol} title={`${day.label}: ${day.visitors} unique visitors, ${day.attempts} checkout attempts, ${day.sales} paid sales (${dayRev})`}>
-        {day.sales>0?<span className={styles.barSaleTag}>+{day.sales}</span>:<span className={styles.barValue}>{day.visitors}</span>}
-        <div className={styles.barTrack}>
-         <div className={`${styles.barFill} ${day.sales>0?styles.barFillSale:''}`} style={{height:`${heightPct}%`}}/>
-        </div>
-        <span className={styles.barLabel}>{day.label.replace(' ','\u00A0')}</span>
-       </div>;
-      })}
-     </div>
-     <div className={styles.routeGrid}>
-      {routeStats.map(r=><div key={r.path} className={styles.routeCard}>
-       <span>{r.title}</span>
-       <strong>{r.visitors14d.toLocaleString()}</strong>
-       <small>{r.visitorsToday} today · {r.kind}</small>
-      </div>)}
-     </div>
-    </div>
-   </section>
-
-   <section className={styles.products}>
-    <div className={styles.sectionTitle}><div><div className={styles.eyebrow}>SHAREABLE SNAPSHOT</div><h2>Product performance & funnel</h2></div><ShareSnapshot text={shareText} templates={shareTemplates}/></div>
-    <div className={styles.tableWrap}><table className={`${styles.table} ${styles.shareTable}`}><thead><tr><th>Product</th><th>Visitors</th><th>Checkouts</th><th>Paid sales</th><th>Checkout conv.</th><th>Unrecovered</th><th>Collected</th></tr></thead><tbody>
-     <tr>
-      <td><strong>{studio.name}</strong><small>$9 · one-time</small></td>
-      <td>{analytics.by_product.studio.toLocaleString()}<small>{pct(studioPaid,analytics.by_product.studio)} visitor conv.</small></td>
-      <td>{studioAttempts.length}<small>{new Set(studioAttempts.map(a=>a.user_id)).size} unique user{new Set(studioAttempts.map(a=>a.user_id)).size===1?'':'s'}</small></td>
-      <td>{studioPaid} sales</td>
-      <td>{studioCompletionRate}</td>
-      <td>{studioAbandonedUsers} user{studioAbandonedUsers===1?'':'s'}<small>{studioAttempts.filter(a=>a.outcome==='abandoned').length} attempt{studioAttempts.filter(a=>a.outcome==='abandoned').length===1?'':'s'}</small></td>
-      <td>{studioRevenue}{studioUnknown>0&&<span className={styles.unknown}>*</span>}</td>
-     </tr>
-     <tr>
-      <td><strong>{guide.name}</strong><small>$5 · one-time</small></td>
-      <td>{analytics.by_product.fieldguide.toLocaleString()}<small>{pct(fgPaid,analytics.by_product.fieldguide)} visitor conv.</small></td>
-      <td>{fgAttempts.length}<small>{new Set(fgAttempts.map(a=>a.user_id)).size} unique user{new Set(fgAttempts.map(a=>a.user_id)).size===1?'':'s'}</small></td>
-      <td>{fgPaid} sales</td>
-      <td>{fgCompletionRate}</td>
-      <td>{fgAbandonedUsers} user{fgAbandonedUsers===1?'':'s'}<small>{fgAttempts.filter(a=>a.outcome==='abandoned').length} attempt{fgAttempts.filter(a=>a.outcome==='abandoned').length===1?'':'s'}</small></td>
-      <td>{fgRevenue}{fgUnknown>0&&<span className={styles.unknown}>*</span>}</td>
-     </tr>
-    </tbody><tfoot><tr><td><strong>Total</strong></td><td>{analytics.total_visitors.toLocaleString()}</td><td>{totalAttempts} attempts</td><td>{totalPaid} paid sales</td><td>{overallCheckoutCompletion}</td><td>{uniqueAbandonedUsers} user{uniqueAbandonedUsers===1?'':'s'}</td><td>{revenue}{amountUnknown>0&&<span className={styles.unknown}>*</span>}</td></tr></tfoot></table></div>
-   </section>
-
-   <section className={styles.cohortSection}>
-    <div className={styles.sectionTitle}>
-     <div><div className={styles.eyebrow}>PRICING COHORTS & UNIT ECONOMICS</div><h2>Price tier performance ($9 vs $19 & $5 vs $0)</h2></div>
-     <span>Tracked via expected_cents & amount_cents</span>
-    </div>
-    <div className={styles.cohortGrid}>
-     <article className={styles.cohortCard}>
-      <span>Studio $9 price cohort</span>
-      <strong>{studio9Paid} / {studio9Attempts.length}</strong>
-      <small>{pct(studio9Paid,studio9Attempts.length)} checkout completion at current $9 price</small>
-     </article>
-     <article className={styles.cohortCard}>
-      <span>Studio $19 legacy cohort</span>
-      <strong>{studio19Paid} / {studio19Attempts.length}</strong>
-      <small>{pct(studio19Paid,studio19Attempts.length)} checkout completion at previous $19 price</small>
-     </article>
-     <article className={styles.cohortCard}>
-      <span>Fieldguide $5 cohort</span>
-      <strong>{fgPaidRows} paid · {fgCompRows} $0</strong>
-      <small>{fg5Attempts.length} $5 checkout attempt{fg5Attempts.length===1?'':'s'} ({pct(fg5Paid,fg5Attempts.length)} conv.)</small>
-     </article>
-     <article className={styles.cohortCard}>
-      <span>Average order & RPV</span>
-      <strong>{avgOrderUsd}</strong>
-      <small>{ paidRowsWithAmount.length } charged order{paidRowsWithAmount.length===1?'':'s'} · {pct(totalPaid,analytics.total_visitors)} overall visitor conv.</small>
-     </article>
-    </div>
-   </section>
-
-   <section className={styles.stageSection}>
-    <div className={styles.sectionTitle}>
-     <div><div className={styles.eyebrow}>LAUNCHPAD STUDIO 5-STAGE PROGRESS</div><h2>Inside-workspace buyer completion</h2></div>
-     <span>Avg {avgChecklist}/7 launch actions · {totalCustomPosts} custom posts drafted</span>
-    </div>
-    <div className={styles.stageGrid}>
-     <article className={styles.stageCard}>
-      <span>Step 1 · Validate idea</span>
-      <strong>{stage1Count}/{workspaces.length}</strong>
-      <small>Filled all 4 audience, problem & offer fields</small>
-     </article>
-     <article className={styles.stageCard}>
-      <span>Step 2 · AI & evidence</span>
-      <strong>{stage2Count}/{workspaces.length}</strong>
-      <small>Recorded real customer research & evidence notes</small>
-     </article>
-     <article className={styles.stageCard}>
-      <span>Step 3 · Content plan</span>
-      <strong>{stage3Count}/{workspaces.length}</strong>
-      <small>Customized 30-day Threads post drafts ({totalCustomPosts} total)</small>
-     </article>
-     <article className={styles.stageCard}>
-      <span>Step 4 · Store & links</span>
-      <strong>{stage4Count}/{workspaces.length}</strong>
-      <small>Added concrete deliverables or live product URLs</small>
-     </article>
-     <article className={styles.stageCard}>
-      <span>Step 5 · Launch checklist</span>
-      <strong>{stage5Count}/{workspaces.length}</strong>
-      <small>Checked off launch tasks (avg {avgChecklist} of 7)</small>
-     </article>
-    </div>
-    <div className={styles.nicheStrip}>
-     <strong>Active workspace niches:</strong>
-     {sortedNiches.length===0?<span>No workspace niches saved yet.</span>:sortedNiches.map(([niche,cnt])=><span key={niche} className={styles.nichePill}>{niche}: {cnt}</span>)}
-    </div>
-   </section>
-
-   <section className={styles.customerSection}>
-    <div className={styles.sectionTitle}>
-     <div><div className={styles.eyebrow}>CUSTOMER JOURNEY & WORKSPACE USAGE</div><h2>Cross-sell, buyer engagement & access control</h2></div>
-     <span>{customerProfiles.length} total account{customerProfiles.length===1?'':'s'}</span>
-    </div>
-    <div className={styles.customerGrid}>
-     <article className={styles.customerCard}>
-      <span>Registered accounts</span>
-      <strong>{customerProfiles.length.toLocaleString()}</strong>
-      <small>{uniquePaidUsers} paid buyer{uniquePaidUsers===1?'':'s'} · {unconvertedAccounts} unpaid account{unconvertedAccounts===1?'':'s'}</small>
-     </article>
-     <article className={styles.customerCard}>
-      <span>Both products owned</span>
-      <strong>{bothOwners.toLocaleString()}</strong>
-      <small>{fgOnlyOwners} Fieldguide-only · {studioOnlyOwners} Studio-only</small>
-     </article>
-     <article className={styles.customerCard}>
-      <span>Fieldguide → Studio upgrade</span>
-      <strong>{pct(bothOwners,totalFgOwners)}</strong>
-      <small>{fgOnlyOwners} upgrade candidate{fgOnlyOwners===1?'':'s'}{fgOwnersTriedStudio>0?` (${fgOwnersTriedStudio} tried checkout)`:''}</small>
-     </article>
-     <article className={styles.customerCard}>
-      <span>Studio workspace active</span>
-      <strong>{activeStudioWorkspaces}/{totalStudioOwners}</strong>
-      <small>{pct(activeStudioWorkspaces,totalStudioOwners)} of Studio buyers saved cloud state</small>
-     </article>
-    </div>
-    <CustomerAdmin
-     customers={customerProfiles.map<CustomerRecord>(c=>({
-      userId:c.userId,
-      email:c.email,
-      ownsStudio:c.ownsStudio,
-      ownsFieldguide:c.ownsFieldguide,
-      triedStudio:c.triedStudio,
-      triedFieldguide:c.triedFieldguide,
-      workspaceKeys:c.workspaceKeys,
-      workspaceSummary:c.workspaceSummary,
-      nicheLabel:c.nicheLabel,
-      checksCompleted:c.checksCompleted,
-      workspaceUpdatedAtFormatted:c.workspaceUpdatedAt?date(c.workspaceUpdatedAt):null,
-      spentFormatted:formatAmounts(c.spent),
-      hasPaid:c.hasPaid,
-      lastActivityFormatted:date(c.lastActivity),
-      lastActivityIso:c.lastActivity
-     }))}
-     paymentExportRows={[
-      ...rows.map<PaymentExportRow>(r=>({
-       type:'payment',
-       id:r.payment_id,
-       customer:shortUser(r.user_id,emailMap),
-       product:products[r.product_key],
-       status:r.access_status,
-       amount:money(r.amount_cents,r.currency),
-       dateIso:r.updated_at
-      })),
-      ...classifiedAttempts.map<PaymentExportRow>(a=>({
-       type:'checkout_attempt',
-       id:a.id,
-       customer:shortUser(a.user_id,emailMap),
-       product:products[a.product_key],
-       status:a.outcome,
-       amount:money(a.expected_cents,'USD'),
-       dateIso:a.created_at
-      }))
-     ]}
-    />
-   </section>
-
-   <section className={styles.recent}>
-    <div className={styles.sectionTitle}>
-     <div><div className={styles.eyebrow}>CHECKOUT INTENT & DROP-OFF LOG</div><h2>Recent checkout attempts</h2></div>
-     <span><Filter size={13} style={{verticalAlign:'-2px',marginRight:4}}/>Latest {Math.min(classifiedAttempts.length,20)} of {classifiedAttempts.length} attempts</span>
-    </div>
-    {classifiedAttempts.length===0?<p className={styles.empty}>No checkout attempts recorded yet. When signed-in users click a checkout button, their attempt and completion status will appear here.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Product</th><th>Started at</th><th>Funnel status</th><th>Expected / Charged</th></tr></thead><tbody>{classifiedAttempts.slice(0,20).map(attempt=>{
-     const label=attempt.outcome==='active'?'Paid':attempt.outcome==='pending'?'Pending webhook':attempt.outcome==='recovered'?'Recovered on retry':attempt.outcome==='revoked'?'Revoked':'Abandoned checkout';
-     const amountText=attempt.purchase&&attempt.purchase.amount_cents>0?money(attempt.purchase.amount_cents,attempt.purchase.currency):money(attempt.expected_cents,'USD');
-     return <tr key={attempt.id}>
-      <td><strong>{shortUser(attempt.user_id,emailMap)}</strong></td>
-      <td>{products[attempt.product_key]}</td>
-      <td>{date(attempt.created_at)}</td>
-      <td><span className={`${styles.badge} ${styles[attempt.outcome]}`}>{label}</span></td>
-      <td>{amountText}</td>
-     </tr>;
-    })}</tbody></table></div>}
-   </section>
-
-   <section className={styles.recent}><div className={styles.sectionTitle}><h2>Recent verified payments</h2><span>Latest {Math.min(rows.length,20)}</span></div>{rows.length===0?<p className={styles.empty}>No payments recorded yet. Completed Dodo checkouts will appear here.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Product</th><th>Date</th><th>Status</th><th>Amount charged</th></tr></thead><tbody>{rows.slice(0,20).map(row=><tr key={row.payment_id}><td><strong>{shortUser(row.user_id,emailMap)}</strong></td><td>{products[row.product_key]}</td><td>{date(row.updated_at)}</td><td><span className={`${styles.badge} ${styles[row.access_status]}`}>{row.access_status==='active'?'Paid':row.access_status==='pending'?'Pending':'Revoked'}</span></td><td>{money(row.amount_cents,row.currency)}</td></tr>)}</tbody></table></div>}</section>
-   <p className={styles.note}>Visitor counts deduplicate a browser/IP and product per day using a one-way token; they are estimates and can undercount shared networks or repeat devices. Checkout attempts track every initiated Dodo session in <code>platform_checkout_attempts</code>, workspace activity reads cloud-synced progress from <code>platform_workspace</code>, and verified payments read from <code>platform_purchases</code>.{amountUnknown>0?' * '+amountUnknown+' legacy paid purchase(s) with unavailable amounts are excluded from collected totals.':''}</p>
+   <div className={styles.tableWrap}><table className={`${styles.table} ${styles.shareTable}`}><thead><tr><th>Product</th><th>Visitors</th><th>Checkouts</th><th>Paid sales</th><th>Checkout conv.</th><th>Unrecovered</th><th>Collected</th></tr></thead><tbody>
+    <tr>
+     <td><strong>{studio.name}</strong><small>$9 · one-time</small></td>
+     <td>{analytics.by_product.studio.toLocaleString()}<small>{pct(studioPaid,analytics.by_product.studio)} visitor conv.</small></td>
+     <td>{studioAttempts.length}<small>{new Set(studioAttempts.map(a=>a.user_id)).size} unique user{new Set(studioAttempts.map(a=>a.user_id)).size===1?'':'s'}</small></td>
+     <td>{studioPaid} sales</td>
+     <td>{studioCompletionRate}</td>
+     <td>{studioAbandonedUsers} user{studioAbandonedUsers===1?'':'s'}<small>{studioAttempts.filter(a=>a.outcome==='abandoned').length} attempt{studioAttempts.filter(a=>a.outcome==='abandoned').length===1?'':'s'}</small></td>
+     <td>{studioRevenue}{studioUnknown>0&&<span className={styles.unknown}>*</span>}</td>
+    </tr>
+    <tr>
+     <td><strong>{guide.name}</strong><small>$5 · one-time</small></td>
+     <td>{analytics.by_product.fieldguide.toLocaleString()}<small>{pct(fgPaid,analytics.by_product.fieldguide)} visitor conv.</small></td>
+     <td>{fgAttempts.length}<small>{new Set(fgAttempts.map(a=>a.user_id)).size} unique user{new Set(fgAttempts.map(a=>a.user_id)).size===1?'':'s'}</small></td>
+     <td>{fgPaid} sales</td>
+     <td>{fgCompletionRate}</td>
+     <td>{fgAbandonedUsers} user{fgAbandonedUsers===1?'':'s'}<small>{fgAttempts.filter(a=>a.outcome==='abandoned').length} attempt{fgAttempts.filter(a=>a.outcome==='abandoned').length===1?'':'s'}</small></td>
+     <td>{fgRevenue}{fgUnknown>0&&<span className={styles.unknown}>*</span>}</td>
+    </tr>
+   </tbody><tfoot><tr><td><strong>Total</strong></td><td>{analytics.total_visitors.toLocaleString()}</td><td>{totalAttempts} attempts</td><td>{totalPaid} paid sales</td><td>{overallCheckoutCompletion}</td><td>{uniqueAbandonedUsers} user{uniqueAbandonedUsers===1?'':'s'}</td><td>{revenue}{amountUnknown>0&&<span className={styles.unknown}>*</span>}</td></tr></tfoot></table></div>
   </section>
- </main>;
+
+  <section className={styles.recent}>
+   <div className={styles.sectionTitle}><h2>Recent verified payments</h2><span>Latest {Math.min(rows.length,20)}</span></div>
+   {rows.length===0?<p className={styles.empty}>No payments recorded yet. Completed Dodo checkouts will appear here.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Product</th><th>Date</th><th>Status</th><th>Amount charged</th></tr></thead><tbody>{rows.slice(0,20).map(row=><tr key={row.payment_id}><td><strong>{shortUser(row.user_id,emailMap)}</strong></td><td>{products[row.product_key]}</td><td>{date(row.updated_at)}</td><td><span className={`${styles.badge} ${styles[row.access_status]}`}>{row.access_status==='active'?'Paid':row.access_status==='pending'?'Pending':'Revoked'}</span></td><td>{money(row.amount_cents,row.currency)}</td></tr>)}</tbody></table></div>}
+  </section>
+
+  <p className={styles.note}>Visitor counts deduplicate a browser/IP and product per day using a one-way token. Use the left sidebar to inspect the Conversion Funnel, 14-Day Trends, Customer Directory & Access Control, and Launchpad Studio 5-Stage Progress.{amountUnknown>0?' * '+amountUnknown+' legacy paid purchase(s) with unavailable amounts are excluded from collected totals.':''}</p>
+ </>;
+
+ const funnelView=<>
+  <section className={styles.funnelSection}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>CONVERSION FUNNEL & DROP-OFF</div><h2>Visitor to paid checkout flow</h2></div>
+    <span>{overallCheckoutCompletion} checkout completion · {overallDropoffRate} unrecovered drop-off</span>
+   </div>
+   <div className={styles.funnelGrid}>
+    <article className={styles.funnelStep}>
+     <div className={styles.funnelStepTop}><span>1. Store visitors</span><span className={styles.funnelRate}>100%</span></div>
+     <strong>{analytics.total_visitors.toLocaleString()}</strong>
+     <small>{analytics.today_visitors.toLocaleString()} active today across all pages</small>
+     <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:'100%'}}/></div>
+    </article>
+    <article className={styles.funnelStep}>
+     <div className={styles.funnelStepTop}><span>2. Product views</span><span className={styles.funnelRate}>{pct(productVisitors,analytics.total_visitors)}</span></div>
+     <strong>{productVisitors.toLocaleString()}</strong>
+     <small>{analytics.by_product.studio.toLocaleString()} Studio · {analytics.by_product.fieldguide.toLocaleString()} Fieldguide</small>
+     <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:`${Math.min(100,Math.max(4,Math.round((productVisitors/topBase)*100)))}%`}}/></div>
+    </article>
+    <article className={styles.funnelStep}>
+     <div className={styles.funnelStepTop}><span>3. Checkout started</span><span className={styles.funnelRate}>{pct(totalAttempts,Math.max(productVisitors,analytics.total_visitors))}</span></div>
+     <strong>{totalAttempts.toLocaleString()}</strong>
+     <small>{uniqueAttemptUsers} user{uniqueAttemptUsers===1?'':'s'} · {studioAttempts.length} Studio, {fgAttempts.length} Guide</small>
+     <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:`${Math.min(100,Math.max(4,Math.round((totalAttempts/topBase)*100)))}%`}}/></div>
+    </article>
+    <article className={styles.funnelStep}>
+     <div className={styles.funnelStepTop}><span>4. Paid & unlocked</span><span className={styles.funnelRate}>{overallCheckoutCompletion} of checkouts</span></div>
+     <strong>{totalPaid.toLocaleString()}</strong>
+     <small>{abandonedAttempts.length} abandoned ({uniqueAbandonedUsers} unrecovered user{uniqueAbandonedUsers===1?'':'s'}){recoveredAttempts.length>0?` · ${recoveredAttempts.length} retry recovered`:''}</small>
+     <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:`${Math.min(100,Math.max(4,Math.round((totalPaid/topBase)*100)))}%`}}/></div>
+    </article>
+   </div>
+  </section>
+
+  <section className={styles.cohortSection}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>PRICING COHORTS & UNIT ECONOMICS</div><h2>Price tier performance ($9 vs $19 & $5 vs $0)</h2></div>
+    <span>Tracked via expected_cents & amount_cents</span>
+   </div>
+   <div className={styles.cohortGrid}>
+    <article className={styles.cohortCard}>
+     <span>Studio $9 price cohort</span>
+     <strong>{studio9Paid} / {studio9Attempts.length}</strong>
+     <small>{pct(studio9Paid,studio9Attempts.length)} checkout completion at current $9 price</small>
+    </article>
+    <article className={styles.cohortCard}>
+     <span>Studio $19 legacy cohort</span>
+     <strong>{studio19Paid} / {studio19Attempts.length}</strong>
+     <small>{pct(studio19Paid,studio19Attempts.length)} checkout completion at previous $19 price</small>
+    </article>
+    <article className={styles.cohortCard}>
+     <span>Fieldguide $5 cohort</span>
+     <strong>{fgPaidRows} paid · {fgCompRows} $0</strong>
+     <small>{fg5Attempts.length} $5 checkout attempt{fg5Attempts.length===1?'':'s'} ({pct(fg5Paid,fg5Attempts.length)} conv.)</small>
+    </article>
+    <article className={styles.cohortCard}>
+     <span>Average order & RPV</span>
+     <strong>{avgOrderUsd}</strong>
+     <small>{paidRowsWithAmount.length} charged order{paidRowsWithAmount.length===1?'':'s'} · {pct(totalPaid,analytics.total_visitors)} overall visitor conv.</small>
+    </article>
+   </div>
+  </section>
+
+  <section className={styles.recent}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>CHECKOUT INTENT & DROP-OFF LOG</div><h2>Recent checkout attempts</h2></div>
+    <span><Filter size={13} style={{verticalAlign:'-2px',marginRight:4}}/>Latest {Math.min(classifiedAttempts.length,20)} of {classifiedAttempts.length} attempts</span>
+   </div>
+   {classifiedAttempts.length===0?<p className={styles.empty}>No checkout attempts recorded yet. When signed-in users click a checkout button, their attempt and completion status will appear here.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Product</th><th>Started at</th><th>Funnel status</th><th>Expected / Charged</th></tr></thead><tbody>{classifiedAttempts.slice(0,20).map(attempt=>{
+    const label=attempt.outcome==='active'?'Paid':attempt.outcome==='pending'?'Pending webhook':attempt.outcome==='recovered'?'Recovered on retry':attempt.outcome==='revoked'?'Revoked':'Abandoned checkout';
+    const amountText=attempt.purchase&&attempt.purchase.amount_cents>0?money(attempt.purchase.amount_cents,attempt.purchase.currency):money(attempt.expected_cents,'USD');
+    return <tr key={attempt.id}>
+     <td><strong>{shortUser(attempt.user_id,emailMap)}</strong></td>
+     <td>{products[attempt.product_key]}</td>
+     <td>{date(attempt.created_at)}</td>
+     <td><span className={`${styles.badge} ${styles[attempt.outcome]}`}>{label}</span></td>
+     <td>{amountText}</td>
+    </tr>;
+   })}</tbody></table></div>}
+  </section>
+ </>;
+
+ const trendsView=<>
+  <section className={styles.trendSection}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>DAILY TRAFFIC & REVENUE TRENDS</div><h2>Last 14 days activity</h2></div>
+    <span>{shortDay(days14[0])} – {shortDay(todayUtc)} (UTC)</span>
+   </div>
+   <div className={styles.trendCard}>
+    <div className={styles.trendKpis}>
+     <div className={styles.trendKpi}>
+      <span>7-day visitors</span>
+      <strong>{visitorsLast7.toLocaleString()}</strong>
+      <small>{deltaLabel(visitorsLast7,visitorsPrev7,'visitors')}</small>
+     </div>
+     <div className={styles.trendKpi}>
+      <span>7-day checkouts</span>
+      <strong>{attemptsLast7.toLocaleString()}</strong>
+      <small>{deltaLabel(attemptsLast7,attemptsPrev7,'attempts')}</small>
+     </div>
+     <div className={styles.trendKpi}>
+      <span>7-day paid sales</span>
+      <strong>{salesLast7.toLocaleString()}</strong>
+      <small>{deltaLabel(salesLast7,salesPrev7,'sales')}</small>
+     </div>
+     <div className={styles.trendKpi}>
+      <span>7-day collected</span>
+      <strong>{formatAmounts(amountsLast7)}</strong>
+      <small>{pct(salesLast7,attemptsLast7)} 7d checkout completion</small>
+     </div>
+    </div>
+    <div className={styles.chartGrid} role="img" aria-label="14-day daily visitors and sales bar chart">
+     {dailySeries.map(day=>{
+      const heightPct=day.visitors>0?Math.max(10,Math.round((day.visitors/maxDailyVisitors)*100)):4;
+      const dayRev=formatAmounts(day.amounts);
+      return <div key={day.date} className={styles.barCol} title={`${day.label}: ${day.visitors} unique visitors, ${day.attempts} checkout attempts, ${day.sales} paid sales (${dayRev})`}>
+       {day.sales>0?<span className={styles.barSaleTag}>+{day.sales}</span>:<span className={styles.barValue}>{day.visitors}</span>}
+       <div className={styles.barTrack}>
+        <div className={`${styles.barFill} ${day.sales>0?styles.barFillSale:''}`} style={{height:`${heightPct}%`}}/>
+       </div>
+       <span className={styles.barLabel}>{day.label.replace(' ','\u00A0')}</span>
+      </div>;
+     })}
+    </div>
+    <div className={styles.routeGrid}>
+     {routeStats.map(r=><div key={r.path} className={styles.routeCard}>
+      <span>{r.title}</span>
+      <strong>{r.visitors14d.toLocaleString()}</strong>
+      <small>{r.visitorsToday} today · {r.kind}</small>
+     </div>)}
+    </div>
+   </div>
+  </section>
+ </>;
+
+ const customersView=<>
+  <section className={styles.customerSection}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>CUSTOMER JOURNEY & WORKSPACE USAGE</div><h2>Cross-sell, buyer engagement & access control</h2></div>
+    <span>{customerProfiles.length} total account{customerProfiles.length===1?'':'s'}</span>
+   </div>
+   <div className={styles.customerGrid}>
+    <article className={styles.customerCard}>
+     <span>Registered accounts</span>
+     <strong>{customerProfiles.length.toLocaleString()}</strong>
+     <small>{uniquePaidUsers} paid buyer{uniquePaidUsers===1?'':'s'} · {unconvertedAccounts} unpaid account{unconvertedAccounts===1?'':'s'}</small>
+    </article>
+    <article className={styles.customerCard}>
+     <span>Both products owned</span>
+     <strong>{bothOwners.toLocaleString()}</strong>
+     <small>{fgOnlyOwners} Fieldguide-only · {studioOnlyOwners} Studio-only</small>
+    </article>
+    <article className={styles.customerCard}>
+     <span>Fieldguide → Studio upgrade</span>
+     <strong>{pct(bothOwners,totalFgOwners)}</strong>
+     <small>{fgOnlyOwners} upgrade candidate{fgOnlyOwners===1?'':'s'}{fgOwnersTriedStudio>0?` (${fgOwnersTriedStudio} tried checkout)`:''}</small>
+    </article>
+    <article className={styles.customerCard}>
+     <span>Studio workspace active</span>
+     <strong>{activeStudioWorkspaces}/{totalStudioOwners}</strong>
+     <small>{pct(activeStudioWorkspaces,totalStudioOwners)} of Studio buyers saved cloud state</small>
+    </article>
+   </div>
+   <CustomerAdmin
+    customers={customerProfiles.map<CustomerRecord>(c=>({
+     userId:c.userId,
+     email:c.email,
+     ownsStudio:c.ownsStudio,
+     ownsFieldguide:c.ownsFieldguide,
+     triedStudio:c.triedStudio,
+     triedFieldguide:c.triedFieldguide,
+     workspaceKeys:c.workspaceKeys,
+     workspaceSummary:c.workspaceSummary,
+     nicheLabel:c.nicheLabel,
+     checksCompleted:c.checksCompleted,
+     workspaceUpdatedAtFormatted:c.workspaceUpdatedAt?date(c.workspaceUpdatedAt):null,
+     spentFormatted:formatAmounts(c.spent),
+     hasPaid:c.hasPaid,
+     lastActivityFormatted:date(c.lastActivity),
+     lastActivityIso:c.lastActivity
+    }))}
+    paymentExportRows={[
+     ...rows.map<PaymentExportRow>(r=>({
+      type:'payment',
+      id:r.payment_id,
+      customer:shortUser(r.user_id,emailMap),
+      product:products[r.product_key],
+      status:r.access_status,
+      amount:money(r.amount_cents,r.currency),
+      dateIso:r.updated_at
+     })),
+     ...classifiedAttempts.map<PaymentExportRow>(a=>({
+      type:'checkout_attempt',
+      id:a.id,
+      customer:shortUser(a.user_id,emailMap),
+      product:products[a.product_key],
+      status:a.outcome,
+      amount:money(a.expected_cents,'USD'),
+      dateIso:a.created_at
+     }))
+    ]}
+   />
+  </section>
+ </>;
+
+ const workspaceView=<>
+  <section className={styles.stageSection}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>LAUNCHPAD STUDIO 5-STAGE PROGRESS</div><h2>Inside-workspace buyer completion</h2></div>
+    <span>Avg {avgChecklist}/7 launch actions · {totalCustomPosts} custom posts drafted</span>
+   </div>
+   <div className={styles.stageGrid}>
+    <article className={styles.stageCard}>
+     <span>Step 1 · Validate idea</span>
+     <strong>{stage1Count}/{workspaces.length}</strong>
+     <small>Filled all 4 audience, problem & offer fields</small>
+    </article>
+    <article className={styles.stageCard}>
+     <span>Step 2 · AI & evidence</span>
+     <strong>{stage2Count}/{workspaces.length}</strong>
+     <small>Recorded real customer research & evidence notes</small>
+    </article>
+    <article className={styles.stageCard}>
+     <span>Step 3 · Content plan</span>
+     <strong>{stage3Count}/{workspaces.length}</strong>
+     <small>Customized 30-day Threads post drafts ({totalCustomPosts} total)</small>
+    </article>
+    <article className={styles.stageCard}>
+     <span>Step 4 · Store & links</span>
+     <strong>{stage4Count}/{workspaces.length}</strong>
+     <small>Added concrete deliverables or live product URLs</small>
+    </article>
+    <article className={styles.stageCard}>
+     <span>Step 5 · Launch checklist</span>
+     <strong>{stage5Count}/{workspaces.length}</strong>
+     <small>Checked off launch tasks (avg {avgChecklist} of 7)</small>
+    </article>
+   </div>
+   <div className={styles.nicheStrip}>
+    <strong>Active workspace niches:</strong>
+    {sortedNiches.length===0?<span>No workspace niches saved yet.</span>:sortedNiches.map(([niche,cnt])=><span key={niche} className={styles.nichePill}>{niche}: {cnt}</span>)}
+   </div>
+  </section>
+ </>;
+
+ return <DashboardShell
+  counts={{
+   paidSales:totalPaid,
+   abandonedCount:abandonedAttempts.length,
+   visitors7d:visitorsLast7,
+   customersCount:customerProfiles.length,
+   activeWorkspaces:activeStudioWorkspaces
+  }}
+  overview={overviewView}
+  funnel={funnelView}
+  trends={trendsView}
+  customers={customersView}
+  workspace={workspaceView}
+ />;
 }
 
 
