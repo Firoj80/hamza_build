@@ -12,4 +12,16 @@ export async function authClient(){
   }
  });
 }
-export async function currentUser(){if(!authConfigured())return null;const db=await authClient();const {data,error}=await db.auth.getUser();return error?null:data.user;}
+export async function currentUser(){
+ if(!authConfigured())return null;
+ try{
+  const jar=await cookies();
+  const all=jar.getAll();
+  if(!all.some(c=>c.name.includes('auth-token')||c.name.startsWith('sb-')))return null;
+  const db=await authClient();
+  const {data,error}=await db.auth.getUser();
+  return error?null:data.user;
+ }catch{
+  return null;
+ }
+}
