@@ -12,6 +12,9 @@ export type CustomerRecord={
  triedStudio:number;
  triedFieldguide:number;
  workspaceKeys:number;
+ workspaceSummary:string|null;
+ nicheLabel:string|null;
+ checksCompleted:number;
  workspaceUpdatedAtFormatted:string|null;
  spentFormatted:string;
  hasPaid:boolean;
@@ -64,7 +67,7 @@ export default function CustomerAdmin({
  const filtered=useMemo(()=>{
   const q=query.trim().toLowerCase();
   return customers.filter(c=>{
-   if(q&&!c.email.toLowerCase().includes(q)&&!c.userId.toLowerCase().includes(q))return false;
+   if(q&&!c.email.toLowerCase().includes(q)&&!c.userId.toLowerCase().includes(q)&&!(c.nicheLabel||'').toLowerCase().includes(q))return false;
    if(segment==='paid')return c.hasPaid;
    if(segment==='upgrade')return c.ownsFieldguide&&!c.ownsStudio;
    if(segment==='abandoned')return !c.hasPaid&&(c.triedStudio+c.triedFieldguide>0);
@@ -109,7 +112,7 @@ export default function CustomerAdmin({
  function exportCustomers(){
   downloadCsv(
    `customers-${new Date().toISOString().slice(0,10)}.csv`,
-   ['Email','User ID','Owns Fieldguide ($5)','Owns Studio ($9)','Studio Checkouts','Fieldguide Checkouts','Studio Workspace Keys','Total Paid','Last Active'],
+   ['Email','User ID','Owns Fieldguide ($5)','Owns Studio ($9)','Studio Checkouts','Fieldguide Checkouts','Studio Niche','Checklist Completed (of 7)','Workspace Summary','Total Paid','Last Active'],
    filtered.map(c=>[
     c.email,
     c.userId,
@@ -117,7 +120,9 @@ export default function CustomerAdmin({
     c.ownsStudio,
     c.triedStudio,
     c.triedFieldguide,
-    c.workspaceKeys,
+    c.nicheLabel||'',
+    c.checksCompleted,
+    c.workspaceSummary||'',
     c.spentFormatted,
     c.lastActivityIso
    ])
@@ -140,8 +145,8 @@ export default function CustomerAdmin({
      type="search"
      value={query}
      onChange={e=>setQuery(e.target.value)}
-     placeholder="Search customer email or user ID..."
-     aria-label="Search customer email or user ID"
+     placeholder="Search customer email, user ID, or niche..."
+     aria-label="Search customer email, user ID, or niche"
     />
    </div>
    <div className={styles.segmentTabs}>
@@ -190,7 +195,7 @@ export default function CustomerAdmin({
    {statusMsg&&<span className={statusMsg.type==='ok'?styles.msgOk:styles.msgErr}>{statusMsg.text}</span>}
   </form>
 
-  {filtered.length===0?<p className={styles.empty}>No customers match the current filter.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Owned products</th><th>Studio workspace</th><th>Lifecycle / upgrade signal</th><th>Total paid</th><th>Quick access control</th></tr></thead><tbody>{filtered.slice(0,50).map(c=>{
+  {filtered.length===0?<p className={styles.empty}>No customers match the current filter.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Owned products</th><th>Studio workspace progress</th><th>Lifecycle / upgrade signal</th><th>Total paid</th><th>Quick access control</th></tr></thead><tbody>{filtered.slice(0,50).map(c=>{
    const ownershipLabel=c.ownsStudio&&c.ownsFieldguide
     ?'Fieldguide + Studio ($14)'
     :c.ownsStudio
@@ -204,7 +209,7 @@ export default function CustomerAdmin({
      ?styles.active
      :styles.neutral;
    const wsText=c.workspaceKeys>0
-    ?`Active · ${c.workspaceKeys} saved key${c.workspaceKeys===1?'':'s'}`
+    ?(c.workspaceSummary||`Active · ${c.workspaceKeys} saved keys`)
     :c.ownsStudio
      ?'Unlocked · not saved yet'
      :'—';
@@ -213,14 +218,14 @@ export default function CustomerAdmin({
     :c.ownsFieldguide&&!c.ownsStudio
      ?{text:c.triedStudio>0?'Warm lead · tried Studio checkout':'Upgrade candidate → Studio ($9)',cls:styles.upgrade}
      :c.ownsStudio&&!c.ownsFieldguide
-      ?{text:c.workspaceKeys>0?'Active Studio builder':'New Studio buyer',cls:styles.active}
+      ?{text:c.checksCompleted>=7?'Completed 7/7 launch actions':c.workspaceKeys>0?'Active Studio builder':'New Studio buyer',cls:styles.active}
       :c.triedStudio+c.triedFieldguide>0
        ?{text:`Abandoned checkout (${c.triedStudio+c.triedFieldguide}x)`,cls:styles.abandoned}
        :{text:'Signed up · browsing',cls:styles.neutral};
    return <tr key={c.userId}>
     <td><strong>{c.email}</strong><span className={styles.cellSub}>Last active {c.lastActivityFormatted}</span></td>
     <td><span className={`${styles.badge} ${ownershipBadge}`}>{ownershipLabel}</span></td>
-    <td>{wsText}{c.workspaceUpdatedAtFormatted&&<span className={styles.cellSub}>Synced {c.workspaceUpdatedAtFormatted}</span>}</td>
+    <td>{wsText}{c.workspaceUpdatedAtFormatted&&<span className={styles.cellSub}>{c.nicheLabel?`${c.nicheLabel} · `:''}Synced {c.workspaceUpdatedAtFormatted}</span>}</td>
     <td><span className={`${styles.badge} ${signal.cls}`}>{signal.text}</span></td>
     <td><strong>{c.spentFormatted}</strong></td>
     <td>

@@ -7,6 +7,7 @@ import {adminClient} from '@/lib/supabase/admin';
 import {guide,studio} from '@/lib/catalog';
 import ShareSnapshot from './share-snapshot';
 import CustomerAdmin,{type CustomerRecord,type PaymentExportRow} from './customer-admin';
+import DashboardShell from './dashboard-shell';
 import {isSalesAdmin} from '@/lib/platform-policy.mjs';
 import styles from './sales.module.css';
 
@@ -189,12 +190,80 @@ export default async function Sales(){
   return {...def,visitors14d,visitorsToday};
  });
 
- // #3 Customer Directory, Cross-Sell & Workspace Usage calculations
- const workspaceByUser=new Map<string,{keys:number;updatedAt:string}>();
+ // #3, #4 & #5 Customer Directory, Cross-Sell & Deep Studio 5-Stage Workspace Progress calculations
+ const nicheNames:Record<string,string>={
+  ai_hustle:'AI Side-Hustle',
+  focus_habits:'Focus & Habits',
+  prompt_mastery:'Prompt Mastery',
+  threads_growth:'Threads Growth',
+  job_resume:'Job & Resume',
+  simple_budget:'Simple Budget',
+  meal_prep:'Meal Prep',
+  budget_travel:'Budget Travel'
+ };
+ type ParsedWorkspace={
+  keys:number;
+  updatedAt:string;
+  nicheLabel:string|null;
+  ideaFields:number;
+  hasEvidence:boolean;
+  customPostsCount:number;
+  hasStoreScope:boolean;
+  checksCompleted:number;
+  summary:string;
+ };
+ const workspaceByUser=new Map<string,ParsedWorkspace>();
+ const nicheCounts=new Map<string,number>();
+ let stage1Count=0;
+ let stage2Count=0;
+ let stage3Count=0;
+ let stage4Count=0;
+ let stage5Count=0;
+ let totalChecksAcrossUsers=0;
+ let totalCustomPosts=0;
+
  for(const w of workspaces){
-  const keys=w.state&&typeof w.state==='object'?Object.keys(w.state).length:0;
-  workspaceByUser.set(w.user_id,{keys,updatedAt:w.updated_at});
+  const st=(w.state&&typeof w.state==='object'?w.state:{}) as Record<string,unknown>;
+  const keys=Object.keys(st).length;
+  const nicheKey=typeof st.niche==='string'?st.niche:'';
+  const nicheLabel=nicheKey?(nicheNames[nicheKey]||nicheKey):null;
+  if(keys>0&&nicheLabel)nicheCounts.set(nicheLabel,(nicheCounts.get(nicheLabel)||0)+1);
+  const ideaFields=['audience','problem','freeTitle','paidTitle'].filter(k=>typeof st[k]==='string'&&(st[k] as string).trim().length>0).length;
+  const hasEvidence=typeof st.evidence==='string'&&st.evidence.trim().length>0;
+  const postsObj=st.posts&&typeof st.posts==='object'&&!Array.isArray(st.posts)?(st.posts as Record<string,unknown>):{};
+  const customPostsCount=Object.values(postsObj).filter(v=>typeof v==='string'&&v.trim().length>0).length;
+  const hasStoreScope=Boolean(
+   (typeof st.deliverables==='string'&&st.deliverables.trim().length>0)||
+   (typeof st.freeUrl==='string'&&st.freeUrl.trim().length>0)||
+   (typeof st.paidUrl==='string'&&st.paidUrl.trim().length>0)
+  );
+  const checksObj=st.checks&&typeof st.checks==='object'&&!Array.isArray(st.checks)?(st.checks as Record<string,unknown>):{};
+  const checksCompleted=[0,1,2,3,4,5,6].filter(i=>Boolean(checksObj[String(i)])).length;
+
+  if(ideaFields>=4)stage1Count++;
+  if(hasEvidence)stage2Count++;
+  if(customPostsCount>0)stage3Count++;
+  if(hasStoreScope)stage4Count++;
+  if(checksCompleted>0)stage5Count++;
+  totalChecksAcrossUsers+=checksCompleted;
+  totalCustomPosts+=customPostsCount;
+
+  const parts:string[]=[`${ideaFields}/4 idea`, `${checksCompleted}/7 checklist`];
+  if(customPostsCount>0)parts.push(`${customPostsCount} post${customPostsCount===1?'':'s'}`);
+  if(hasEvidence)parts.push('evidence logged');
+  workspaceByUser.set(w.user_id,{
+   keys,
+   updatedAt:w.updated_at,
+   nicheLabel,
+   ideaFields,
+   hasEvidence,
+   customPostsCount,
+   hasStoreScope,
+   checksCompleted,
+   summary:keys>0?parts.join(' · '):'Unlocked · not saved yet'
+  });
  }
+
  const allUserIds=new Set<string>();
  for(const u of authUsers){if(u.id)allUserIds.add(u.id);}
  for(const r of rows){if(r.user_id)allUserIds.add(r.user_id);}
@@ -231,6 +300,9 @@ export default async function Sales(){
    triedStudio,
    triedFieldguide,
    workspaceKeys:ws?.keys||0,
+   workspaceSummary:ws?.summary||null,
+   nicheLabel:ws?.nicheLabel||null,
+   checksCompleted:ws?.checksCompleted||0,
    workspaceUpdatedAt:ws?.updatedAt||null,
    spent,
    hasPaid:ownsStudio||ownsFieldguide,
@@ -246,8 +318,29 @@ export default async function Sales(){
  const activeStudioWorkspaces=customerProfiles.filter(c=>c.ownsStudio&&c.workspaceKeys>0).length;
  const fgOwnersTriedStudio=customerProfiles.filter(c=>c.ownsFieldguide&&!c.ownsStudio&&c.triedStudio>0).length;
  const unconvertedAccounts=customerProfiles.filter(c=>!c.hasPaid).length;
+ const avgChecklist=workspaces.length>0?(totalChecksAcrossUsers/workspaces.length).toFixed(1):'0.0';
+ const sortedNiches=Array.from(nicheCounts.entries()).sort((a,b)=>b[1]-a[1]);
+
+ // #6 Pricing Tier Cohorts & Unit Economics calculations
+ const studio9Attempts=studioAttempts.filter(a=>a.expected_cents===900);
+ const studio9Paid=studio9Attempts.filter(a=>a.outcome==='active').length;
+ const studio19Attempts=studioAttempts.filter(a=>a.expected_cents===1900);
+ const studio19Paid=studio19Attempts.filter(a=>a.outcome==='active').length;
+ const fg5Attempts=fgAttempts.filter(a=>a.expected_cents===500);
+ const fg5Paid=fg5Attempts.filter(a=>a.outcome==='active').length;
+ const fgPaidRows=fgRows.filter(r=>r.access_status==='active'&&r.amount_cents>0).length;
+ const fgCompRows=fgRows.filter(r=>r.access_status==='active'&&r.amount_cents===0).length;
+ const paidRowsWithAmount=rows.filter(r=>r.access_status==='active'&&r.amount_cents>0);
+ const usdTotalCents=totalAmounts['USD']||0;
+ const usdPaidCount=paidRowsWithAmount.filter(r=>r.currency==='USD').length;
+ const avgOrderUsd=usdPaidCount>0?money(Math.round(usdTotalCents/usdPaidCount),'USD'):revenue;
 
  const shareText=`My product progress so far:\n${analytics.total_visitors.toLocaleString()} unique visitors\n${studio.name}: ${studioPaid} sales (${studioRevenue} collected)\n${guide.name}: ${fgPaid} sales (${fgRevenue} collected)\nBuilding in public, one useful step at a time.`;
+ const shareTemplates={
+  milestone:shareText,
+  funnel:`Store funnel snapshot:\n• ${analytics.total_visitors.toLocaleString()} unique visitors\n• ${productVisitors.toLocaleString()} product page views\n• ${totalAttempts} checkouts started\n• ${totalPaid} paid sales (${overallCheckoutCompletion} checkout completion)\n• ${revenue} collected so far.`,
+  weekly:`Last 7 days building in public:\n• ${visitorsLast7.toLocaleString()} unique visitors\n• ${attemptsLast7} checkout attempts\n• ${salesLast7} paid sales (${formatAmounts(amountsLast7)} collected)\n• ${activeStudioWorkspaces} builders actively using Launchpad Studio.`
+ };
  return <main className={styles.page}>
   <header className={styles.header}><BrandMark href="/" className="wordmark" icon/><Link className={styles.back} href="/"><ArrowLeft size={16}/> Landing page</Link></header>
   <section className={styles.content}>
@@ -344,7 +437,7 @@ export default async function Sales(){
    </section>
 
    <section className={styles.products}>
-    <div className={styles.sectionTitle}><div><div className={styles.eyebrow}>SHAREABLE SNAPSHOT</div><h2>Product performance & funnel</h2></div><ShareSnapshot text={shareText}/></div>
+    <div className={styles.sectionTitle}><div><div className={styles.eyebrow}>SHAREABLE SNAPSHOT</div><h2>Product performance & funnel</h2></div><ShareSnapshot text={shareText} templates={shareTemplates}/></div>
     <div className={styles.tableWrap}><table className={`${styles.table} ${styles.shareTable}`}><thead><tr><th>Product</th><th>Visitors</th><th>Checkouts</th><th>Paid sales</th><th>Checkout conv.</th><th>Unrecovered</th><th>Collected</th></tr></thead><tbody>
      <tr>
       <td><strong>{studio.name}</strong><small>$9 · one-time</small></td>
@@ -365,6 +458,73 @@ export default async function Sales(){
       <td>{fgRevenue}{fgUnknown>0&&<span className={styles.unknown}>*</span>}</td>
      </tr>
     </tbody><tfoot><tr><td><strong>Total</strong></td><td>{analytics.total_visitors.toLocaleString()}</td><td>{totalAttempts} attempts</td><td>{totalPaid} paid sales</td><td>{overallCheckoutCompletion}</td><td>{uniqueAbandonedUsers} user{uniqueAbandonedUsers===1?'':'s'}</td><td>{revenue}{amountUnknown>0&&<span className={styles.unknown}>*</span>}</td></tr></tfoot></table></div>
+   </section>
+
+   <section className={styles.cohortSection}>
+    <div className={styles.sectionTitle}>
+     <div><div className={styles.eyebrow}>PRICING COHORTS & UNIT ECONOMICS</div><h2>Price tier performance ($9 vs $19 & $5 vs $0)</h2></div>
+     <span>Tracked via expected_cents & amount_cents</span>
+    </div>
+    <div className={styles.cohortGrid}>
+     <article className={styles.cohortCard}>
+      <span>Studio $9 price cohort</span>
+      <strong>{studio9Paid} / {studio9Attempts.length}</strong>
+      <small>{pct(studio9Paid,studio9Attempts.length)} checkout completion at current $9 price</small>
+     </article>
+     <article className={styles.cohortCard}>
+      <span>Studio $19 legacy cohort</span>
+      <strong>{studio19Paid} / {studio19Attempts.length}</strong>
+      <small>{pct(studio19Paid,studio19Attempts.length)} checkout completion at previous $19 price</small>
+     </article>
+     <article className={styles.cohortCard}>
+      <span>Fieldguide $5 cohort</span>
+      <strong>{fgPaidRows} paid · {fgCompRows} $0</strong>
+      <small>{fg5Attempts.length} $5 checkout attempt{fg5Attempts.length===1?'':'s'} ({pct(fg5Paid,fg5Attempts.length)} conv.)</small>
+     </article>
+     <article className={styles.cohortCard}>
+      <span>Average order & RPV</span>
+      <strong>{avgOrderUsd}</strong>
+      <small>{ paidRowsWithAmount.length } charged order{paidRowsWithAmount.length===1?'':'s'} · {pct(totalPaid,analytics.total_visitors)} overall visitor conv.</small>
+     </article>
+    </div>
+   </section>
+
+   <section className={styles.stageSection}>
+    <div className={styles.sectionTitle}>
+     <div><div className={styles.eyebrow}>LAUNCHPAD STUDIO 5-STAGE PROGRESS</div><h2>Inside-workspace buyer completion</h2></div>
+     <span>Avg {avgChecklist}/7 launch actions · {totalCustomPosts} custom posts drafted</span>
+    </div>
+    <div className={styles.stageGrid}>
+     <article className={styles.stageCard}>
+      <span>Step 1 · Validate idea</span>
+      <strong>{stage1Count}/{workspaces.length}</strong>
+      <small>Filled all 4 audience, problem & offer fields</small>
+     </article>
+     <article className={styles.stageCard}>
+      <span>Step 2 · AI & evidence</span>
+      <strong>{stage2Count}/{workspaces.length}</strong>
+      <small>Recorded real customer research & evidence notes</small>
+     </article>
+     <article className={styles.stageCard}>
+      <span>Step 3 · Content plan</span>
+      <strong>{stage3Count}/{workspaces.length}</strong>
+      <small>Customized 30-day Threads post drafts ({totalCustomPosts} total)</small>
+     </article>
+     <article className={styles.stageCard}>
+      <span>Step 4 · Store & links</span>
+      <strong>{stage4Count}/{workspaces.length}</strong>
+      <small>Added concrete deliverables or live product URLs</small>
+     </article>
+     <article className={styles.stageCard}>
+      <span>Step 5 · Launch checklist</span>
+      <strong>{stage5Count}/{workspaces.length}</strong>
+      <small>Checked off launch tasks (avg {avgChecklist} of 7)</small>
+     </article>
+    </div>
+    <div className={styles.nicheStrip}>
+     <strong>Active workspace niches:</strong>
+     {sortedNiches.length===0?<span>No workspace niches saved yet.</span>:sortedNiches.map(([niche,cnt])=><span key={niche} className={styles.nichePill}>{niche}: {cnt}</span>)}
+    </div>
    </section>
 
    <section className={styles.customerSection}>
@@ -403,6 +563,9 @@ export default async function Sales(){
       triedStudio:c.triedStudio,
       triedFieldguide:c.triedFieldguide,
       workspaceKeys:c.workspaceKeys,
+      workspaceSummary:c.workspaceSummary,
+      nicheLabel:c.nicheLabel,
+      checksCompleted:c.checksCompleted,
       workspaceUpdatedAtFormatted:c.workspaceUpdatedAt?date(c.workspaceUpdatedAt):null,
       spentFormatted:formatAmounts(c.spent),
       hasPaid:c.hasPaid,
