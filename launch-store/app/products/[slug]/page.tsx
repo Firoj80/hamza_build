@@ -41,14 +41,14 @@ export default async function ProductPage({ params }: Props) {
         <div className="eyebrow"><span/>{product.eyebrow}</div>
         <h1>{product.name}<br/><em>{product.headline}</em></h1>
         <p>{product.description}</p>
-        <div className="detail-price"><strong>{isGuide ? 'Free' : `$${product.price}`}</strong><span>{isGuide ? 'USD · no payment' : 'USD · pay once'}<br/>Account access</span></div>
-        {isGuide ? <Link href={guide.readerHref} className="button dark">Open the free Fieldguide <ArrowUpRight size={18}/></Link> : <CheckoutButton product={product.product} className="button dark">Get Launchpad Studio access · ${product.price}</CheckoutButton>}
+        <div className="detail-price"><strong>${product.price}</strong><span>USD · pay once<br/>Account access</span></div>
+        <CheckoutButton product={product.product} className="button dark">Get {product.name} access · ${product.price}</CheckoutButton>
         <div className="detail-access"><ShieldCheck size={16}/>{product.access}</div>
       </div>
       <div className="product-detail-visual">
         <div className="detail-image-label">{product.imageLabel}</div>
         <Image src={product.image} alt={product.imageAlt} width={isGuide ? 1536 : 1440} height={isGuide ? 1024 : 1000} priority />
-        {isGuide && <p className="detail-image-note">Cover concept. Create a free account to open the seven-page guide.</p>}
+        {isGuide && <p className="detail-image-note">Cover concept. Purchase access to open the seven-page guide in your account library.</p>}
       </div>
     </section>
 
@@ -65,10 +65,10 @@ export default async function ProductPage({ params }: Props) {
 
     <section className="detail-bottom wrap">
       <div><div className="eyebrow">GOOD TO KNOW</div><h2>Clear access.<br/><em>Honest expectations.</em></h2><p>{product.limitation}</p></div>
-      <aside><span className="detail-price"><strong>{isGuide ? 'Free' : `$${product.price}`}</strong><small>{isGuide ? 'USD · account access' : 'USD · one-time purchase'}</small></span>{isGuide ? <Link href={guide.readerHref} className="button lime">Open the free Fieldguide <ArrowUpRight size={18}/></Link> : <CheckoutButton product={product.product} className="button lime">Get access · ${product.price}</CheckoutButton>}<p>{isGuide ? 'No checkout. No payment. Sign in to your account.' : 'Secure checkout · Account access · No monthly product subscription'}</p></aside>
+      <aside><span className="detail-price"><strong>${product.price}</strong><small>USD · one-time purchase</small></span><CheckoutButton product={product.product} className="button lime">Get access · ${product.price}</CheckoutButton><p>Secure checkout · Account access · No monthly product subscription</p></aside>
     </section>
 
-    <section className="detail-next wrap"><div><div className="eyebrow">THE NEXT USEFUL STEP</div><p>{product.nextStep}</p></div><Link href={product.nextHref} className="text-link">Explore {isGuide ? `${studio.name} · $${studio.price}` : `Free ${guide.name}`}<ArrowRight size={16}/></Link></section>
+    <section className="detail-next wrap"><div><div className="eyebrow">THE NEXT USEFUL STEP</div><p>{product.nextStep}</p></div><Link href={product.nextHref} className="text-link">Explore {isGuide ? `${studio.name} · $${studio.price}` : `${guide.name} · $${guide.price}`}<ArrowRight size={16}/></Link></section>
     <footer className="detail-footer wrap"><BrandMark href="/"/><span>Small tools for people making their first useful thing.</span><Link href="/support">Support</Link></footer>
   </main>;
 }

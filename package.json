@@ -1,0 +1,14 @@
+{
+  "name": "build-hamza-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "launch-store"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=launch-store",
+    "build": "npm run build --workspace=launch-store",
+    "start": "npm run start --workspace=launch-store",
+    "lint": "npm run typecheck --workspace=launch-store"
+  }
+}

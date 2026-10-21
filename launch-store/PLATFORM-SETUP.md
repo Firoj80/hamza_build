@@ -2,9 +2,9 @@
 
 ## What changed
 
-- Idea-to-Income Fieldguide: **Free**, separate one-time purchase, read inside the account.
+- Idea-to-Income Fieldguide: **$5 USD**, separate one-time purchase, read inside the account.
 - Launchpad Studio: **$19 USD**, separate one-time purchase, used inside the account.
-- No public free-PDF URL or downloadable Studio HTML/ZIP is served by the website.
+- No public PDF URL or downloadable Studio HTML/ZIP is served by the website.
 - Supabase email/password sign-in, per-account library and cloud-saved workspace.
 - Dodo checkout is tied to a server-created checkout attempt and signed-in user.
 - Payment confirmation is verified with Dodo and persisted in Supabase.
@@ -34,7 +34,7 @@ NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 
 PostHog is optional and starts collecting only after the project token is set. In PostHog, open Project settings and copy the **project API key/token** (the public `phc_...` token, never a personal `phx_...` key). Add it in `.env.local` and in Vercel as `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`; set `NEXT_PUBLIC_POSTHOG_HOST` to the ingestion host shown by your PostHog region, then redeploy. This integration records page views, product detail views, and checkout attempts; automatic click/form capture and session replay are disabled. The existing first-party visitor counter remains available independently.
 
-The owner-only sales dashboard is available at `/sales` after signing in. `alamtech9@gmail.com` is the configured owner email; the authenticated Supabase account must use this address. It reports privacy-friendly unique visitor estimates, verified Dodo payment totals and product counts; the free Fieldguide is shown as account access rather than a paid sale. Amounts include tax and exclude processor fees. Visitor analytics stores a daily HMAC token instead of raw IP addresses or user agents.
+The owner-only sales dashboard is available at `/sales` after signing in. `alamtech9@gmail.com` is the configured owner email; the authenticated Supabase account must use this address. It reports privacy-friendly unique visitor estimates, verified Dodo payment totals and product counts. Amounts include tax and exclude processor fees. Visitor analytics stores a daily HMAC token instead of raw IP addresses or user agents.
 
 ## Supabase Auth
 
@@ -44,7 +44,7 @@ In Authentication → URL Configuration, set Site URL to the exact deployed orig
 
 Create two **one-time**, fixed-price USD products in test mode:
 
-1. Idea-to-Income Fieldguide: free account access; no Dodo product is required.
+1. Idea-to-Income Fieldguide: 500 cents ($5).
 2. Launchpad Studio: 1900 cents ($19).
 
 Do not attach digital-file entitlements or the old Studio ZIP to these products. Account access is fulfilled by this platform. If you already attached files to a previous Dodo product, detach them or create fresh platform products before live sales. This project does not silently modify existing Dodo settings.

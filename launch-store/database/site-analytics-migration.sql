@@ -49,7 +49,11 @@ language sql stable security invoker set search_path='' as $$
    'amounts',coalesce((select jsonb_object_agg(currency,total) from (select currency,sum(amount_cents) as total from public.platform_purchases where product_key='studio' and access_status='active' and amount_cents>0 group by currency) sums),'{}'::jsonb)
   ),
   'fieldguide',jsonb_build_object(
-   'accesses',(select count(*) from public.platform_purchases where product_key='fieldguide' and access_status='active')
+   'paid_sales',(select count(*) from public.platform_purchases where product_key='fieldguide' and access_status='active'),
+   'pending_sales',(select count(*) from public.platform_purchases where product_key='fieldguide' and access_status='pending'),
+   'revoked_sales',(select count(*) from public.platform_purchases where product_key='fieldguide' and access_status='revoked'),
+   'unknown_amount_sales',(select count(*) from public.platform_purchases where product_key='fieldguide' and access_status='active' and amount_cents=0),
+   'amounts',coalesce((select jsonb_object_agg(currency,total) from (select currency,sum(amount_cents) as total from public.platform_purchases where product_key='fieldguide' and access_status='active' and amount_cents>0 group by currency) sums),'{}'::jsonb)
   )
  );
 $$;

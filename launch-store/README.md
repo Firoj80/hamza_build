@@ -1,6 +1,6 @@
 # Build Hamza paid platform
 
-Idea-to-Income Fieldguide: free account access. Launchpad Studio: $19. Both are accessed through signed-in accounts. No public product downloads.
+Idea-to-Income Fieldguide: $5. Launchpad Studio: $19. Both are accessed through signed-in accounts. No public product downloads.
 
 See [PLATFORM-SETUP.md](PLATFORM-SETUP.md) for Supabase, Dodo Payments, testing and Vercel deployment instructions.
 
