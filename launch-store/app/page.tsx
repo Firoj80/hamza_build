@@ -1,20 +1,31 @@
 import Image from 'next/image';
-import {ArrowUpRight,ArrowRight,BookOpen,Check,MousePointer2,FileText,Layers,Compass,ShieldCheck,Plus,LogIn,UserPlus} from 'lucide-react';
+import {ArrowUpRight,ArrowRight,BookOpen,Check,MousePointer2,FileText,Layers,Compass,ShieldCheck,Plus,LogIn,UserPlus,Star} from 'lucide-react';
 import StudioPreview from './studio-preview';
 import Link from 'next/link';
-import {guide,studio,social} from '@/lib/catalog';
+import {social} from '@/lib/catalog';
 import CheckoutButton from './checkout-button';
 import SiteHeader from './site-header';
 import SiteFooter from './site-footer';
 import {currentUser} from '@/lib/supabase/server';
+import {loadEmailStudioState} from '@/lib/email-reviews-store';
+import {getActiveCatalogProducts} from '@/lib/product-store';
+
+export const dynamic = 'force-dynamic';
 
 export default async function Home(){
- const user=await currentUser();
+ const [user,emailState,catalogProducts]=await Promise.all([
+  currentUser(),
+  loadEmailStudioState(),
+  getActiveCatalogProducts()
+ ]);
+ const publishedReviews=emailState.reviews.filter(r=>r.published).slice(0,6);
+ const avgRating=publishedReviews.length>0?(publishedReviews.reduce((s,r)=>s+r.rating,0)/publishedReviews.length).toFixed(1):'5.0';
+ const primaryProduct=catalogProducts.find(p=>p.key==='fieldguide')||catalogProducts[0];
  return <>
   <a className="skip-link" href="#main">Skip to content</a>
   <div className="announcement">
    <span>A small first step can become something useful.</span>
-   <a href="#tools">Get the Fieldguide · $5 <ArrowRight size={13}/></a>
+   <a href="#tools">{primaryProduct?`${primaryProduct.ctaLabel||`Get ${primaryProduct.name} · $${primaryProduct.price}`}`:'Get the Fieldguide · $5'} <ArrowRight size={13}/></a>
   </div>
   <SiteHeader/>
   <main id="main">
@@ -24,7 +35,9 @@ export default async function Home(){
      <h1>Your first product.<br/>A clearer <em>way<br className="desktop-break"/> forward.</em></h1>
      <p>You don’t need another big idea.<br/>You need a small, useful one—and a plan to bring it to life.</p>
      <div className="hero-actions">
-      <CheckoutButton product="fieldguide" className="button dark">Get the Fieldguide · $5</CheckoutButton>
+      <CheckoutButton product={primaryProduct?primaryProduct.key:'fieldguide'} className="button dark">
+       {primaryProduct?primaryProduct.ctaLabel:`Get the Fieldguide · $5`}
+      </CheckoutButton>
       <a className="text-link" href="#tools">Explore the tools <ArrowRight size={16}/></a>
      </div>
      <div className="hero-fine">
@@ -57,9 +70,9 @@ export default async function Home(){
     <div className="hero-visual">
      <div className="image-label"><span className="mini-dot"/> FROM YOUR FIRST IDEA TO YOUR FIRST LAUNCH</div>
      <div className="hero-cover-frame">
-      <Image src="/images/idea-to-income-fieldguide-cover.svg" alt="Idea-to-Income Fieldguide hardcover monograph concept and customer validation scorecard sheet" width={1600} height={1100} unoptimized priority/>
+      <Image src={primaryProduct?primaryProduct.image:'/images/idea-to-income-fieldguide-cover.svg'} alt={primaryProduct?primaryProduct.imageAlt:'Idea-to-Income Fieldguide hardcover monograph concept and customer validation scorecard sheet'} width={1600} height={1100} unoptimized priority/>
      </div>
-     <div className="visual-caption"><span>01 / IDEA-TO-INCOME FIELDGUIDE</span><span>ACCOUNT ACCESS · NOT A PHYSICAL BOOK</span></div>
+     <div className="visual-caption"><span>01 / {primaryProduct?primaryProduct.name.toUpperCase():'IDEA-TO-INCOME FIELDGUIDE'}</span><span>ACCOUNT ACCESS · NOT A PHYSICAL BOOK</span></div>
      <div className="floating-note"><span className="note-star">✳</span><div>A little less overthinking.<br/><b>A little more making.</b></div></div>
     </div>
    </section>
@@ -75,59 +88,51 @@ export default async function Home(){
     <div className="section-heading">
      <div>
       <div className="eyebrow">THE STARTER COLLECTION</div>
-      <h2>One idea. Two useful companions.</h2>
+      <h2>{catalogProducts.length===2?'One idea. Two useful companions.':`One idea. ${catalogProducts.length} useful companions.`}</h2>
      </div>
      <p>Start with clarity. Add a workspace when<br/>you’re ready to organise the launch.</p>
     </div>
 
     <div className="product-grid">
-     <article className="product-card">
-      <Link href={guide.href} className="product-photo cover-showcase-light" aria-label="View Idea-to-Income Fieldguide details">
-       <Image src="/images/idea-to-income-fieldguide-cover.svg" alt="Idea-to-Income Fieldguide hardcover monograph concept and validation scorecard worksheet" width={1600} height={1100} unoptimized/>
-       <span className="product-badge">$5 · START HERE</span>
-      </Link>
-      <div className="product-body">
-       <div className="product-number">01 / THE FOUNDATION</div>
-       <div className="product-title">
-        <Link href={guide.href} className="product-title-link"><h3>Idea-to-Income<br/>Fieldguide</h3></Link>
-        <span>$5<small>USD · pay once</small></span>
-       </div>
-       <p>A practical seven-page guide to finding one useful problem, checking demand, and planning your first launch.</p>
-       <ul>
-        <li><Check/>Five customer-research questions</li>
-        <li><Check/>A worked example and idea worksheet</li>
-        <li><Check/>AI prompts and a launch checklist</li>
-       </ul>
-       <Link href={guide.href} className="product-detail-link">See everything inside <ArrowUpRight size={15}/></Link>
-       <CheckoutButton product="fieldguide" className="button outline">Get the Fieldguide · $5</CheckoutButton>
-       <small className="format-note">7-page fieldguide · Account access · Taxes shown at checkout</small>
-      </div>
-     </article>
-
-     <article className="product-card">
-      <Link href={studio.href} className="product-photo cover-showcase-dark" aria-label="View Launchpad Studio details">
-       <Image src="/images/launchpad-studio-cover.svg" alt="Launchpad Studio 5-stage online workspace showcase with offer builder, 30 post starters, and scenario model" width={1600} height={1100} unoptimized/>
-       <span className="product-badge green">$9 · FLAGSHIP WORKSPACE</span>
-      </Link>
-      <div className="product-body">
-       <div className="product-number">02 / THE WORKSPACE</div>
-       <div className="product-title">
-        <Link href={studio.href} className="product-title-link"><h3>Launchpad<br/>Studio</h3></Link>
-        <span>$9<small>USD · pay once</small></span>
-       </div>
-       <p>Your online workspace for turning a product idea into editable prompts, listing drafts, and a content plan.</p>
-       <ul>
-        <li><Check/>30 distinct, editable post starters</li>
-        <li><Check/>Your own links, notes and listing drafts</li>
-        <li><Check/>Scenario calculator and copyable plan</li>
-       </ul>
-       <Link href={studio.href} className="product-detail-link">See everything inside <ArrowUpRight size={15}/></Link>
-       <CheckoutButton product="studio">Get Launchpad Studio · $9</CheckoutButton>
-       <small className="format-note">Online workspace · Login required · Taxes shown at checkout</small>
-      </div>
-     </article>
+     {catalogProducts.map((item, idx) => {
+      const href = `/products/${item.slug}`;
+      const isDarkCover = item.coverTheme === 'dark';
+      const isGreenBadge = item.badgeTheme === 'green';
+      const buttonStyle = idx === 0 && catalogProducts.length > 1 ? 'button outline' : 'button dark';
+      return (
+       <article className="product-card" key={item.key}>
+        <Link href={href} className={`product-photo ${isDarkCover ? 'cover-showcase-dark' : 'cover-showcase-light'}`} aria-label={`View ${item.name} details`}>
+         <Image src={item.image} alt={item.imageAlt} width={1600} height={1100} unoptimized/>
+         <span className={`product-badge ${isGreenBadge ? 'green' : ''}`}>{item.badge}</span>
+        </Link>
+        <div className="product-body">
+         <div className="product-number">{item.cardTag || `0${idx + 1} / DIGITAL TOOL`}</div>
+         <div className="product-title">
+          <Link href={href} className="product-title-link"><h3>{item.name}</h3></Link>
+          <span>
+           {item.compareAtPrice && item.compareAtPrice > item.price && (
+            <s style={{fontSize:'14px',color:'#8a948d',marginRight:'6px',fontWeight:500}}>${item.compareAtPrice}</s>
+           )}
+           ${item.price}<small>{item.currency} · pay once</small>
+          </span>
+         </div>
+         <p>{item.shortDescription || item.description}</p>
+         <ul>
+          {item.cardBullets.map((b) => (
+           <li key={b}><Check/>{b}</li>
+          ))}
+         </ul>
+         <Link href={href} className="product-detail-link">See everything inside <ArrowUpRight size={15}/></Link>
+         <CheckoutButton product={item.key} className={buttonStyle}>
+          {item.ctaLabel || `Get ${item.name} · $${item.price}`}
+         </CheckoutButton>
+         <small className="format-note">{item.formatNote}</small>
+        </div>
+       </article>
+      );
+     })}
     </div>
-    <p className="mockup-note">Product covers are editorial concept showcases. Interactive workspace previews and real working app screenshots are shown below and on the product page. Both products are separate one-time purchases accessed through your account.</p>
+    <p className="mockup-note">Product covers are editorial concept showcases. Interactive workspace previews and real working app screenshots are shown below and on the product page. All products are separate one-time purchases accessed through your account.</p>
    </section>
 
    <section className="process-section" id="inside">
@@ -151,6 +156,42 @@ export default async function Home(){
     </div>
    </section>
 
+   {publishedReviews.length>0&&(
+    <section className="wrap section-space" id="reviews">
+     <div className="section-heading">
+      <div>
+       <div className="eyebrow">READER &amp; BUILDER NOTES · ★ {avgRating} / 5.0</div>
+       <h2>What early creators are saying.</h2>
+      </div>
+      <div>
+       <p style={{marginBottom:'10px'}}>Real notes from readers and Launchpad Studio builders.</p>
+       <Link className="text-link" href="/review">Purchased a tool? Leave a rating &amp; review <ArrowUpRight size={16}/></Link>
+      </div>
+     </div>
+     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:'18px'}}>
+      {publishedReviews.slice(0,3).map(rev=>(
+       <article key={rev.id} style={{background:'#fff',border:'1px solid #e2e7df',borderRadius:'16px',padding:'22px',display:'flex',flexDirection:'column',gap:'10px'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'8px'}}>
+         <div style={{display:'flex',gap:'3px',color:'#d49b00'}}>
+          {Array.from({length:5}).map((_,i)=><Star key={i} size={15} fill={i<rev.rating?'#d49b00':'none'}/>)}
+         </div>
+         {rev.verifiedBuyer&&(
+          <span style={{fontSize:'11px',fontWeight:700,background:'#e7f3ea',color:'#285934',padding:'3px 9px',borderRadius:'999px'}}>
+           Verified Buyer
+          </span>
+         )}
+        </div>
+        <h3 style={{margin:0,fontSize:'16.5px',lineHeight:1.35,color:'#173b31'}}>{rev.headline}</h3>
+        <p style={{margin:0,fontSize:'14px',lineHeight:1.55,color:'#4a5851',flex:1}}>{rev.comment}</p>
+        <div style={{fontSize:'12px',color:'#768178',paddingTop:'8px',borderTop:'1px solid #f0f2ee'}}>
+         <strong>{rev.name}</strong> · {rev.role}
+        </div>
+       </article>
+      ))}
+     </div>
+    </section>
+   )}
+
    <section className="honest wrap section-space">
     <div>
      <div className="eyebrow">BUILT BY A CREATOR, FOR THE FIRST STEP</div>
@@ -172,7 +213,7 @@ export default async function Home(){
      <div>
       <Layers/>
       <h3>One clear next step.</h3>
-      <p>The Fieldguide is $5 and Launchpad Studio is $9. Both are separate one-time purchases; no monthly product subscription or personal AI API key is required.</p>
+      <p>All tools in our collection are separate one-time purchases; no monthly product subscription or personal AI API key is required.</p>
      </div>
     </div>
    </section>
@@ -185,9 +226,9 @@ export default async function Home(){
     </div>
     <div>
      {[
-      ['Which one should I start with?','Start with the $5 Idea-to-Income Fieldguide. It helps you choose and investigate a problem. Launchpad Studio is $9 and provides an online workspace for prompts, listing drafts and post starters. Each tool is a separate one-time purchase.'],
+      ['Which one should I start with?','Start with the Idea-to-Income Fieldguide. It helps you choose and investigate a problem. Launchpad Studio provides an online workspace for prompts, listing drafts and post starters. Each tool is a separate one-time purchase.'],
       ['Does Launchpad Studio include AI?','No. It prepares prompts and uses editable templates; it does not run an AI model. Paste prompts into Gemini or another tool separately. Those services need internet and may have their own account or subscription requirements.'],
-      ['How do I access my products?','Sign in to this platform and open your library. Your purchased Fieldguide and Launchpad Studio work in your browser with an internet connection and save progress to your account. There is no downloadable app ZIP or HTML file. The layout adapts to desktop and mobile screens.'],
+      ['How do I access my products?','Sign in to this platform and open your library. Your purchased guides and tools work in your browser with an internet connection and save progress to your account.'],
       ['What happens after I buy?','Create or sign in to your account, complete Dodo checkout, and return to your library. Server-side payment verification unlocks the product for your account. Keep your purchase email. A redirect parameter alone never unlocks access.'],
       ['Will this guarantee sales or followers?','No. These tools help you prepare and organise a launch. Demand, distribution and successful usage need real testing. The calculator shows hypothetical scenarios, not earnings predictions.'],
       ['What about support and refunds?','For a missing file, access issue or a question about the product, use the support page. Refund eligibility is handled according to the terms shown at checkout and applicable consumer rights.']
@@ -199,8 +240,10 @@ export default async function Home(){
     <div className="eyebrow">YOUR NEXT SMALL STEP</div>
     <h2>You don’t have to see<br/>the whole path to <em>begin.</em></h2>
     <p>Start with one person. One problem. One useful thing.</p>
-    <CheckoutButton product="fieldguide" className="button lime">Get the Fieldguide · $5</CheckoutButton>
-    <span>Seven practical pages · $5 one-time purchase.</span>
+    <CheckoutButton product={primaryProduct?primaryProduct.key:'fieldguide'} className="button lime">
+     {primaryProduct?primaryProduct.ctaLabel:'Get the Fieldguide · $5'}
+    </CheckoutButton>
+    <span>{primaryProduct?`One-time purchase · $${primaryProduct.price} USD.`:'Seven practical pages · $5 one-time purchase.'}</span>
    </section>
   </main>
   <SiteFooter/>

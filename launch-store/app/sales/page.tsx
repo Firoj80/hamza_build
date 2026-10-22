@@ -5,10 +5,14 @@ import {adminClient} from '@/lib/supabase/admin';
 import {guide,studio} from '@/lib/catalog';
 import ShareSnapshot from './share-snapshot';
 import CustomerAdmin,{type CustomerRecord,type PaymentExportRow} from './customer-admin';
+import EmailCampaignAdmin from './email-campaign-admin';
+import ProductManagerAdmin,{type EnrichedManagedProduct} from './product-manager-admin';
 import DashboardShell from './dashboard-shell';
 import {isSalesAdmin} from '@/lib/platform-policy.mjs';
 import {configuredSiteOrigin} from '@/lib/payment-policy.mjs';
 import {TRAFFIC_SOURCES,resolvePageviewTrafficSource} from '@/lib/traffic-source.mjs';
+import {loadEmailStudioState,resolveGoogleClientId} from '@/lib/email-reviews-store';
+import {loadProductCatalogState,resolveDodoProductId} from '@/lib/product-store';
 import styles from './sales.module.css';
 
 export const dynamic='force-dynamic';
@@ -245,7 +249,7 @@ export default async function Sales(){
 
  for(const w of workspaces){
   const st=(w.state&&typeof w.state==='object'?w.state:{}) as Record<string,unknown>;
-  const keys=Object.keys(st).length;
+  const keys=Object.keys(st).filter(k=>!k.startsWith('_')).length;
   const nicheKey=typeof st.niche==='string'?st.niche:'';
   const nicheLabel=nicheKey?(nicheNames[nicheKey]||nicheKey):null;
   if(keys>0&&nicheLabel)nicheCounts.set(nicheLabel,(nicheCounts.get(nicheLabel)||0)+1);
@@ -393,11 +397,30 @@ export default async function Sales(){
  };
 
  // Live Conversion & Checkout Diagnostic Insights
+ const productCatalogState=await loadProductCatalogState();
+ const enrichedCatalogProducts:EnrichedManagedProduct[]=productCatalogState.products.map(p=>{
+  const resolved=resolveDodoProductId(p);
+  return {
+   ...p,
+   resolvedDodo:{
+    configured:Boolean(resolved.productId),
+    source:resolved.source,
+    envVarName:resolved.envVarName,
+    maskedId:resolved.productId
+     ?resolved.productId.length>12
+      ?`${resolved.productId.slice(0,8)}…${resolved.productId.slice(-4)}`
+      :resolved.productId
+     :''
+   }
+  };
+ });
+ const activeCatalogProducts=enrichedCatalogProducts.filter(p=>p.status==='active');
  const dodoEnv=process.env.DODO_PAYMENTS_ENVIRONMENT||'test_mode';
  const hasDodoKey=Boolean(process.env.DODO_PAYMENTS_API_KEY);
- const hasStudioProduct=Boolean(process.env.DODO_STUDIO_PRODUCT_ID);
- const hasFgProduct=Boolean(process.env.DODO_FIELDGUIDE_PRODUCT_ID);
- const dodoReady=hasDodoKey&&hasStudioProduct&&hasFgProduct;
+ const hasStudioProduct=Boolean(process.env.DODO_STUDIO_PRODUCT_ID)||Boolean(enrichedCatalogProducts.find(p=>p.key==='studio')?.resolvedDodo.configured);
+ const hasFgProduct=Boolean(process.env.DODO_FIELDGUIDE_PRODUCT_ID)||Boolean(enrichedCatalogProducts.find(p=>p.key==='fieldguide')?.resolvedDodo.configured);
+ const allActiveProductsHaveDodo=activeCatalogProducts.length>0&&activeCatalogProducts.every(p=>p.resolvedDodo.configured);
+ const dodoReady=hasDodoKey&&(allActiveProductsHaveDodo||(hasStudioProduct&&hasFgProduct));
  const isTestMode=dodoEnv!=='live_mode';
  const nonAdminUsers=customerProfiles.filter(c=>!isSalesAdmin(c.email,process.env.SALES_DASHBOARD_ADMIN_EMAIL));
  const unpaidSignupsWithoutAttempt=nonAdminUsers.filter(c=>!c.hasPaid&&c.triedStudio===0&&c.triedFieldguide===0).length;
@@ -407,8 +430,8 @@ export default async function Sales(){
  if(isTestMode||!dodoReady){
   primaryBottleneckTitle=isTestMode?'Dodo Payments is currently in TEST MODE':'Dodo product IDs or API key missing';
   primaryBottleneckDetail=isTestMode
-   ?'Real customer cards will be declined while DODO_PAYMENTS_ENVIRONMENT is set to test_mode. Switch to live_mode with live product IDs ($5 Fieldguide & $9 Studio) in Vercel to accept real sales.'
-   :'Ensure DODO_PAYMENTS_API_KEY, DODO_FIELDGUIDE_PRODUCT_ID, and DODO_STUDIO_PRODUCT_ID are configured in Vercel environment variables.';
+   ?'Real customer cards will be declined while DODO_PAYMENTS_ENVIRONMENT is set to test_mode. Switch to live_mode with live product IDs in Vercel (or paste pdt_... IDs in the Products tab) to accept real sales.'
+   :'Ensure DODO_PAYMENTS_API_KEY is set and each active product has a Dodo Product ID (pdt_...) configured in the Products tab or in Vercel environment variables.';
  }else if(totalViews>0&&productVisitors===0){
   primaryBottleneckTitle='Visitors are landing on "/" but not opening product pages or checkout';
   primaryBottleneckDetail=`${totalViews} views recorded on the homepage, but 0 product detail views and 0 checkout attempts. Link directly to /products/first-product-fieldguide?via=threads ($5 impulse entry) in your posts.`;
@@ -795,15 +818,56 @@ export default async function Sales(){
   </section>
  </>;
 
+ const emailStudioState=await loadEmailStudioState();
+ const googleClientId=resolveGoogleClientId();
+ const customerRecordsForAdmin=customerProfiles.map<CustomerRecord>(c=>({
+  userId:c.userId,
+  email:c.email,
+  ownsStudio:c.ownsStudio,
+  ownsFieldguide:c.ownsFieldguide,
+  triedStudio:c.triedStudio,
+  triedFieldguide:c.triedFieldguide,
+  workspaceKeys:c.workspaceKeys,
+  workspaceSummary:c.workspaceSummary,
+  nicheLabel:c.nicheLabel,
+  checksCompleted:c.checksCompleted,
+  workspaceUpdatedAtFormatted:c.workspaceUpdatedAt?date(c.workspaceUpdatedAt):null,
+  spentFormatted:formatAmounts(c.spent),
+  hasPaid:c.hasPaid,
+  lastActivityFormatted:date(c.lastActivity),
+  lastActivityIso:c.lastActivity
+ }));
+
+ const emailView=<EmailCampaignAdmin
+  customers={customerRecordsForAdmin}
+  initialTemplates={emailStudioState.templates}
+  initialAutomation={emailStudioState.automation}
+  initialSentLogs={emailStudioState.sentLogs}
+  initialReviews={emailStudioState.reviews}
+  googleClientId={googleClientId}
+  siteOrigin={configuredSiteOrigin()}
+  adminEmail={user.email||''}
+ />;
+
+ const productsView=<ProductManagerAdmin
+  initialProducts={enrichedCatalogProducts}
+  dodoEnvironment={dodoEnv}
+  hasDodoApiKey={hasDodoKey}
+ />;
+
  return <DashboardShell
   counts={{
    paidSales:totalPaid,
+   productsCount:enrichedCatalogProducts.length,
    abandonedCount:abandonedAttempts.length,
    visitors7d:visitorsLast7,
    customersCount:customerProfiles.length,
+   emailBadge:`20 tpl · ★${emailStudioState.reviews.length}`,
    activeWorkspaces:activeStudioWorkspaces
   }}
   overview={overviewView}
+  products={productsView}
+  email={emailView}
   funnel={funnelView}
   trends={trendsView}
   customers={customersView}

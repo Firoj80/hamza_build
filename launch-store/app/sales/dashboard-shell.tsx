@@ -3,9 +3,11 @@ import {useState,type ReactNode} from 'react';
 import Link from 'next/link';
 import {
  LayoutDashboard,
+ Package,
  Filter,
  TrendingUp,
  Users,
+ Mail,
  Layers,
  ArrowLeft,
  RefreshCw,
@@ -16,27 +18,33 @@ import {
 import BrandMark from '../brand-mark';
 import styles from './sales.module.css';
 
-export type NavTab='overview'|'funnel'|'trends'|'customers'|'workspace';
+export type NavTab='overview'|'products'|'funnel'|'trends'|'customers'|'email'|'workspace';
 
 export default function DashboardShell({
  counts,
  overview,
+ products,
  funnel,
  trends,
  customers,
+ email,
  workspace
 }:{
  counts:{
   paidSales:number;
+  productsCount:number;
   abandonedCount:number;
   visitors7d:number;
   customersCount:number;
+  emailBadge:string;
   activeWorkspaces:number;
  };
  overview:ReactNode;
+ products:ReactNode;
  funnel:ReactNode;
  trends:ReactNode;
  customers:ReactNode;
+ email:ReactNode;
  workspace:ReactNode;
 }){
  const [activeTab,setActiveTab]=useState<NavTab>('overview');
@@ -57,6 +65,22 @@ export default function DashboardShell({
    sub:'Core metrics & recent sales',
    badge:counts.paidSales,
    icon:LayoutDashboard
+  },
+  {
+   id:'products',
+   shortLabel:'Products',
+   label:'Products & Dodo IDs',
+   sub:'Add, edit, delete & pricing',
+   badge:counts.productsCount,
+   icon:Package
+  },
+  {
+   id:'email',
+   shortLabel:'Gmail',
+   label:'Gmail & Reviews',
+   sub:'4 filters, 20 templates & auto-send',
+   badge:counts.emailBadge,
+   icon:Mail
   },
   {
    id:'funnel',
@@ -177,6 +201,22 @@ export default function DashboardShell({
       </div>
      </div>
      <div className={styles.headerActions}>
+      <button
+       type="button"
+       onClick={()=>selectTab('products')}
+       className={styles.copyButton}
+       style={{padding:'8px 12px'}}
+      >
+       <Package size={14}/> Manage Products
+      </button>
+      <button
+       type="button"
+       onClick={()=>selectTab('email')}
+       className={styles.copyButton}
+       style={{padding:'8px 12px'}}
+      >
+       <Mail size={14}/> Gmail &amp; Reviews
+      </button>
       <Link className={styles.refresh} href="/sales"><RefreshCw size={14}/> Refresh</Link>
       <Link className={styles.back} href="/"><ArrowLeft size={14}/> Storefront</Link>
      </div>
@@ -184,6 +224,8 @@ export default function DashboardShell({
 
     <div className={styles.tabContent}>
      {activeTab==='overview'&&overview}
+     {activeTab==='products'&&products}
+     {activeTab==='email'&&email}
      {activeTab==='funnel'&&funnel}
      {activeTab==='trends'&&trends}
      {activeTab==='customers'&&customers}

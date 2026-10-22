@@ -27,6 +27,7 @@ export default async function SiteFooter(){
       <h4>The Collection</h4>
       <Link href={guide.href}>Idea-to-Income Fieldguide · $5</Link>
       <Link href={studio.href}>Launchpad Studio · $9</Link>
+      <Link href="/review">Rate &amp; Review a tool</Link>
       <Link href="/#inside">How the workflow fits</Link>
       <Link href="/#questions">Common questions</Link>
      </div>

@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import {ArrowUpRight,BookOpen,Check,CheckCircle2,HelpCircle,KeyRound,Layers,Lock,LogOut,ShieldCheck,Store} from 'lucide-react';
+import {ArrowUpRight,Check,CheckCircle2,HelpCircle,KeyRound,Lock,LogOut,ShieldCheck,Store} from 'lucide-react';
 import {ownedProducts} from '@/lib/access';
 import {isSalesAdmin} from '@/lib/platform-policy.mjs';
+import {getActiveCatalogProducts} from '@/lib/product-store';
 import {redirect} from 'next/navigation';
 import CheckoutButton from '../checkout-button';
 import BrandMark from '../brand-mark';
@@ -12,49 +13,32 @@ export const dynamic='force-dynamic';
 export const metadata={title:'Your library — Hamza Idrishi',robots:{index:false,follow:false}};
 
 export default async function Library({searchParams}:{searchParams?:Promise<Record<string,string|string[]|undefined>>}){
- const {user,products}=await ownedProducts();
+ const [{user,products},activeProducts]=await Promise.all([
+  ownedProducts(),
+  getActiveCatalogProducts()
+ ]);
  if(!user)redirect('/login?next=/library');
  const isAdmin=Boolean(user.email&&isSalesAdmin(user.email));
  const params=searchParams?await searchParams:{};
- const rawBuy=typeof params?.buy==='string'?params.buy:'';
- const pendingBuyProduct=rawBuy==='fieldguide'||rawBuy==='studio'?rawBuy:null;
- const shouldAutoCheckout=Boolean(pendingBuyProduct&&!products.includes(pendingBuyProduct));
+ const rawBuy=typeof params?.buy==='string'?params.buy.trim():'';
 
- const catalog=[
-  {
-   key:'fieldguide' as const,
-   name:'Idea-to-Income Fieldguide',
-   price:5,
-   path:'/fieldguide',
-   detailPath:'/products/first-product-fieldguide',
-   image:'/images/idea-to-income-fieldguide-cover.svg',
-   imageAlt:'Idea-to-Income Fieldguide hardcover monograph and validation scorecard cover',
-   tag:'01 / THE FOUNDATION',
-   text:'A seven-page guide to choosing a useful problem, checking demand, and planning your first launch.',
-   highlights:[
-    'Five customer-research questions & validation scorecard',
-    'Worked example and printable/fillable idea worksheet',
-    'AI prompt templates and first-version launch checklist'
-   ]
-  },
-  {
-   key:'studio' as const,
-   name:'Launchpad Studio',
-   price:9,
-   path:'/studio',
-   detailPath:'/products/launchpad-studio',
-   image:'/images/launchpad-studio-cover.svg',
-   imageAlt:'Launchpad Studio 5-stage online workspace cover showcase',
-   tag:'02 / THE WORKSPACE',
-   text:'Your online workspace for prompts, product drafts, 30 post starters, and cloud-saved launch progress.',
-   highlights:[
-    'Interactive 5-step launch planner saved to your account',
-    '30 editable content & announcement post starters',
-    'Listing draft builder and realistic revenue scenario calculator'
-   ]
-  }
- ];
- const selectedCatalogItem=shouldAutoCheckout?catalog.find(c=>c.key===pendingBuyProduct):null;
+ const catalog=activeProducts.map((p,idx)=>({
+  key:p.key,
+  name:p.name,
+  price:p.price,
+  path:p.key==='fieldguide'?'/fieldguide':p.key==='studio'?'/studio':p.readerHref||`/products/${p.slug}/access`,
+  detailPath:`/products/${p.slug}`,
+  image:p.image,
+  imageAlt:p.imageAlt,
+  tag:p.cardTag||`0${idx+1} / DIGITAL PRODUCT`,
+  text:p.shortDescription||p.description,
+  highlights:p.cardBullets.length>0?p.cardBullets:p.includes.slice(0,3)
+ }));
+
+ const matchedBuyProduct=rawBuy?catalog.find(c=>c.key===rawBuy||c.detailPath.endsWith(`/${rawBuy}`)):null;
+ const shouldAutoCheckout=Boolean(matchedBuyProduct&&!products.includes(matchedBuyProduct.key));
+ const selectedCatalogItem=shouldAutoCheckout?matchedBuyProduct:null;
+ const unlockedCount=catalog.filter(c=>products.includes(c.key)).length;
 
  return (
   <div className="page-shell">
@@ -101,16 +85,17 @@ export default async function Library({searchParams}:{searchParams?:Promise<Reco
      <div>
       <div className="eyebrow"><span/> YOUR PERSONAL LIBRARY</div>
       <h1>A clearer place<br/>to make <em>your next move.</em></h1>
-      <p>Signed in as <strong>{user.email}</strong>. Your purchased guide and workspace stay together here.</p>
+      <p>Signed in as <strong>{user.email}</strong>. Your purchased guides and workspaces stay together here.</p>
      </div>
      <div className="library-summary-card">
       <div className="library-summary-stat">
        <span>UNLOCKED TOOLS</span>
-       <strong>{products.length} / 2</strong>
+       <strong>{unlockedCount} / {catalog.length}</strong>
       </div>
       <div className="library-summary-links">
+       <Link href="/review">★ Leave a rating &amp; review</Link>
        <Link href="/account/password"><KeyRound size={14}/> Update password</Link>
-       <Link href="/support"><HelpCircle size={14}/> Account & purchase help</Link>
+       <Link href="/support"><HelpCircle size={14}/> Account &amp; purchase help</Link>
       </div>
      </div>
     </section>
@@ -148,7 +133,7 @@ export default async function Library({searchParams}:{searchParams?:Promise<Reco
         <div className="library-card-actions">
          {unlocked ? (
           <Link className="button dark" href={p.path}>
-           <span>{p.key==='studio'?'Open Launchpad Studio':'Open Fieldguide Reader'}</span>
+           <span>{p.key==='studio'?'Open Launchpad Studio':p.key==='fieldguide'?'Open Fieldguide Reader':`Open ${p.name}`}</span>
            <ArrowUpRight size={17}/>
           </Link>
          ) : (
@@ -158,7 +143,7 @@ export default async function Library({searchParams}:{searchParams?:Promise<Reco
            </CheckoutButton>
            <Link href={p.detailPath} className="library-detail-link">
             Preview what’s inside first <ArrowUpRight size={14}/>
-          </Link>
+           </Link>
           </>
          )}
         </div>
@@ -171,7 +156,7 @@ export default async function Library({searchParams}:{searchParams?:Promise<Reco
      <div className="library-help-copy">
       <ShieldCheck size={20}/>
       <div>
-       <strong>Idea-to-Income Fieldguide ($5) and Launchpad Studio ($9) are separate one-time purchases linked to your account.</strong>
+       <strong>All products in our catalog are one-time purchases linked to your account.</strong>
        <p>Just completed a purchase? Server verification unlocks your product automatically within moments.</p>
       </div>
      </div>
