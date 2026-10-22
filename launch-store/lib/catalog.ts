@@ -10,7 +10,10 @@ export const productDetails = {
     eyebrow: 'THE FIRST STEP',
     headline: 'Turn one useful problem into a clear first launch.',
     description: 'A practical seven-page guide for choosing a specific audience, checking whether a problem matters, shaping a small product, and planning an honest launch.',
+    shareTitle: 'Idea-to-Income Fieldguide ($5) — Turn one useful problem into a clear first launch.',
+    shareDescription: 'A practical seven-page guide with a worked example, fill-in idea brief, 5 customer validation questions, 3 AI prompts, listing template, and launch checklist.',
     image: '/images/idea-to-income-fieldguide-cover.svg',
+    ogImage: '/images/idea-to-income-fieldguide-og.png',
     imageAlt: 'Idea-to-Income Fieldguide hardcover monograph concept and customer validation scorecard sheet',
     imageLabel: 'EDITION 01 · FIELDGUIDE COVER',
     includes: [
@@ -37,7 +40,10 @@ export const productDetails = {
     eyebrow: 'THE ONLINE WORKSPACE',
     headline: 'Take your product idea from notes to a launch plan.',
     description: 'A private, browser-based workspace that helps you investigate an idea, prepare prompts, shape your offer, draft useful posts and keep launch notes together.',
+    shareTitle: 'Launchpad Studio ($9) — Take your product idea from notes to a launch plan.',
+    shareDescription: 'A private 5-stage online workspace with 8 built-in topic examples, editable AI prompts, 30 post starters, scenario calculator, and cloud-saved launch checklist.',
     image: '/images/launchpad-studio-cover.svg',
+    ogImage: '/images/launchpad-studio-og.png',
     imageAlt: 'Launchpad Studio 5-stage command center cover with offer brief, AI prompt builder, scenario model and 30 post starters',
     imageLabel: 'EDITION 02 · WORKSPACE COVER',
     includes: [

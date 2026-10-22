@@ -2,8 +2,32 @@ import Link from 'next/link';
 import {ArrowLeft,BookOpen,KeyRound,LogOut} from 'lucide-react';
 import {requireProduct} from '@/lib/access';
 
+import type {Metadata} from 'next';
+import {productDetails} from '@/lib/catalog';
+
+const studioMeta=productDetails['launchpad-studio'];
 export const dynamic='force-dynamic';
-export const metadata={title:'Launchpad Studio — Hamza Idrishi',robots:{index:false,follow:false}};
+export const metadata:Metadata={
+ title:'Launchpad Studio — Hamza Idrishi',
+ description:studioMeta.description,
+ robots:{index:false,follow:false},
+ openGraph:{
+  type:'website',
+  siteName:'Hamza Idrishi · Build_hamza',
+  title:studioMeta.shareTitle,
+  description:studioMeta.shareDescription,
+  url:'/products/launchpad-studio',
+  images:[{url:studioMeta.ogImage,width:1600,height:1100,alt:studioMeta.imageAlt,type:'image/png'}],
+ },
+ twitter:{
+  card:'summary_large_image',
+  site:'@hamza_build',
+  creator:'@hamza_build',
+  title:studioMeta.shareTitle,
+  description:studioMeta.shareDescription,
+  images:[{url:studioMeta.ogImage,alt:studioMeta.imageAlt}],
+ },
+};
 
 export default async function Studio(){
  await requireProduct('studio');

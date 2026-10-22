@@ -4,8 +4,32 @@ import {requireProduct} from '@/lib/access';
 import BrandMark from '@/app/brand-mark';
 import SiteFooter from '@/app/site-footer';
 
+import type {Metadata} from 'next';
+import {productDetails} from '@/lib/catalog';
+
+const fieldguideMeta=productDetails['first-product-fieldguide'];
 export const dynamic='force-dynamic';
-export const metadata={title:'Idea-to-Income Fieldguide — Your library',robots:{index:false,follow:false}};
+export const metadata:Metadata={
+ title:'Idea-to-Income Fieldguide — Your library',
+ description:fieldguideMeta.description,
+ robots:{index:false,follow:false},
+ openGraph:{
+  type:'website',
+  siteName:'Hamza Idrishi · Build_hamza',
+  title:fieldguideMeta.shareTitle,
+  description:fieldguideMeta.shareDescription,
+  url:'/products/first-product-fieldguide',
+  images:[{url:fieldguideMeta.ogImage,width:1600,height:1100,alt:fieldguideMeta.imageAlt,type:'image/png'}],
+ },
+ twitter:{
+  card:'summary_large_image',
+  site:'@hamza_build',
+  creator:'@hamza_build',
+  title:fieldguideMeta.shareTitle,
+  description:fieldguideMeta.shareDescription,
+  images:[{url:fieldguideMeta.ogImage,alt:fieldguideMeta.imageAlt}],
+ },
+};
 
 export default async function Fieldguide(){
  await requireProduct('fieldguide');

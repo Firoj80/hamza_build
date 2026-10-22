@@ -34,13 +34,13 @@
 .back,.refresh{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#46534d;font-size:12px;background:#fff;border:1px solid #dde3da;border-radius:8px;padding:8px 12px;font-weight:600}
 .back:hover,.refresh:hover{background:#eef2ea}
 .eyebrow{font-size:10px;letter-spacing:.14em;font-weight:700;color:#738276;text-transform:uppercase}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
 .stat{background:#fff;border:1px solid #e4e8e1;border-radius:13px;padding:18px;display:flex;flex-direction:column;gap:7px;box-shadow:0 4px 18px #203c2906}
 .stat>span{display:flex;align-items:center;gap:7px;color:#627067;font-size:12px;font-weight:600}
 .stat strong{font-size:26px;letter-spacing:-.04em}
 .stat small,.shareTable td small{font-size:12px;color:#79847d;line-height:1.4}
 .tabContent{display:flex;flex-direction:column;gap:24px;min-width:0}
-.products,.recent,.funnelSection,.trendSection,.customerSection,.stageSection,.cohortSection{margin-top:0;min-width:0}
+.products,.recent,.funnelSection,.trendSection,.customerSection,.stageSection,.cohortSection,.trafficSection{margin-top:0;min-width:0}
 .products h2,.recent h2{font-size:18px;letter-spacing:-.02em;margin:0 0 14px}
 .sectionTitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
 .sectionTitle h2{margin:4px 0 0;font-size:18px}
@@ -59,7 +59,18 @@
 .empty,.note,.error{background:#fff;border:1px solid #e4e8e1;border-radius:12px;padding:16px;color:#68736d;font-size:13px}
 .note{margin-top:4px;font-size:12px;line-height:1.6}.error{color:#9b4239}
 
-.copyButton{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #d8e0d6;border-radius:8px;padding:8px 11px;background:#fff;color:#284739;font:600 12px 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}.copyButton:hover{background:#eef3e8;border-color:#c3d0bf}
+.copyButton{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #173b31;border-radius:8px;padding:8px 13px;background:#173b31;color:#f6f5e9;font:600 12px 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}.copyButton:hover{background:#234f41;border-color:#234f41}
+.snapshotContainer{display:flex;flex-direction:column;gap:10px;width:100%;margin-bottom:14px}
+.snapshotBar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.snapshotTabs{display:inline-flex;align-items:center;gap:4px;background:#eef1ea;padding:3px;border-radius:999px}
+.snapshotTabs button{border:0;background:transparent;color:#4f5d54;border-radius:999px;padding:5px 10px;font:600 11px 'DM Sans',sans-serif;cursor:pointer}
+.snapshotPreview{margin:0;background:#fafbf8;border:1px solid #dce3d6;border-radius:11px;padding:13px 15px;font:500 12.5px/1.55 'DM Sans',sans-serif;color:#1d2925;white-space:pre-wrap;word-break:break-word}
+.trafficGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.trafficCard{background:#fff;border:1px solid #e4e8e1;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px;box-shadow:0 4px 16px #203c2906}
+.trafficTop{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;font-weight:700;color:#1d2925}
+.trafficCard strong{font-size:22px;letter-spacing:-.03em;color:#1d2925}
+.trafficCard small{font-size:11.5px;color:#68736d;line-height:1.4}
+.trafficHint{font-size:10.5px;color:#8a948d;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .funnelGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .funnelStep{background:#fff;border:1px solid #e4e8e1;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;position:relative}
 .funnelStepTop{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.08em;color:#738276;text-transform:uppercase;gap:6px}
@@ -121,9 +132,6 @@
 .actionGrant:hover{background:#dfece0}
 .actionRevoke{background:#fdf0ed;color:#8e3930;border-color:#f0cfc9}
 .actionRevoke:hover{background:#f9e1dc}
-.snapshotBar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.snapshotTabs{display:inline-flex;align-items:center;gap:4px;background:#eef1ea;padding:3px;border-radius:999px}
-.snapshotTabs button{border:0;background:transparent;color:#4f5d54;border-radius:999px;padding:5px 10px;font:600 11px 'DM Sans',sans-serif;cursor:pointer}
 .stageGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .stageCard{background:#fff;border:1px solid #e4e8e1;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px}
 .stageCard span{font-size:10px;font-weight:700;letter-spacing:.08em;color:#738276;text-transform:uppercase}
@@ -137,6 +145,10 @@
 .cohortCard strong{font-size:22px;letter-spacing:-.03em;color:#1d2925}
 .cohortCard small{font-size:12px;color:#79847d;line-height:1.45}
 
+@media(max-width:1100px){
+ .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .trafficGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 @media(max-width:960px){
  .shell{grid-template-columns:64px minmax(0,1fr)}
  .backdrop{display:block;position:fixed;inset:0;background:rgba(15,30,24,.48);z-index:55}
@@ -167,12 +179,12 @@
 
  .menuBtn{display:inline-flex}
  .mainPane{padding:18px 14px 48px}
- .stats,.funnelGrid,.trendKpis,.customerGrid,.cohortGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stats,.funnelGrid,.trendKpis,.customerGrid,.cohortGrid,.trafficGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .routeGrid,.stageGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .chartGrid{gap:4px}
 }
 @media(max-width:540px){
- .stats,.funnelGrid,.trendKpis,.routeGrid,.customerGrid,.stageGrid,.cohortGrid{grid-template-columns:1fr}
+ .stats,.funnelGrid,.trendKpis,.routeGrid,.customerGrid,.stageGrid,.cohortGrid,.trafficGrid{grid-template-columns:1fr}
  .mainHeader{flex-direction:column;align-items:stretch;gap:10px}
  .headerActions{justify-content:flex-start}
  .stat{padding:15px}

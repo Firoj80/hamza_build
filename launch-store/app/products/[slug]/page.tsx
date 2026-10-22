@@ -22,7 +22,43 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = getDetails(slug);
   if (!product) return { title: 'Product not found' };
-  return { title: `${product.name} — Hamza Idrishi`, description: product.description };
+  const pageUrl = `/products/${slug}`;
+  return {
+    title: `${product.name} — Hamza Idrishi`,
+    description: product.description,
+    alternates: {
+      canonical: pageUrl,
+    },
+    openGraph: {
+      type: 'website',
+      siteName: 'Hamza Idrishi · Build_hamza',
+      title: product.shareTitle,
+      description: product.shareDescription,
+      url: pageUrl,
+      images: [
+        {
+          url: product.ogImage,
+          width: 1600,
+          height: 1100,
+          alt: product.imageAlt,
+          type: 'image/png',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: '@hamza_build',
+      creator: '@hamza_build',
+      title: product.shareTitle,
+      description: product.shareDescription,
+      images: [
+        {
+          url: product.ogImage,
+          alt: product.imageAlt,
+        },
+      ],
+    },
+  };
 }
 
 export default async function ProductPage({ params }: Props) {

@@ -1,5 +1,5 @@
 import {notFound,redirect} from 'next/navigation';
-import {TrendingUp,ShoppingBag,Clock3,Filter} from 'lucide-react';
+import {TrendingUp,ShoppingBag,Clock3,Filter,Users} from 'lucide-react';
 import {currentUser} from '@/lib/supabase/server';
 import {adminClient} from '@/lib/supabase/admin';
 import {guide,studio} from '@/lib/catalog';
@@ -7,6 +7,7 @@ import ShareSnapshot from './share-snapshot';
 import CustomerAdmin,{type CustomerRecord,type PaymentExportRow} from './customer-admin';
 import DashboardShell from './dashboard-shell';
 import {isSalesAdmin} from '@/lib/platform-policy.mjs';
+import {TRAFFIC_SOURCES,decodeSourceFromVisitorHash} from '@/lib/traffic-source.mjs';
 import styles from './sales.module.css';
 
 export const dynamic='force-dynamic';
@@ -54,7 +55,7 @@ export default async function Sales(){
  ]=await Promise.all([
   db.from('platform_purchases').select('payment_id,attempt_id,user_id,product_key,access_status,provider_status,amount_cents,currency,updated_at').order('updated_at',{ascending:false}).limit(500),
   db.from('platform_checkout_attempts').select('id,user_id,product_key,provider_product_id,expected_cents,created_at').order('created_at',{ascending:false}).limit(500),
-  db.from('site_pageviews').select('viewed_on,path,visitor_hash').gte('viewed_on',start14Date).limit(5000),
+  db.from('site_pageviews').select('viewed_on,path,visitor_hash').order('viewed_on',{ascending:false}).limit(10000),
   db.from('platform_workspace').select('user_id,state,updated_at').order('updated_at',{ascending:false}).limit(500),
   db.rpc('get_site_analytics'),
   db.rpc('get_product_sales_summary'),
@@ -65,7 +66,8 @@ export default async function Sales(){
  const summary=salesData as SalesSummary;
  const rows=(data||[]) as Purchase[];
  const attempts=(attemptsError?[]:attemptsData||[]) as CheckoutAttempt[];
- const pageviews=(pageviewsError?[]:pageviewsData||[]) as PageviewRow[];
+ const allPageviews=(pageviewsError?[]:pageviewsData||[]) as PageviewRow[];
+ const pageviews=allPageviews.filter(p=>p.viewed_on>=start14Date);
  const workspaces=(workspaceError?[]:workspaceData||[]) as WorkspaceRow[];
  const authUsers=usersResult?.data?.users||[];
  const emailMap=new Map<string,string>();
@@ -87,6 +89,26 @@ export default async function Sales(){
  const studioRevenue=formatAmounts(studioAmounts);
  const fgRevenue=formatAmounts(fgAmounts);
  const revenue=formatAmounts(totalAmounts);
+ const todaySales=rows.filter(r=>r.access_status==='active'&&r.updated_at?.slice(0,10)===todayUtc).length;
+
+ // Total Views, Views Today & Traffic Sources Attribution
+ const totalViews=Math.max(allPageviews.length,analytics.total_visitors);
+ const todayViews=Math.max(allPageviews.filter(p=>p.viewed_on===todayUtc).length,analytics.today_visitors);
+ const trafficStatsAll=TRAFFIC_SOURCES.map(src=>{
+  const matching=allPageviews.filter(pv=>decodeSourceFromVisitorHash(pv.visitor_hash)===src.key);
+  const matchingToday=matching.filter(pv=>pv.viewed_on===todayUtc);
+  const visitors=new Set(matching.map(pv=>pv.visitor_hash)).size;
+  const todayVisitors=new Set(matchingToday.map(pv=>pv.visitor_hash)).size;
+  return {
+   ...src,
+   shortLabel:(src as {shortLabel?:string}).shortLabel||src.label,
+   views:matching.length,
+   todayViews:matchingToday.length,
+   visitors,
+   todayVisitors
+  };
+ });
+ const trafficSourcesToShow=trafficStatsAll.filter(s=>s.key!=='other'||s.views>0);
 
  // Conversion Funnel & Checkout Drop-off calculations
  const purchaseByAttempt=new Map<string,Purchase>();
@@ -308,6 +330,9 @@ export default async function Sales(){
   };
  }).sort((a,b)=>Number(b.hasPaid)-Number(a.hasPaid)||b.lastActivity.localeCompare(a.lastActivity));
 
+ const totalRegisteredUsers=customerProfiles.length;
+ const todayRegisteredUsers=authUsers.filter(u=>u.created_at&&u.created_at.slice(0,10)===todayUtc).length;
+
  const bothOwners=customerProfiles.filter(c=>c.ownsStudio&&c.ownsFieldguide).length;
  const fgOnlyOwners=customerProfiles.filter(c=>c.ownsFieldguide&&!c.ownsStudio).length;
  const studioOnlyOwners=customerProfiles.filter(c=>c.ownsStudio&&!c.ownsFieldguide).length;
@@ -333,12 +358,39 @@ export default async function Sales(){
  const usdPaidCount=paidRowsWithAmount.filter(r=>r.currency==='USD').length;
  const avgOrderUsd=usdPaidCount>0?money(Math.round(usdTotalCents/usdPaidCount),'USD'):revenue;
 
- const shareText=`My product progress so far:\n${analytics.total_visitors.toLocaleString()} unique visitors\n${studio.name}: ${studioPaid} sales (${studioRevenue} collected)\n${guide.name}: ${fgPaid} sales (${fgRevenue} collected)\nBuilding in public, one useful step at a time.`;
+ const trafficSummaryLine=trafficSourcesToShow
+  .map(s=>`${s.shortLabel}: ${s.views}${s.todayViews>0?` (+${s.todayViews} today)`:''}`)
+  .join(' · ');
+
+ const shareText=[
+  `Building in public update:`,
+  `• Total views: ${totalViews.toLocaleString()} (${analytics.total_visitors.toLocaleString()} unique visitors)`,
+  `• Views today: ${todayViews.toLocaleString()} (${analytics.today_visitors.toLocaleString()} unique today)`,
+  `• Traffic sources: ${trafficSummaryLine}`,
+  `• Sales: ${totalPaid} paid (${revenue} collected${todaySales>0?` · +${todaySales} today`:''}) — ${studio.name}: ${studioPaid} (${studioRevenue}), ${guide.name}: ${fgPaid} (${fgRevenue})`,
+  `• Today registered users: ${todayRegisteredUsers} (${totalRegisteredUsers.toLocaleString()} total registered)`,
+  `Building in public, one useful step at a time.`
+ ].join('\n');
+
  const shareTemplates={
   milestone:shareText,
-  funnel:`Store funnel snapshot:\n• ${analytics.total_visitors.toLocaleString()} unique visitors\n• ${productVisitors.toLocaleString()} product page views\n• ${totalAttempts} checkouts started\n• ${totalPaid} paid sales (${overallCheckoutCompletion} checkout completion)\n• ${revenue} collected so far.`,
-  weekly:`Last 7 days building in public:\n• ${visitorsLast7.toLocaleString()} unique visitors\n• ${attemptsLast7} checkout attempts\n• ${salesLast7} paid sales (${formatAmounts(amountsLast7)} collected)\n• ${activeStudioWorkspaces} builders actively using Launchpad Studio.`
+  funnel:[
+   `Store funnel & traffic snapshot:`,
+   `• Total views: ${totalViews.toLocaleString()} (${todayViews.toLocaleString()} views today)`,
+   `• Traffic sources: ${trafficSummaryLine}`,
+   `• Product page views: ${productVisitors.toLocaleString()} (${ totalAttempts } checkouts started)`,
+   `• Sales: ${totalPaid} paid (${overallCheckoutCompletion} checkout conv. · ${revenue} collected)`,
+   `• Registered users today: ${todayRegisteredUsers} (${totalRegisteredUsers.toLocaleString()} total users)`
+  ].join('\n'),
+  weekly:[
+   `Last 7 days building in public:`,
+   `• Total views: ${totalViews.toLocaleString()} (${todayViews.toLocaleString()} today · ${visitorsLast7.toLocaleString()} unique in 7d)`,
+   `• Traffic sources: ${trafficSummaryLine}`,
+   `• Sales: ${totalPaid} total paid (${salesLast7} in last 7d · ${revenue} total collected)`,
+   `• Today registered users: ${todayRegisteredUsers} (${totalRegisteredUsers.toLocaleString()} total · ${activeStudioWorkspaces} active in Studio)`
+  ].join('\n')
  };
+
  const overviewView=<>
   {analyticsError&&<p className={styles.note}>Visitor analytics could not be loaded right now. Refresh to try again.</p>}
   <div className={styles.stats}>
@@ -350,12 +402,17 @@ export default async function Sales(){
    <article className={styles.stat}>
     <span><Clock3 size={17}/> Paid sales</span>
     <strong>{totalPaid}</strong>
-    <small>{uniquePaidUsers} buyer{uniquePaidUsers===1?'':'s'} · {totalPending} pending / {totalRevoked} revoked</small>
+    <small>{todaySales} today · {uniquePaidUsers} buyer{uniquePaidUsers===1?'':'s'} ({totalPending} pending)</small>
    </article>
    <article className={styles.stat}>
-    <span><TrendingUp size={17}/> Total visitors</span>
-    <strong>{analytics.total_visitors.toLocaleString()}</strong>
-    <small>{analytics.today_visitors.toLocaleString()} today · {visitorsLast7.toLocaleString()} last 7d</small>
+    <span><TrendingUp size={17}/> Total views</span>
+    <strong>{totalViews.toLocaleString()}</strong>
+    <small>{todayViews.toLocaleString()} views today · {analytics.total_visitors.toLocaleString()} unique visitors</small>
+   </article>
+   <article className={styles.stat}>
+    <span><Users size={17}/> Registered users</span>
+    <strong>{totalRegisteredUsers.toLocaleString()}</strong>
+    <small>{todayRegisteredUsers} registered today · {uniquePaidUsers} paid</small>
    </article>
    <article className={styles.stat}>
     <span><Filter size={17}/> Checkout conversion</span>
@@ -364,11 +421,34 @@ export default async function Sales(){
    </article>
   </div>
 
+  <section className={styles.trafficSection}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>TRAFFIC ATTRIBUTION · CHANNELS</div><h2>Traffic sources (Threads, X, Pinterest, Medium, Google & Direct)</h2></div>
+    <span>{totalViews.toLocaleString()} total views · {todayViews.toLocaleString()} today</span>
+   </div>
+   <div className={styles.trafficGrid}>
+    {trafficSourcesToShow.map(src=>{
+     const share=pct(src.views,Math.max(totalViews,1));
+     const barWidth=totalViews>0?Math.min(100,Math.max(src.views>0?6:0,Math.round((src.views/totalViews)*100))):0;
+     return <article key={src.key} className={styles.trafficCard}>
+      <div className={styles.trafficTop}>
+       <span>{src.label}</span>
+       <span className={styles.funnelRate}>{share}</span>
+      </div>
+      <strong>{src.views.toLocaleString()} <span style={{fontSize:'13px',fontWeight:500,color:'#68736d'}}>views</span></strong>
+      <small>{src.todayViews.toLocaleString()} today · {src.visitors.toLocaleString()} unique visitor{src.visitors===1?'':'s'}</small>
+      <div className={styles.funnelBar}><div className={styles.funnelFill} style={{width:`${barWidth}%`}}/></div>
+      <span className={styles.trafficHint} title={src.hint}>{src.hint}</span>
+     </article>;
+    })}
+   </div>
+  </section>
+
   <section className={styles.products}>
    <div className={styles.sectionTitle}>
-    <div><div className={styles.eyebrow}>SHAREABLE SNAPSHOT</div><h2>Product performance & funnel</h2></div>
-    <ShareSnapshot text={shareText} templates={shareTemplates}/>
+    <div><div className={styles.eyebrow}>SHAREABLE SNAPSHOT · SOCIAL READY</div><h2>Copy Threads summary & product performance</h2></div>
    </div>
+   <ShareSnapshot text={shareText} templates={shareTemplates}/>
    <div className={styles.tableWrap}><table className={`${styles.table} ${styles.shareTable}`}><thead><tr><th>Product</th><th>Visitors</th><th>Checkouts</th><th>Paid sales</th><th>Checkout conv.</th><th>Unrecovered</th><th>Collected</th></tr></thead><tbody>
     <tr>
      <td><strong>{studio.name}</strong><small>$9 · one-time</small></td>
@@ -396,7 +476,7 @@ export default async function Sales(){
    {rows.length===0?<p className={styles.empty}>No payments recorded yet. Completed Dodo checkouts will appear here.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Product</th><th>Date</th><th>Status</th><th>Amount charged</th></tr></thead><tbody>{rows.slice(0,20).map(row=><tr key={row.payment_id}><td><strong>{shortUser(row.user_id,emailMap)}</strong></td><td>{products[row.product_key]}</td><td>{date(row.updated_at)}</td><td><span className={`${styles.badge} ${styles[row.access_status]}`}>{row.access_status==='active'?'Paid':row.access_status==='pending'?'Pending':'Revoked'}</span></td><td>{money(row.amount_cents,row.currency)}</td></tr>)}</tbody></table></div>}
   </section>
 
-  <p className={styles.note}>Visitor counts deduplicate a browser/IP and product per day using a one-way token. Use the left sidebar to inspect the Conversion Funnel, 14-Day Trends, Customer Directory & Access Control, and Launchpad Studio 5-Stage Progress.{amountUnknown>0?' * '+amountUnknown+' legacy paid purchase(s) with unavailable amounts are excluded from collected totals.':''}</p>
+  <p className={styles.note}>Visitor counts deduplicate a browser/IP and product per day using a one-way token. Traffic sources automatically detect referrals from Threads, X, Pinterest, Medium, Google, and Direct visits (or ?utm_source=threads / x / pinterest / medium / google).{amountUnknown>0?' * '+amountUnknown+' legacy paid purchase(s) with unavailable amounts are excluded from collected totals.':''}</p>
  </>;
 
  const funnelView=<>

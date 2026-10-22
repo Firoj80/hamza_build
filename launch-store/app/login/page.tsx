@@ -7,8 +7,40 @@ import {postAuthRedirect,safeNext} from '@/lib/platform-policy.mjs';
 import {authConfigured,currentUser} from '@/lib/supabase/server';
 import {redirect} from 'next/navigation';
 
+import type {Metadata} from 'next';
+import {productDetails} from '@/lib/catalog';
+
 export const dynamic='force-dynamic';
-export const metadata={title:'Account & Sign in — Hamza Idrishi',robots:{index:false,follow:false}};
+
+export async function generateMetadata({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}):Promise<Metadata>{
+ const params=await searchParams;
+ const next=safeNext(params.next);
+ const product=next==='/fieldguide'?productDetails['first-product-fieldguide']:next==='/studio'?productDetails['launchpad-studio']:null;
+ if(product){
+  return {
+   title:`${product.name} — Hamza Idrishi`,
+   description:product.description,
+   robots:{index:false,follow:false},
+   openGraph:{
+    type:'website',
+    siteName:'Hamza Idrishi · Build_hamza',
+    title:product.shareTitle,
+    description:product.shareDescription,
+    url:`/products/${product.product==='fieldguide'?'first-product-fieldguide':'launchpad-studio'}`,
+    images:[{url:product.ogImage,width:1600,height:1100,alt:product.imageAlt,type:'image/png'}],
+   },
+   twitter:{
+    card:'summary_large_image',
+    site:'@hamza_build',
+    creator:'@hamza_build',
+    title:product.shareTitle,
+    description:product.shareDescription,
+    images:[{url:product.ogImage,alt:product.imageAlt}],
+   },
+  };
+ }
+ return {title:'Account & Sign in — Hamza Idrishi',robots:{index:false,follow:false}};
+}
 
 export default async function Login({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
  const params=await searchParams;

@@ -30,17 +30,20 @@ export default function ShareSnapshot({
   }
  }
 
- return <div className={styles.snapshotBar}>
-  {templates&&(
-   <div className={styles.snapshotTabs} role="group" aria-label="Build in public post template">
-    <button type="button" className={mode==='milestone'?styles.segActive:''} onClick={()=>setMode('milestone')}>Milestone</button>
-    <button type="button" className={mode==='funnel'?styles.segActive:''} onClick={()=>setMode('funnel')}>Funnel post</button>
-    <button type="button" className={mode==='weekly'?styles.segActive:''} onClick={()=>setMode('weekly')}>7d update</button>
-   </div>
-  )}
-  <button type="button" onClick={copy} className={styles.copyButton}>
-   {copied?<Check size={15}/>:<Copy size={15}/>}
-   {copied?'Copied post':'Copy Threads summary'}
-  </button>
+ return <div className={styles.snapshotContainer}>
+  <div className={styles.snapshotBar}>
+   {templates&&(
+    <div className={styles.snapshotTabs} role="group" aria-label="Build in public post template">
+     <button type="button" className={mode==='milestone'?styles.segActive:''} onClick={()=>setMode('milestone')}>Threads summary</button>
+     <button type="button" className={mode==='funnel'?styles.segActive:''} onClick={()=>setMode('funnel')}>Funnel post</button>
+     <button type="button" className={mode==='weekly'?styles.segActive:''} onClick={()=>setMode('weekly')}>7d update</button>
+    </div>
+   )}
+   <button type="button" onClick={copy} className={styles.copyButton}>
+    {copied?<Check size={15}/>:<Copy size={15}/>}
+    {copied?'Copied post':'Copy Threads summary'}
+   </button>
+  </div>
+  <pre className={styles.snapshotPreview} aria-label="Threads summary preview">{activeText}</pre>
  </div>;
 }
