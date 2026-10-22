@@ -392,6 +392,42 @@ export default async function Sales(){
   ].join('\n')
  };
 
+ // Live Conversion & Checkout Diagnostic Insights
+ const dodoEnv=process.env.DODO_PAYMENTS_ENVIRONMENT||'test_mode';
+ const hasDodoKey=Boolean(process.env.DODO_PAYMENTS_API_KEY);
+ const hasStudioProduct=Boolean(process.env.DODO_STUDIO_PRODUCT_ID);
+ const hasFgProduct=Boolean(process.env.DODO_FIELDGUIDE_PRODUCT_ID);
+ const dodoReady=hasDodoKey&&hasStudioProduct&&hasFgProduct;
+ const isTestMode=dodoEnv!=='live_mode';
+ const nonAdminUsers=customerProfiles.filter(c=>!isSalesAdmin(c.email,process.env.SALES_DASHBOARD_ADMIN_EMAIL));
+ const unpaidSignupsWithoutAttempt=nonAdminUsers.filter(c=>!c.hasPaid&&c.triedStudio===0&&c.triedFieldguide===0).length;
+
+ let primaryBottleneckTitle='Gathering initial visitor data';
+ let primaryBottleneckDetail='Share your tracked links (?via=threads, ?via=x, ?via=fb) on social media to bring visitors into the store.';
+ if(isTestMode||!dodoReady){
+  primaryBottleneckTitle=isTestMode?'Dodo Payments is currently in TEST MODE':'Dodo product IDs or API key missing';
+  primaryBottleneckDetail=isTestMode
+   ?'Real customer cards will be declined while DODO_PAYMENTS_ENVIRONMENT is set to test_mode. Switch to live_mode with live product IDs ($5 Fieldguide & $9 Studio) in Vercel to accept real sales.'
+   :'Ensure DODO_PAYMENTS_API_KEY, DODO_FIELDGUIDE_PRODUCT_ID, and DODO_STUDIO_PRODUCT_ID are configured in Vercel environment variables.';
+ }else if(totalViews>0&&productVisitors===0){
+  primaryBottleneckTitle='Visitors are landing on "/" but not opening product pages or checkout';
+  primaryBottleneckDetail=`${totalViews} views recorded on the homepage, but 0 product detail views and 0 checkout attempts. Link directly to /products/first-product-fieldguide?via=threads ($5 impulse entry) in your posts.`;
+ }else if(unpaidSignupsWithoutAttempt>0&&totalAttempts===0){
+  primaryBottleneckTitle=`${unpaidSignupsWithoutAttempt} visitor(s) created an account after clicking Buy, then stopped before Dodo checkout`;
+  primaryBottleneckDetail='Previously, /library?buy=... did not auto-launch Dodo checkout after account signup. This is now fixed so new signups from Buy buttons go straight into Dodo checkout.';
+ }else if(totalViews>0&&totalAttempts===0){
+  primaryBottleneckTitle=`${analytics.total_visitors} unique visitor(s) browsed (${productVisitors} product views), 0 started checkout`;
+  primaryBottleneckDetail='Visitors are browsing without completing Step 1 account signup. Direct social posts to the $5 Fieldguide (/products/first-product-fieldguide?via=threads) as a low-friction entry offer.';
+ }else if(totalAttempts>0&&totalPaid===0){
+  primaryBottleneckTitle=`${totalAttempts} checkout attempt(s) started by ${uniqueAttemptUsers} user(s), 0 completed payment`;
+  primaryBottleneckDetail='Visitors reached Dodo checkout but abandoned before paying—or Dodo product price/webhook settings need verification. Check the Recent Checkout Attempts table in the Funnel tab.';
+ }else if(totalPaid>0){
+  primaryBottleneckTitle=`Funnel active: ${totalPaid} paid sale(s) from ${totalAttempts} checkout attempt(s) (${overallCheckoutCompletion})`;
+  primaryBottleneckDetail=abandonedAttempts.length>0
+   ?`${abandonedAttempts.length} checkout attempt(s) were abandoned (${uniqueAbandonedUsers} unrecovered user(s)). Follow up with signed-up users in the Customers tab.`
+   :'Checkout flow and payment reconciliation are operating normally.';
+ }
+
  const overviewView=<>
   {analyticsError&&<p className={styles.note}>Visitor analytics could not be loaded right now. Refresh to try again.</p>}
   <div className={styles.stats}>
@@ -421,6 +457,40 @@ export default async function Sales(){
     <small>{totalPaid}/{totalAttempts} checkouts paid · {abandonedAttempts.length} dropped</small>
    </article>
   </div>
+
+  <section className={styles.cohortSection}>
+   <div className={styles.sectionTitle}>
+    <div><div className={styles.eyebrow}>CONVERSION DIAGNOSTIC · WHY VISITORS AREN’T BUYING YET</div><h2>{primaryBottleneckTitle}</h2></div>
+    <span className={`${styles.badge} ${isTestMode||!dodoReady?styles.revoked:totalPaid>0?styles.active:styles.pending}`}>
+     {isTestMode?'Dodo: TEST MODE':!dodoReady?'Config incomplete':'Dodo: LIVE MODE'}
+    </span>
+   </div>
+   <p className={styles.note} style={{marginTop:0,marginBottom:'12px',color:'#1d2925',background:'#f8faf6',borderColor:'#cfe0c7'}}>
+    <strong>Diagnosis:</strong> {primaryBottleneckDetail}
+   </p>
+   <div className={styles.cohortGrid}>
+    <article className={styles.cohortCard}>
+     <span>1. Storefront → Product views</span>
+     <strong>{productVisitors} / {analytics.total_visitors}</strong>
+     <small>{pct(productVisitors,analytics.total_visitors)} of unique visitors opened a product detail page ({analytics.by_product.fieldguide} Guide · {analytics.by_product.studio} Studio)</small>
+    </article>
+    <article className={styles.cohortCard}>
+     <span>2. Visitors → Account signups</span>
+     <strong>{nonAdminUsers.length} signup{nonAdminUsers.length===1?'':'s'}</strong>
+     <small>{unpaidSignupsWithoutAttempt} signed up without starting Dodo checkout · {uniqueAttemptUsers} started checkout</small>
+    </article>
+    <article className={styles.cohortCard}>
+     <span>3. Checkout → Paid completion</span>
+     <strong>{totalPaid} / {totalAttempts}</strong>
+     <small>{abandonedAttempts.length} abandoned at payment screen · {totalPending} pending webhook</small>
+    </article>
+    <article className={styles.cohortCard}>
+     <span>4. Payment gateway status</span>
+     <strong>{dodoEnv==='live_mode'?'Live mode':'Test mode'}</strong>
+     <small>{dodoReady?'API key + $5/$9 product IDs set':'Missing Dodo env vars'} · Auto-checkout after signup enabled</small>
+    </article>
+   </div>
+  </section>
 
   <section className={styles.trafficSection}>
    <div className={styles.sectionTitle}>

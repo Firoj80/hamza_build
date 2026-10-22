@@ -9,12 +9,14 @@ export default function LoginForm({
  next,
  configured,
  initialMode = 'signup',
- loggedOutInitially = false
+ loggedOutInitially = false,
+ checkoutProduct = null
 }:{
  next: string;
  configured: boolean;
  initialMode?: AuthMode;
  loggedOutInitially?: boolean;
+ checkoutProduct?: { name: string; price: number } | null;
 }){
  const [showLoggedOut,setShowLoggedOut]=useState(loggedOutInitially);
  const [mode,setMode]=useState<AuthMode>(initialMode);
@@ -106,6 +108,12 @@ export default function LoginForm({
     }
    }}
   >
+   {checkoutProduct && (
+    <div style={{background:'#eef4ea',border:'1px solid #c9dec2',borderRadius:'10px',padding:'10px 12px',marginBottom:'14px',fontSize:'12.5px',color:'#173b31',lineHeight:1.45}}>
+     <strong style={{display:'block',fontSize:'13px'}}>Selected: {checkoutProduct.name} · ${checkoutProduct.price} USD</strong>
+     <span>Step 1 of 2: {mode==='login'?'Sign in':'Create your account'} below — Dodo checkout opens automatically next.</span>
+    </div>
+   )}
    <div className="auth-tabs" aria-label="Account options">
     <button
      type="button"
@@ -131,13 +139,13 @@ export default function LoginForm({
     {mode==='login' && (
      <>
       <h2>Welcome back.</h2>
-      <p>Sign in with the email and password linked to your library.</p>
+      <p>{checkoutProduct ? `Sign in to continue to your $${checkoutProduct.price} ${checkoutProduct.name} checkout.` : 'Sign in with the email and password linked to your library.'}</p>
      </>
     )}
     {mode==='signup' && (
      <>
-      <h2>Create your account.</h2>
-      <p>Instant setup with your email and password—no verification email wait.</p>
+      <h2>{checkoutProduct ? 'Quick account setup.' : 'Create your account.'}</h2>
+      <p>{checkoutProduct ? `Link ${checkoutProduct.name} to your email—no verification email wait.` : 'Instant setup with your email and password—no verification email wait.'}</p>
      </>
     )}
     {mode==='recover' && (
@@ -196,9 +204,9 @@ export default function LoginForm({
      {busy
       ? 'Please wait…'
       : mode==='signup'
-      ? 'Create account & continue'
+      ? (checkoutProduct ? `Create account & continue to $${checkoutProduct.price} checkout` : 'Create account & continue')
       : mode==='login'
-      ? 'Sign in to my library'
+      ? (checkoutProduct ? `Sign in & continue to $${checkoutProduct.price} checkout` : 'Sign in to my library')
       : 'Send password reset link'}
     </span>
     <ArrowRight size={17}/>

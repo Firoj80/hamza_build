@@ -38,8 +38,19 @@ export function trustedRequestOrigin(req, env=process.env) {
     if (actual && originHeader === actual) return actual;
     return null;
   }
-  if (req.headers?.get('sec-fetch-site') === 'same-origin') {
+  const fetchSite = req.headers?.get('sec-fetch-site');
+  if (fetchSite === 'same-origin') {
     return actual || configured;
+  }
+  if (fetchSite !== 'cross-site') {
+    const referer = req.headers?.get('referer');
+    if (referer) {
+      try {
+        const refOrigin = siteOrigin(referer);
+        if (refOrigin === configured) return configured;
+        if (actual && refOrigin === actual) return actual;
+      } catch {}
+    }
   }
   return null;
 }

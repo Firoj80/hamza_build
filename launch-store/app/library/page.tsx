@@ -11,10 +11,14 @@ import SiteFooter from '../site-footer';
 export const dynamic='force-dynamic';
 export const metadata={title:'Your library — Hamza Idrishi',robots:{index:false,follow:false}};
 
-export default async function Library(){
+export default async function Library({searchParams}:{searchParams?:Promise<Record<string,string|string[]|undefined>>}){
  const {user,products}=await ownedProducts();
  if(!user)redirect('/login?next=/library');
  const isAdmin=Boolean(user.email&&isSalesAdmin(user.email));
+ const params=searchParams?await searchParams:{};
+ const rawBuy=typeof params?.buy==='string'?params.buy:'';
+ const pendingBuyProduct=rawBuy==='fieldguide'||rawBuy==='studio'?rawBuy:null;
+ const shouldAutoCheckout=Boolean(pendingBuyProduct&&!products.includes(pendingBuyProduct));
 
  const catalog=[
   {
@@ -50,6 +54,7 @@ export default async function Library(){
    ]
   }
  ];
+ const selectedCatalogItem=shouldAutoCheckout?catalog.find(c=>c.key===pendingBuyProduct):null;
 
  return (
   <div className="page-shell">
@@ -80,6 +85,18 @@ export default async function Library(){
    </header>
 
    <main className="platform-library wrap">
+    {selectedCatalogItem && (
+     <section className="order-box" style={{marginBottom:'24px',border:'2px solid #173b31',background:'#f4f8f2',display:'flex',alignItems:'center',justifyContent:'space-between',gap:'18px',flexWrap:'wrap'}}>
+      <div>
+       <div className="eyebrow" style={{marginBottom:'6px'}}><span/> STEP 2 OF 2 · ACCOUNT CONNECTED</div>
+       <h2 style={{margin:'0 0 6px',fontSize:'clamp(20px,2.4vw,26px)'}}>Continuing to your {selectedCatalogItem.name} (${selectedCatalogItem.price}) checkout…</h2>
+       <p style={{margin:0,color:'#4a5851',fontSize:'14px'}}>Your account (<strong>{user.email}</strong>) is ready. If Dodo checkout does not open automatically in a moment, click the button to continue.</p>
+      </div>
+      <CheckoutButton product={selectedCatalogItem.key} autoStart className="button dark">
+       Continue to ${selectedCatalogItem.price} checkout
+      </CheckoutButton>
+     </section>
+    )}
     <section className="library-hero-banner">
      <div>
       <div className="eyebrow"><span/> YOUR PERSONAL LIBRARY</div>

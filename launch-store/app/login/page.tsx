@@ -12,10 +12,16 @@ import {productDetails} from '@/lib/catalog';
 
 export const dynamic='force-dynamic';
 
+function resolveTargetProduct(next:string){
+ if(next==='/fieldguide'||next==='/library?buy=fieldguide')return productDetails['first-product-fieldguide'];
+ if(next==='/studio'||next==='/library?buy=studio')return productDetails['launchpad-studio'];
+ return null;
+}
+
 export async function generateMetadata({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}):Promise<Metadata>{
  const params=await searchParams;
  const next=safeNext(params.next);
- const product=next==='/fieldguide'?productDetails['first-product-fieldguide']:next==='/studio'?productDetails['launchpad-studio']:null;
+ const product=resolveTargetProduct(next);
  if(product){
   return {
    title:`${product.name} — Hamza Idrishi`,
@@ -48,6 +54,7 @@ export default async function Login({searchParams}:{searchParams:Promise<Record<
  const loggedOut=params.logged_out==='1';
  const rawMode=typeof params.mode==='string'?params.mode:'';
  const initialMode=rawMode==='login'?'login':rawMode==='recover'?'recover':loggedOut?'login':'signup';
+ const targetProduct=resolveTargetProduct(next);
 
  const user=await currentUser();
  if(user)redirect(postAuthRedirect(user.email,next));
@@ -73,11 +80,22 @@ export default async function Login({searchParams}:{searchParams:Promise<Record<
    <main className="auth-portal-main wrap">
     <div className="auth-portal-grid">
      <section className="auth-editorial-panel">
-      <div className="eyebrow"><span/> YOUR PERSONAL WORKSPACE</div>
-      <h1>One account.<br/>Your <em>useful tools.</em></h1>
-      <p className="auth-lead">
-       Sign in or create an account in seconds. Your purchased Fieldguide and Launchpad Studio workspace stay linked to your email so you can pick up right where you left off.
-      </p>
+      <div className="eyebrow"><span/> {targetProduct ? `STEP 1 OF 2 · ACCOUNT SETUP FOR $${targetProduct.price} CHECKOUT` : 'YOUR PERSONAL WORKSPACE'}</div>
+      {targetProduct ? (
+       <>
+        <h1>Unlock <em>{targetProduct.name}.</em></h1>
+        <p className="auth-lead">
+         Create your account or sign in first so your <strong>${targetProduct.price} USD one-time purchase</strong> is permanently linked to your email. You’ll go straight to secure Dodo checkout in the next step.
+        </p>
+       </>
+      ) : (
+       <>
+        <h1>One account.<br/>Your <em>useful tools.</em></h1>
+        <p className="auth-lead">
+         Sign in or create an account in seconds. Your purchased Fieldguide and Launchpad Studio workspace stay linked to your email so you can pick up right where you left off.
+        </p>
+       </>
+      )}
 
       <div className="auth-feature-list">
        <div className="auth-feature-item">
@@ -121,6 +139,7 @@ export default async function Login({searchParams}:{searchParams:Promise<Record<
         configured={authConfigured()}
         initialMode={initialMode}
         loggedOutInitially={loggedOut}
+        checkoutProduct={targetProduct?{name:targetProduct.name,price:targetProduct.price}:null}
        />
       </div>
      </section>
@@ -131,3 +150,4 @@ export default async function Login({searchParams}:{searchParams:Promise<Record<
   </div>
  );
 }
+
