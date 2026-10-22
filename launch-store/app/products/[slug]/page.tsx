@@ -67,10 +67,14 @@ export default async function ProductPage({ params }: Props) {
             )}
           </div>
         </div>
-        <div className="product-detail-visual">
+        <div className={`product-detail-visual ${isGuide ? 'is-guide-cover' : 'is-studio-cover'}`}>
           <div className="detail-image-label">{product.imageLabel}</div>
-          <Image src={product.image} alt={product.imageAlt} width={isGuide ? 1536 : 1440} height={isGuide ? 1024 : 1000} priority />
-          {isGuide && <p className="detail-image-note">Cover concept. Purchase access to open the seven-page guide in your account library.</p>}
+          <Image src={product.image} alt={product.imageAlt} width={1600} height={1100} unoptimized priority />
+          <p className="detail-image-note">
+            {isGuide
+              ? 'Editorial cover concept. Purchase access to open the interactive seven-page guide in your account library.'
+              : 'Workspace cover showcase. Explore the five real working app screenshots in the interactive gallery below.'}
+          </p>
         </div>
       </section>
 

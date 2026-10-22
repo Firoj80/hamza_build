@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {ArrowUpRight,BookOpen,Check,CheckCircle2,HelpCircle,KeyRound,Layers,Lock,LogOut,ShieldCheck,Store} from 'lucide-react';
 import {ownedProducts} from '@/lib/access';
 import {isSalesAdmin} from '@/lib/platform-policy.mjs';
@@ -21,7 +22,9 @@ export default async function Library(){
    name:'Idea-to-Income Fieldguide',
    price:5,
    path:'/fieldguide',
-   detailPath:'/products/idea-to-income-fieldguide',
+   detailPath:'/products/first-product-fieldguide',
+   image:'/images/idea-to-income-fieldguide-cover.svg',
+   imageAlt:'Idea-to-Income Fieldguide hardcover monograph and validation scorecard cover',
    tag:'01 / THE FOUNDATION',
    text:'A seven-page guide to choosing a useful problem, checking demand, and planning your first launch.',
    highlights:[
@@ -36,6 +39,8 @@ export default async function Library(){
    price:9,
    path:'/studio',
    detailPath:'/products/launchpad-studio',
+   image:'/images/launchpad-studio-cover.svg',
+   imageAlt:'Launchpad Studio 5-stage online workspace cover showcase',
    tag:'02 / THE WORKSPACE',
    text:'Your online workspace for prompts, product drafts, 30 post starters, and cloud-saved launch progress.',
    highlights:[
@@ -98,6 +103,9 @@ export default async function Library(){
       const unlocked=products.includes(p.key);
       return (
        <article className={`order-box library-product-card ${unlocked?'is-unlocked':'is-locked'}`} key={p.key}>
+        <Link href={unlocked ? p.path : p.detailPath} className="library-card-cover" aria-label={p.name}>
+         <Image src={p.image} alt={p.imageAlt} width={1600} height={1100} unoptimized/>
+        </Link>
         <div className="library-card-top">
          <span className="library-card-tag">{p.tag}</span>
          {unlocked ? (

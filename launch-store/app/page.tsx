@@ -56,7 +56,9 @@ export default async function Home(){
     </div>
     <div className="hero-visual">
      <div className="image-label"><span className="mini-dot"/> FROM YOUR FIRST IDEA TO YOUR FIRST LAUNCH</div>
-     <Image src="/images/first-product-fieldguide.webp" alt="Green workbook concept mockup that still shows the earlier First Product Fieldguide title" width={1536} height={1024} priority/>
+     <div className="hero-cover-frame">
+      <Image src="/images/idea-to-income-fieldguide-cover.svg" alt="Idea-to-Income Fieldguide hardcover monograph concept and customer validation scorecard sheet" width={1600} height={1100} unoptimized priority/>
+     </div>
      <div className="visual-caption"><span>01 / IDEA-TO-INCOME FIELDGUIDE</span><span>ACCOUNT ACCESS · NOT A PHYSICAL BOOK</span></div>
      <div className="floating-note"><span className="note-star">✳</span><div>A little less overthinking.<br/><b>A little more making.</b></div></div>
     </div>
@@ -80,8 +82,8 @@ export default async function Home(){
 
     <div className="product-grid">
      <article className="product-card">
-      <Link href={guide.href} className="product-photo" aria-label="View Idea-to-Income Fieldguide details">
-       <Image src="/images/first-product-fieldguide.webp" alt="Green workbook concept mockup with the earlier First Product Fieldguide cover title" width={1536} height={1024}/>
+      <Link href={guide.href} className="product-photo cover-showcase-light" aria-label="View Idea-to-Income Fieldguide details">
+       <Image src="/images/idea-to-income-fieldguide-cover.svg" alt="Idea-to-Income Fieldguide hardcover monograph concept and validation scorecard worksheet" width={1600} height={1100} unoptimized/>
        <span className="product-badge">$5 · START HERE</span>
       </Link>
       <div className="product-body">
@@ -103,9 +105,9 @@ export default async function Home(){
      </article>
 
      <article className="product-card">
-      <Link href={studio.href} className="product-photo real-product-photo" aria-label="View Launchpad Studio details">
-       <Image src="/images/screenshots/studio-validate.jpg" alt="Actual Launchpad Studio app: validation workspace with sidebar, product fields and customer evidence" width={1440} height={1000}/>
-       <span className="product-badge green">ACTUAL APP SCREENSHOT</span>
+      <Link href={studio.href} className="product-photo cover-showcase-dark" aria-label="View Launchpad Studio details">
+       <Image src="/images/launchpad-studio-cover.svg" alt="Launchpad Studio 5-stage online workspace showcase with offer builder, 30 post starters, and scenario model" width={1600} height={1100} unoptimized/>
+       <span className="product-badge green">$9 · FLAGSHIP WORKSPACE</span>
       </Link>
       <div className="product-body">
        <div className="product-number">02 / THE WORKSPACE</div>
@@ -125,7 +127,7 @@ export default async function Home(){
       </div>
      </article>
     </div>
-    <p className="mockup-note">The Fieldguide cover is a concept mockup. Launchpad Studio images are real screenshots of the working app. Both products are separate one-time purchases accessed through your account.</p>
+    <p className="mockup-note">Product covers are editorial concept showcases. Interactive workspace previews and real working app screenshots are shown below and on the product page. Both products are separate one-time purchases accessed through your account.</p>
    </section>
 
    <section className="process-section" id="inside">

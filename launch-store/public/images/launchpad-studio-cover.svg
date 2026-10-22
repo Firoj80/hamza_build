@@ -1,0 +1,282 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" width="1600" height="1100" fill="none">
+  <defs>
+    <!-- Deep Architectural Stage Gradients -->
+    <linearGradient id="studioStage" x1="0" y1="0" x2="1600" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0d261f"/>
+      <stop offset="52%" stop-color="#15382e"/>
+      <stop offset="100%" stop-color="#081914"/>
+    </linearGradient>
+    <radialGradient id="limeAura" cx="0.50" cy="0.45" r="0.55">
+      <stop offset="0%" stop-color="#d9f45b" stop-opacity="0.20"/>
+      <stop offset="55%" stop-color="#6b8f3e" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#081914" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sidebarGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#173b31"/>
+      <stop offset="100%" stop-color="#0f2921"/>
+    </linearGradient>
+
+    <!-- Shadows -->
+    <filter id="windowShadow" x="-10%" y="-8%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="30" stdDeviation="28" flood-color="#030c09" flood-opacity="0.60"/>
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#030c09" flood-opacity="0.32"/>
+    </filter>
+    <filter id="floatShadow" x="-15%" y="-15%" width="135%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#04100c" flood-opacity="0.50"/>
+    </filter>
+
+    <pattern id="darkGrid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M 64 0 L 0 0 0 64" fill="none" stroke="#d9f45b" stroke-width="1" stroke-opacity="0.05"/>
+    </pattern>
+  </defs>
+
+  <!-- Stage Backdrop -->
+  <rect width="1600" height="1100" fill="url(#studioStage)"/>
+  <rect width="1600" height="1100" fill="url(#darkGrid)"/>
+  <rect width="1600" height="1100" fill="url(#limeAura)"/>
+
+  <!-- Top Authentic Metadata Strip -->
+  <g font-family="'Manrope', 'DM Sans', sans-serif" font-size="12.5" font-weight="800" letter-spacing="2.2">
+    <text x="76" y="54" fill="#d9f45b">HAMZA IDRISHI / BUILD_HAMZA · 02 / THE ONLINE WORKSPACE</text>
+    <text x="1524" y="54" text-anchor="end" fill="#b5c9bc">LAUNCHPAD STUDIO · $9 USD ONE-TIME</text>
+  </g>
+  <line x1="76" y1="72" x2="1524" y2="72" stroke="#d9f45b" stroke-opacity="0.18" stroke-width="1"/>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN LAUNCHPAD STUDIO WORKSPACE (FAITHFUL TO Launchpad_Platform.html)     -->
+  <!-- ========================================================================= -->
+  <g filter="url(#windowShadow)" transform="translate(76, 96)">
+    <!-- Outer Frame -->
+    <rect x="0" y="0" width="1448" height="820" rx="14" fill="#173b31" stroke="#3c6956" stroke-width="2"/>
+
+    <!-- ========================================================== -->
+    <!-- LEFT SIDEBAR (Exact match to aside.sidebar in HTML)        -->
+    <!-- ========================================================== -->
+    <g transform="translate(2, 2)">
+      <path d="M 12 0 L 252 0 L 252 816 L 12 816 Q 0 816 0 804 L 0 12 Q 0 0 12 0 Z" fill="url(#sidebarGrad)"/>
+      <line x1="252" y1="0" x2="252" y2="816" stroke="#294e40" stroke-width="1.5"/>
+
+      <!-- .studio-logo & .byline -->
+      <g transform="translate(26, 34)">
+        <text x="0" y="42" fill="#f2f3de" font-family="Georgia, serif" font-size="48" letter-spacing="-4">l<tspan fill="#d8e4a5">p</tspan></text>
+        <text x="58" y="22" fill="#eff2e5" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" letter-spacing="2">LAUNCHPAD</text>
+        <text x="58" y="42" fill="#eff2e5" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" letter-spacing="2">STUDIO</text>
+        <text x="4" y="76" fill="#a5b69b" font-family="'Manrope', sans-serif" font-size="11" font-weight="700" letter-spacing="1.7">BY HAMZA IDRISHI</text>
+        <text x="4" y="94" fill="#89a087" font-family="'DM Sans', sans-serif" font-size="10.5" letter-spacing="1.2">Build_hamza</text>
+      </g>
+
+      <!-- .nav-label & 5 Exact Steps -->
+      <g transform="translate(18, 162)">
+        <text x="10" y="0" fill="#9bac94" font-family="'Manrope', sans-serif" font-size="11" font-weight="700" letter-spacing="1.7">YOUR WORKSPACE</text>
+
+        <!-- 01 Validate idea -->
+        <g transform="translate(0, 18)">
+          <rect x="0" y="0" width="216" height="46" rx="6" fill="#365546"/>
+          <text x="14" y="28" fill="#d9e5a5" font-family="'Manrope', sans-serif" font-size="12" font-weight="700">01</text>
+          <text x="42" y="28" fill="#fffef4" font-family="'DM Sans', sans-serif" font-size="15" font-weight="600">Validate idea</text>
+          <text x="198" y="28" text-anchor="end" fill="#c6d5a3" font-size="15">↗</text>
+        </g>
+
+        <!-- 02 AI prompts -->
+        <g transform="translate(0, 72)">
+          <rect x="0" y="0" width="216" height="44" rx="6" fill="transparent"/>
+          <text x="14" y="27" fill="#a9bb92" font-family="'Manrope', sans-serif" font-size="12" font-weight="700">02</text>
+          <text x="42" y="27" fill="#c1cdb7" font-family="'DM Sans', sans-serif" font-size="15">AI prompts</text>
+          <text x="198" y="27" text-anchor="end" fill="#c6d5a3" font-size="15">↗</text>
+        </g>
+
+        <!-- 03 Content plan -->
+        <g transform="translate(0, 124)">
+          <rect x="0" y="0" width="216" height="44" rx="6" fill="transparent"/>
+          <text x="14" y="27" fill="#a9bb92" font-family="'Manrope', sans-serif" font-size="12" font-weight="700">03</text>
+          <text x="42" y="27" fill="#c1cdb7" font-family="'DM Sans', sans-serif" font-size="15">Content plan</text>
+          <text x="198" y="27" text-anchor="end" fill="#c6d5a3" font-size="15">↗</text>
+        </g>
+
+        <!-- 04 Store & numbers -->
+        <g transform="translate(0, 176)">
+          <rect x="0" y="0" width="216" height="44" rx="6" fill="transparent"/>
+          <text x="14" y="27" fill="#a9bb92" font-family="'Manrope', sans-serif" font-size="12" font-weight="700">04</text>
+          <text x="42" y="27" fill="#c1cdb7" font-family="'DM Sans', sans-serif" font-size="15">Store &amp; numbers</text>
+          <text x="198" y="27" text-anchor="end" fill="#c6d5a3" font-size="15">↗</text>
+        </g>
+
+        <!-- 05 Launch checklist -->
+        <g transform="translate(0, 228)">
+          <rect x="0" y="0" width="216" height="44" rx="6" fill="transparent"/>
+          <text x="14" y="27" fill="#a9bb92" font-family="'Manrope', sans-serif" font-size="12" font-weight="700">05</text>
+          <text x="42" y="27" fill="#c1cdb7" font-family="'DM Sans', sans-serif" font-size="15">Launch checklist</text>
+          <text x="198" y="27" text-anchor="end" fill="#c6d5a3" font-size="15">↗</text>
+        </g>
+      </g>
+
+      <!-- .sidebar-bottom (Verbatim from Launchpad_Platform.html) -->
+      <g transform="translate(24, 650)">
+        <line x1="0" y1="0" x2="204" y2="0" stroke="#496044" stroke-width="1"/>
+        <circle cx="6" cy="24" r="4" fill="#cedc96"/>
+        <text x="18" y="28" fill="#d1dcc5" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="600">Account workspace</text>
+        <text x="0" y="54" fill="#9daf93" font-family="'DM Sans', sans-serif" font-size="12">Your progress is saved to your</text>
+        <text x="0" y="74" fill="#9daf93" font-family="'DM Sans', sans-serif" font-size="12">account. Use your library to</text>
+        <text x="0" y="94" fill="#9daf93" font-family="'DM Sans', sans-serif" font-size="12">return anytime.</text>
+        <text x="0" y="124" fill="#a9bb99" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="700" letter-spacing="1.2">SMALL STEPS. USEFUL WORK.</text>
+      </g>
+    </g>
+
+    <!-- ========================================================== -->
+    <!-- MAIN WORKSPACE SHELL (Exact match to .shell in HTML)       -->
+    <!-- ========================================================== -->
+    <g transform="translate(254, 2)">
+      <path d="M 0 0 L 1180 0 Q 1192 0 1192 12 L 1192 804 Q 1192 816 1180 816 L 0 816 Z" fill="#f7f7f0"/>
+
+      <!-- .topbar -->
+      <path d="M 0 0 L 1180 0 Q 1192 0 1192 12 L 1192 72 L 0 72 Z" fill="#fafaf5"/>
+      <line x1="0" y1="72" x2="1192" y2="72" stroke="#e0e3d6" stroke-width="1.5"/>
+
+      <text x="38" y="41" fill="#7e8872" font-family="'Manrope', sans-serif" font-size="12" font-weight="700" letter-spacing="1.4">LAUNCHPAD STUDIO   /   <tspan fill="#284536">VALIDATE · PROMPTS · CONTENT · STORE · LAUNCH</tspan></text>
+
+      <!-- Save progress & Copy plan buttons -->
+      <rect x="892" y="18" width="128" height="38" rx="5" fill="#f7f8f0" stroke="#d9decc" stroke-width="1.2"/>
+      <text x="956" y="42" text-anchor="middle" fill="#3c543e" font-family="'DM Sans', sans-serif" font-size="14" font-weight="600">Save progress</text>
+
+      <rect x="1032" y="18" width="124" height="38" rx="5" fill="#173b31"/>
+      <text x="1094" y="42" text-anchor="middle" fill="#fffef5" font-family="'DM Sans', sans-serif" font-size="14" font-weight="600">↗ Copy plan</text>
+
+      <!-- .page-intro -->
+      <g transform="translate(38, 100)">
+        <text x="0" y="0" fill="#7d8f5c" font-family="'Manrope', sans-serif" font-size="11" font-weight="700" letter-spacing="1.8">YOUR FIRST LAUNCH, ORGANISED.</text>
+        <text x="0" y="38" fill="#173b31" font-family="'Manrope', sans-serif" font-size="34" font-weight="700" letter-spacing="-0.9">A useful idea starts with <tspan fill="#738552" font-family="Georgia, serif" font-style="italic" font-weight="400">one small step.</tspan></text>
+        <text x="0" y="64" fill="#808a77" font-family="'DM Sans', sans-serif" font-size="14.5">A little less overthinking. A little more making.</text>
+
+        <rect x="838" y="28" width="278" height="32" rx="4" fill="#eff2e4" stroke="#d9dfca" stroke-width="1"/>
+        <text x="977" y="48" text-anchor="middle" fill="#718054" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="700" letter-spacing="1">PRIVATE WORKSPACE · ACCOUNT ACCESS</text>
+
+        <!-- .overview (Exact 3 cards from Launchpad_Platform.html) -->
+        <g transform="translate(0, 86)">
+          <!-- Card 1 -->
+          <rect x="0" y="0" width="358" height="74" rx="6" fill="#fdfdf8" stroke="#dfe3d5" stroke-width="1.2"/>
+          <rect x="16" y="18" width="38" height="38" rx="6" fill="#eef1e2"/>
+          <text x="35" y="43" text-anchor="middle" fill="#82965a" font-size="18">⌖</text>
+          <text x="68" y="30" fill="#8a947d" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="700" letter-spacing="1">YOUR STARTING POINT</text>
+          <text x="68" y="52" fill="#173b31" font-family="'Manrope', sans-serif" font-size="16" font-weight="700">First Product Launch</text>
+
+          <!-- Card 2 -->
+          <rect x="379" y="0" width="358" height="74" rx="6" fill="#fdfdf8" stroke="#dfe3d5" stroke-width="1.2"/>
+          <rect x="395" y="18" width="38" height="38" rx="6" fill="#eef1e2"/>
+          <text x="414" y="43" text-anchor="middle" fill="#82965a" font-size="17">▤</text>
+          <text x="447" y="30" fill="#8a947d" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="700" letter-spacing="1">CONTENT LIBRARY</text>
+          <text x="447" y="52" fill="#173b31" font-family="'Manrope', sans-serif" font-size="16" font-weight="700">30 editable post starters</text>
+
+          <!-- Card 3 -->
+          <rect x="758" y="0" width="358" height="74" rx="6" fill="#fdfdf8" stroke="#dfe3d5" stroke-width="1.2"/>
+          <rect x="774" y="18" width="38" height="38" rx="6" fill="#eef1e2"/>
+          <text x="793" y="43" text-anchor="middle" fill="#82965a" font-size="17">✓</text>
+          <text x="826" y="30" fill="#8a947d" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="700" letter-spacing="1">LAUNCH PROGRESS</text>
+          <text x="826" y="52" fill="#173b31" font-family="'Manrope', sans-serif" font-size="16" font-weight="700">0 of 7 actions</text>
+        </g>
+
+        <!-- Main Workspace Layout: Panel 1 + Panel 2/3/4 Preview + Context Rail -->
+        <g transform="translate(0, 180)">
+          <!-- Left Main Section: 1. Choose and validate (Verbatim from HTML) -->
+          <rect x="0" y="0" width="760" height="500" rx="7" fill="#fffefa" stroke="#dce1d0" stroke-width="1.5"/>
+          <text x="26" y="38" fill="#173b31" font-family="'Manrope', sans-serif" font-size="23" font-weight="700">1. Choose and validate</text>
+          <text x="26" y="64" fill="#7e8873" font-family="'DM Sans', sans-serif" font-size="14">Use these examples as starting points. Confirm the problem with potential buyers before building.</text>
+
+          <!-- Topic examples & Example product pair selects -->
+          <text x="26" y="94" fill="#55684b" font-family="'DM Sans', sans-serif" font-size="13" font-weight="600">Topic examples</text>
+          <rect x="26" y="102" width="342" height="42" rx="5" fill="#fbfcf7" stroke="#d6ddc8"/>
+          <text x="40" y="128" fill="#173b31" font-family="'DM Sans', sans-serif" font-size="14">First Product Launch (8 built-in topics)</text>
+          <text x="350" y="128" text-anchor="end" fill="#55684b" font-size="12">▾</text>
+
+          <text x="390" y="94" fill="#55684b" font-family="'DM Sans', sans-serif" font-size="13" font-weight="600">Example product pair</text>
+          <rect x="390" y="102" width="344" height="42" rx="5" fill="#fbfcf7" stroke="#d6ddc8"/>
+          <text x="404" y="128" fill="#173b31" font-family="'DM Sans', sans-serif" font-size="14">Example 1: Idea-to-Income Fieldguide</text>
+          <text x="716" y="128" text-anchor="end" fill="#55684b" font-size="12">▾</text>
+
+          <!-- .note box -->
+          <rect x="26" y="158" width="708" height="44" rx="4" fill="#f0f3e3" stroke="#dce4c7"/>
+          <rect x="26" y="158" width="4" height="44" fill="#b5c77d"/>
+          <text x="42" y="185" fill="#6d7b5b" font-family="'DM Sans', sans-serif" font-size="13">Example funnel: Idea-to-Income Fieldguide → Launchpad Studio. Edit the fields below for your own offer.</text>
+
+          <!-- Audience & Problem fields -->
+          <text x="26" y="226" fill="#55684b" font-family="'DM Sans', sans-serif" font-size="13" font-weight="600">Who exactly will use this?</text>
+          <rect x="26" y="234" width="342" height="40" rx="5" fill="#fbfcf7" stroke="#d6ddc8"/>
+          <text x="40" y="259" fill="#40553b" font-family="'DM Sans', sans-serif" font-size="13.5">Freelance tutors preparing weekly lessons</text>
+
+          <text x="390" y="226" fill="#55684b" font-family="'DM Sans', sans-serif" font-size="13" font-weight="600">Your optional paid next step ($ USD)</text>
+          <rect x="390" y="234" width="344" height="40" rx="5" fill="#fbfcf7" stroke="#d6ddc8"/>
+          <text x="404" y="259" fill="#40553b" font-family="'DM Sans', sans-serif" font-size="13.5">Lesson Prep Kit · $9 USD</text>
+
+          <!-- Bottom Mini Preview of Stages 02, 03, 04 inside the workspace -->
+          <g transform="translate(26, 294)">
+            <rect x="0" y="0" width="708" height="180" rx="6" fill="#f3f5eb" stroke="#dfe5d1"/>
+            <text x="18" y="26" fill="#284536" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.4">INCLUDED ACROSS STAGES 02–05 OF YOUR WORKSPACE</text>
+
+            <!-- Stage 02 pill -->
+            <rect x="18" y="40" width="330" height="56" rx="5" fill="#fffefa" stroke="#d8dfd0"/>
+            <text x="32" y="62" fill="#173b31" font-family="'Manrope', sans-serif" font-size="13" font-weight="800">02. Prepare an AI prompt</text>
+            <text x="32" y="82" fill="#6d7b5b" font-family="'DM Sans', sans-serif" font-size="12">Outline · 1 Page · Plain-English Edit · Paid Scope · 5 Emails</text>
+
+            <!-- Stage 03 pill -->
+            <rect x="360" y="40" width="330" height="56" rx="5" fill="#fffefa" stroke="#d8dfd0"/>
+            <text x="374" y="62" fill="#173b31" font-family="'Manrope', sans-serif" font-size="13" font-weight="800">03. 30-Day post starter library</text>
+            <text x="374" y="82" fill="#6d7b5b" font-family="'DM Sans', sans-serif" font-size="12">Day 1 Name the problem · Day 3 Show one step · Day 6 Demo</text>
+
+            <!-- Stage 04 pill -->
+            <rect x="18" y="108" width="330" height="56" rx="5" fill="#fffefa" stroke="#d8dfd0"/>
+            <text x="32" y="130" fill="#173b31" font-family="'Manrope', sans-serif" font-size="13" font-weight="800">04. Listing, links &amp; scenario calculator</text>
+            <text x="32" y="150" fill="#6d7b5b" font-family="'DM Sans', sans-serif" font-size="12">Views, visit rate %, purchase rate % &amp; provider fee math</text>
+
+            <!-- Stage 05 pill -->
+            <rect x="360" y="108" width="330" height="56" rx="5" fill="#fffefa" stroke="#d8dfd0"/>
+            <text x="374" y="130" fill="#173b31" font-family="'Manrope', sans-serif" font-size="13" font-weight="800">05. Launch &amp; measure (7 actions)</text>
+            <text x="374" y="150" fill="#6d7b5b" font-family="'DM Sans', sans-serif" font-size="12">Track 24h &amp; 72h views, visits, signups &amp; paid purchases</text>
+          </g>
+
+          <!-- Right .context-rail (Exact match to .guide-card & .quiet-card in HTML) -->
+          <g transform="translate(782, 0)">
+            <rect x="0" y="0" width="334" height="275" rx="6" fill="#eff2e5" stroke="#dce2ce" stroke-width="1.2"/>
+            <text x="22" y="46" fill="#95a86b" font-family="Georgia, serif" font-style="italic" font-size="34">01</text>
+            <text x="22" y="82" fill="#173b31" font-family="'Manrope', sans-serif" font-size="18" font-weight="700">Talk before you build.</text>
+            <text x="22" y="110" fill="#7a866d" font-family="'DM Sans', sans-serif" font-size="13.5">Start with a specific person and a</text>
+            <text x="22" y="130" fill="#7a866d" font-family="'DM Sans', sans-serif" font-size="13.5">recurring problem. Real conversations</text>
+            <text x="22" y="150" fill="#7a866d" font-family="'DM Sans', sans-serif" font-size="13.5">make the next step clearer.</text>
+
+            <text x="22" y="188" fill="#617352" font-family="'DM Sans', sans-serif" font-size="13.5"><tspan fill="#81994e">↗</tspan> Ask about their last experience</text>
+            <text x="22" y="216" fill="#617352" font-family="'DM Sans', sans-serif" font-size="13.5"><tspan fill="#81994e">↗</tspan> Learn their current workaround</text>
+            <text x="22" y="244" fill="#617352" font-family="'DM Sans', sans-serif" font-size="13.5"><tspan fill="#81994e">↗</tspan> Record evidence, not guesses</text>
+
+            <!-- .quiet-card -->
+            <rect x="0" y="292" width="334" height="208" rx="6" fill="#fafbf6" stroke="#dce2d0" stroke-width="1.2"/>
+            <text x="22" y="324" fill="#7d8f5c" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="800" letter-spacing="1.5">A NOTE TO YOUR FUTURE SELF</text>
+            <text x="22" y="350" fill="#7a866d" font-family="'DM Sans', sans-serif" font-size="13">Keep your first version small enough to</text>
+            <text x="22" y="370" fill="#7a866d" font-family="'DM Sans', sans-serif" font-size="13">test. Improve it after someone uses it.</text>
+            <line x1="22" y1="388" x2="312" y2="388" stroke="#dce2d0"/>
+            <text x="22" y="414" fill="#647651" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700">Your experience matters.</text>
+            <text x="22" y="434" fill="#7a866d" font-family="'DM Sans', sans-serif" font-size="12.5">Templates help you start. Your</text>
+            <text x="22" y="452" fill="#7a866d" font-family="'DM Sans', sans-serif" font-size="12.5">knowledge makes the work useful.</text>
+            <text x="22" y="480" fill="#81916b" font-family="'DM Sans', sans-serif" font-size="11.5" font-weight="600">No built-in AI · Take prompts to your AI tool.</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- BOTTOM FOREGROUND SUMMARY BADGES (100% VERBATIM PRODUCT FACTS)            -->
+  <!-- ========================================================================= -->
+  <g filter="url(#floatShadow)" transform="translate(76, 944)">
+    <rect x="0" y="0" width="690" height="74" rx="8" fill="#122f26" stroke="#d9f45b" stroke-width="1.5"/>
+    <rect x="18" y="17" width="40" height="40" rx="6" fill="#d9f45b"/>
+    <text x="38" y="43" text-anchor="middle" fill="#0d261f" font-family="Georgia, serif" font-size="22" font-weight="700">lp</text>
+    <text x="74" y="32" fill="#d9f45b" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.6">5 STAGES · 8 TOPIC EXAMPLES · 30 POST STARTERS · SCENARIO CALCULATOR</text>
+    <text x="74" y="54" fill="#ffffff" font-family="'DM Sans', sans-serif" font-size="14.5" font-weight="600">Validate idea → Prepare AI prompts → Plan 30 posts → Listing &amp; math → Launch checklist</text>
+  </g>
+
+  <g filter="url(#floatShadow)" transform="translate(1074, 944)">
+    <rect x="0" y="0" width="450" height="74" rx="8" fill="#fffefa" stroke="#d9f45b" stroke-width="1.5"/>
+    <circle cx="34" cy="37" r="15" fill="#173b31"/>
+    <path d="M27 37 L32 42 L41 31" stroke="#d9f45b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="62" y="32" fill="#5c6d58" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.4">$9 USD ONE-TIME · PRIVATE ACCOUNT ACCESS</text>
+    <text x="62" y="54" fill="#173b31" font-family="'Manrope', sans-serif" font-size="14.5" font-weight="800">Saved to Your Library · No Monthly Subscription</text>
+  </g>
+</svg>

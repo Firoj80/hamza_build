@@ -1,0 +1,248 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" width="1600" height="1100" fill="none">
+  <defs>
+    <!-- Studio Backdrop Gradients -->
+    <linearGradient id="bgStone" x1="0" y1="0" x2="1600" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f3f5ec"/>
+      <stop offset="50%" stop-color="#e5ead9"/>
+      <stop offset="100%" stop-color="#d4ddc7"/>
+    </linearGradient>
+    <radialGradient id="sunBeam" cx="0.20" cy="0.16" r="0.78">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.88"/>
+      <stop offset="55%" stop-color="#f7f9ef" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#d4ddc7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="limeGlow" cx="0.35" cy="0.52" r="0.46">
+      <stop offset="0%" stop-color="#d9f45b" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#d9f45b" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Hardcover Book Gradients -->
+    <linearGradient id="bookCover" x1="210" y1="100" x2="820" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1d493d"/>
+      <stop offset="48%" stop-color="#15382e"/>
+      <stop offset="100%" stop-color="#0b221b"/>
+    </linearGradient>
+    <linearGradient id="bookSpine" x1="170" y1="130" x2="225" y2="955" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0c241d"/>
+      <stop offset="50%" stop-color="#194135"/>
+      <stop offset="100%" stop-color="#071712"/>
+    </linearGradient>
+    <linearGradient id="goldLime" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e7fa87"/>
+      <stop offset="55%" stop-color="#d9f45b"/>
+      <stop offset="100%" stop-color="#b5cf49"/>
+    </linearGradient>
+    <linearGradient id="sheetPaper" x1="820" y1="120" x2="1500" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fffefb"/>
+      <stop offset="100%" stop-color="#f5f4ea"/>
+    </linearGradient>
+
+    <!-- Elevation Shadows -->
+    <filter id="bookShadow" x="-15%" y="-10%" width="140%" height="135%">
+      <feDropShadow dx="24" dy="34" stdDeviation="26" flood-color="#0c211a" flood-opacity="0.34"/>
+      <feDropShadow dx="5" dy="8" stdDeviation="7" flood-color="#0c211a" flood-opacity="0.18"/>
+    </filter>
+    <filter id="sheetShadow" x="-12%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="14" dy="22" stdDeviation="18" flood-color="#132c23" flood-opacity="0.20"/>
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#132c23" flood-opacity="0.10"/>
+    </filter>
+    <filter id="badgeShadow" x="-15%" y="-15%" width="135%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#0d241d" flood-opacity="0.26"/>
+    </filter>
+
+    <pattern id="archGrid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#173b31" stroke-width="1" stroke-opacity="0.05"/>
+    </pattern>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="1100" fill="url(#bgStone)"/>
+  <rect width="1600" height="1100" fill="url(#sunBeam)"/>
+  <rect width="1600" height="1100" fill="url(#archGrid)"/>
+  <rect width="1600" height="1100" fill="url(#limeGlow)"/>
+
+  <!-- Architectural Studio Horizon -->
+  <path d="M0 845 L1600 775 L1600 1100 L0 1100 Z" fill="#dce3cf" opacity="0.74"/>
+  <line x1="0" y1="845" x2="1600" y2="775" stroke="#bdc8ad" stroke-width="1.5"/>
+
+  <!-- Top Authentic Product Metadata Bar -->
+  <g fill="#4f604d" font-family="'Manrope', 'DM Sans', -apple-system, sans-serif" font-size="12.5" font-weight="800" letter-spacing="2.2">
+    <text x="64" y="56">HAMZA IDRISHI / BUILD_HAMZA · 01 / THE FIRST STEP</text>
+    <text x="1536" y="56" text-anchor="end">IDEA-TO-INCOME FIELDGUIDE · $5 USD ONE-TIME</text>
+  </g>
+  <line x1="64" y1="74" x2="1536" y2="74" stroke="#173b31" stroke-opacity="0.14" stroke-width="1"/>
+
+  <!-- ========================================================================= -->
+  <!-- LEFT FOCAL OBJECT: ACTUAL FIELDGUIDE COVER (PAGE 01 OF THE PDF)           -->
+  <!-- ========================================================================= -->
+  <g filter="url(#bookShadow)" transform="translate(0, 8)">
+    <!-- Book Page Block (Top & Right visible edges) -->
+    <path d="M204 128 L774 90 L798 104 L228 144 Z" fill="#f6f4e8" stroke="#d8d6c8" stroke-width="1"/>
+    <path d="M212 133 L780 95" stroke="#e2e0d2" stroke-width="1.5"/>
+    <path d="M220 138 L788 100" stroke="#dcd9ca" stroke-width="1.5"/>
+    <path d="M774 90 L798 104 L798 914 L774 902 Z" fill="#eae8da"/>
+
+    <!-- Book Spine (Left 3D Bevel) -->
+    <path d="M176 144 L226 142 L226 958 L176 944 Z" fill="url(#bookSpine)"/>
+    <line x1="212" y1="143" x2="212" y2="955" stroke="#d9f45b" stroke-opacity="0.3" stroke-width="1.5"/>
+
+    <!-- Main Front Hardcover Board -->
+    <path d="M224 142 L794 102 L794 918 L224 958 Z" fill="url(#bookCover)"/>
+
+    <!-- Inner Foil Frame -->
+    <path d="M250 168 L768 132 L768 890 L250 926 Z" stroke="#d9f45b" stroke-opacity="0.24" stroke-width="1.5" fill="none"/>
+
+    <!-- Cover Typography & Diagram (Matches Page 1 & Page 2 of first-product-fieldguide.pdf) -->
+    <g transform="translate(274, 204) skewY(-4.0)">
+      <!-- Top Author Header from Page 1 -->
+      <rect x="0" y="0" width="248" height="30" rx="4" fill="#d9f45b" fill-opacity="0.14" stroke="#d9f45b" stroke-opacity="0.45" stroke-width="1"/>
+      <circle cx="16" cy="15" r="4" fill="#d9f45b"/>
+      <text x="28" y="19" fill="#d9f45b" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.8">HAMZA IDRISHI / BUILD_HAMZA</text>
+      <text x="466" y="19" text-anchor="end" fill="#a8bfb1" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.5">$5 · 7-PAGE GUIDE</text>
+
+      <!-- Exact Product Title -->
+      <text x="0" y="88" fill="#f9f8f4" font-family="'Manrope', -apple-system, sans-serif" font-size="50" font-weight="800" letter-spacing="-1.4">Idea-to-Income</text>
+      <text x="0" y="148" fill="url(#goldLime)" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="54" font-weight="700">Fieldguide</text>
+
+      <!-- Exact Subtitle from Page 1 of the PDF -->
+      <text x="0" y="188" fill="#d6e2d9" font-family="'DM Sans', sans-serif" font-size="15.5" font-weight="500">A practical guide to choosing one useful problem, checking</text>
+      <text x="0" y="211" fill="#d6e2d9" font-family="'DM Sans', sans-serif" font-size="15.5" font-weight="500">demand, shaping a small offer, and testing a launch.</text>
+
+      <line x1="0" y1="234" x2="466" y2="234" stroke="#d9f45b" stroke-opacity="0.25" stroke-width="1"/>
+
+      <!-- Exact 3 Cover Milestones from Page 1 of the PDF -->
+      <g transform="translate(0, 254)">
+        <rect x="0" y="0" width="466" height="226" rx="8" fill="#0c221b" fill-opacity="0.6" stroke="#2c5949" stroke-width="1.2"/>
+        <line x1="0" y1="75" x2="466" y2="75" stroke="#23493c" stroke-dasharray="4 6"/>
+        <line x1="0" y1="150" x2="466" y2="150" stroke="#23493c" stroke-dasharray="4 6"/>
+
+        <!-- Trajectory Curve connecting the 3 exact milestones -->
+        <path d="M 42 184 C 125 178, 165 124, 226 114 C 292 104, 345 52, 418 44" fill="none" stroke="#d9f45b" stroke-width="3.2" stroke-linecap="round"/>
+
+        <!-- Milestone 01 -->
+        <circle cx="42" cy="184" r="10" fill="#14362c" stroke="#d9f45b" stroke-width="3"/>
+        <rect x="62" y="168" width="212" height="30" rx="5" fill="#163b30" stroke="#31614f" stroke-width="1"/>
+        <text x="74" y="188" fill="#d9f45b" font-family="'Manrope', sans-serif" font-size="12" font-weight="800">01</text>
+        <text x="98" y="188" fill="#f4f6ee" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700">Choose a real problem</text>
+
+        <!-- Milestone 02 -->
+        <circle cx="226" cy="114" r="10" fill="#14362c" stroke="#d9f45b" stroke-width="3"/>
+        <rect x="148" y="68" width="224" height="30" rx="5" fill="#163b30" stroke="#31614f" stroke-width="1"/>
+        <text x="160" y="88" fill="#d9f45b" font-family="'Manrope', sans-serif" font-size="12" font-weight="800">02</text>
+        <text x="184" y="88" fill="#f4f6ee" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700">Talk to potential users</text>
+
+        <!-- Milestone 03 -->
+        <circle cx="418" cy="44" r="13" fill="#d9f45b" fill-opacity="0.25"/>
+        <circle cx="418" cy="44" r="7.5" fill="#d9f45b"/>
+        <rect x="218" y="20" width="184" height="30" rx="5" fill="#d9f45b"/>
+        <text x="232" y="40" fill="#0d261f" font-family="'Manrope', sans-serif" font-size="12" font-weight="800">03</text>
+        <text x="256" y="40" fill="#0d261f" font-family="'Manrope', sans-serif" font-size="13" font-weight="800">Test a small launch</text>
+      </g>
+
+      <!-- Exact 6 Table-of-Contents Chapters from Page 2 of the PDF -->
+      <g transform="translate(0, 500)">
+        <text x="0" y="14" fill="#9cb5a5" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="800" letter-spacing="1.8">CONTENTS INSIDE THE GUIDE</text>
+        <text x="0" y="38" fill="#f2f5ea" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="600">01 Choose a narrow problem  ·  02 Check demand  ·  03 Draft with AI</text>
+        <text x="0" y="60" fill="#f2f5ea" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="600">04 Package &amp; publish  ·  05 Show work on Threads  ·  06 Launch experiment</text>
+      </g>
+
+      <!-- Exact Footer Note from Page 1 of the PDF -->
+      <g transform="translate(0, 590)">
+        <line x1="0" y1="0" x2="466" y2="0" stroke="#2c5748" stroke-width="1"/>
+        <circle cx="16" cy="28" r="16" fill="#d9f45b"/>
+        <text x="16" y="34" text-anchor="middle" fill="#102b23" font-family="Georgia, serif" font-size="16" font-weight="700">hi.</text>
+        <text x="44" y="24" fill="#f9f8f4" font-family="'Manrope', sans-serif" font-size="12.5" font-weight="700">A clear starting point for first-time creators.</text>
+        <text x="44" y="42" fill="#9bb3a3" font-family="'DM Sans', sans-serif" font-size="12">No sales or income promises · Online library reader</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- RIGHT FOCAL OBJECTS: ACTUAL INTERIOR SHEETS FROM THE FIELDGUIDE PDF       -->
+  <!-- ========================================================================= -->
+
+  <!-- SHEET A (TOP RIGHT): Page 03 "01 / CHOOSE" Worked Example & Idea Brief -->
+  <g filter="url(#sheetShadow)" transform="translate(825, 112) rotate(1.4)">
+    <rect x="0" y="0" width="695" height="415" rx="10" fill="url(#sheetPaper)" stroke="#cfd8c2" stroke-width="1.5"/>
+    <path d="M 0 10 Q 0 0 10 0 L 685 0 Q 695 0 695 10 L 695 12 L 0 12 Z" fill="#173b31"/>
+
+    <g transform="translate(36, 36)">
+      <text x="0" y="0" fill="#687862" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.8">01 / CHOOSE · WORKED EXAMPLE &amp; FILL-IN IDEA BRIEF</text>
+      <rect x="528" y="-15" width="95" height="22" rx="4" fill="#e9f2d5" stroke="#c3d898" stroke-width="1"/>
+      <text x="575.5" y="0" text-anchor="middle" fill="#1f4631" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="800">PAGE 03</text>
+
+      <text x="0" y="38" fill="#173b31" font-family="'Manrope', sans-serif" font-size="26" font-weight="800" letter-spacing="-0.7">Choose one narrow problem</text>
+      <text x="0" y="62" fill="#5e6b5b" font-family="'DM Sans', sans-serif" font-size="13.5">Name a specific person, a recurring task, and a concrete output.</text>
+
+      <!-- Worked Example Box: Tutor Worksheet Kit (Verbatim from Page 3) -->
+      <g transform="translate(0, 78)">
+        <rect x="0" y="0" width="623" height="122" rx="7" fill="#eef3e3" stroke="#cad8b4" stroke-width="1.2"/>
+        <text x="18" y="24" fill="#284e33" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.4">WORKED EXAMPLE / TUTOR WORKSHEET KIT</text>
+        <text x="18" y="48" fill="#173b31" font-family="'DM Sans', sans-serif" font-size="13.5"><tspan font-weight="700">Audience:</tspan> Independent English tutors preparing beginner lessons.</text>
+        <text x="18" y="72" fill="#173b31" font-family="'DM Sans', sans-serif" font-size="13.5"><tspan font-weight="700">Recurring task:</tspan> Formatting weekly practice worksheets takes time.</text>
+        <text x="18" y="96" fill="#173b31" font-family="'DM Sans', sans-serif" font-size="13.5"><tspan font-weight="700">Small first resource:</tspan> One editable worksheet + completed example &amp; instructions.</text>
+      </g>
+
+      <!-- Write Your Idea Brief (Verbatim from Page 3) -->
+      <g transform="translate(0, 218)">
+        <text x="0" y="14" fill="#173b31" font-family="'Manrope', sans-serif" font-size="15" font-weight="800">Write your idea brief</text>
+        <g transform="translate(0, 26)" font-family="'DM Sans', sans-serif" font-size="13" fill="#4f5e4d">
+          <text x="0" y="16" font-weight="600">My audience is:</text>
+          <line x1="190" y1="16" x2="623" y2="16" stroke="#c8d1bc" stroke-width="1.5"/>
+          <text x="0" y="44" font-weight="600">They struggle with this recurring task:</text>
+          <line x1="250" y1="44" x2="623" y2="44" stroke="#c8d1bc" stroke-width="1.5"/>
+          <text x="0" y="72" font-weight="600">Their current workaround is:</text>
+          <line x1="195" y1="72" x2="623" y2="72" stroke="#c8d1bc" stroke-width="1.5"/>
+          <text x="0" y="100" font-weight="600">My resource helps them produce:</text>
+          <line x1="220" y1="100" x2="623" y2="100" stroke="#c8d1bc" stroke-width="1.5"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- SHEET B (BOTTOM RIGHT): Page 04 "02 / RESEARCH" Five Useful Questions + Page 05 Prompts -->
+  <g filter="url(#sheetShadow)" transform="translate(805, 512) rotate(-1.1)">
+    <rect x="0" y="0" width="715" height="448" rx="10" fill="url(#sheetPaper)" stroke="#cfd8c2" stroke-width="1.5"/>
+    <path d="M 0 10 Q 0 0 10 0 L 705 0 Q 715 0 715 10 L 715 12 L 0 12 Z" fill="#6e8c42"/>
+
+    <g transform="translate(36, 36)">
+      <text x="0" y="0" fill="#687862" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.8">02 / RESEARCH · CHECK DEMAND BEFORE BUILDING</text>
+      <rect x="530" y="-15" width="112" height="22" rx="4" fill="#173b31"/>
+      <text x="586" y="0" text-anchor="middle" fill="#d9f45b" font-family="'Manrope', sans-serif" font-size="10.5" font-weight="800">PAGES 04–07</text>
+
+      <text x="0" y="36" fill="#173b31" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" letter-spacing="-0.6">Five useful questions for potential users</text>
+
+      <!-- The Exact 5 Questions from Page 4 of the PDF -->
+      <g transform="translate(0, 52)" font-family="'DM Sans', sans-serif" font-size="13.5" fill="#263c32">
+        <rect x="0" y="0" width="643" height="36" rx="5" fill="#f4f6ed" stroke="#dfe5d4"/>
+        <text x="14" y="23" fill="#5e7d37" font-family="'Manrope', sans-serif" font-weight="800">Q1</text>
+        <text x="44" y="23">When did this problem last happen? Walk me through it.</text>
+
+        <rect x="0" y="42" width="643" height="36" rx="5" fill="#f4f6ed" stroke="#dfe5d4"/>
+        <text x="14" y="65" fill="#5e7d37" font-family="'Manrope', sans-serif" font-weight="800">Q2</text>
+        <text x="44" y="65">How do you solve it now, and what is frustrating about that?</text>
+
+        <rect x="0" y="84" width="643" height="36" rx="5" fill="#f4f6ed" stroke="#dfe5d4"/>
+        <text x="14" y="107" fill="#5e7d37" font-family="'Manrope', sans-serif" font-weight="800">Q3</text>
+        <text x="44" y="107">How much time or money does the current process take?</text>
+
+        <rect x="0" y="126" width="643" height="36" rx="5" fill="#f4f6ed" stroke="#dfe5d4"/>
+        <text x="14" y="149" fill="#5e7d37" font-family="'Manrope', sans-serif" font-weight="800">Q4</text>
+        <text x="44" y="149">What have you tried or paid for already?</text>
+
+        <rect x="0" y="168" width="643" height="36" rx="5" fill="#f4f6ed" stroke="#dfe5d4"/>
+        <text x="14" y="191" fill="#5e7d37" font-family="'Manrope', sans-serif" font-weight="800">Q5</text>
+        <text x="44" y="191">Would you test this specific draft? What would make it worth buying?</text>
+      </g>
+
+      <!-- Plus Exact Sections 03, 04, 05, 06 Summary Strip -->
+      <g transform="translate(0, 272)">
+        <rect x="0" y="0" width="643" height="108" rx="8" fill="#173b31"/>
+        <text x="20" y="26" fill="#d9f45b" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" letter-spacing="1.5">ALSO INCLUDED IN PAGES 05–07 OF THE FIELDGUIDE</text>
+        <text x="20" y="52" fill="#ffffff" font-family="'DM Sans', sans-serif" font-size="13.5" font-weight="600">✓ 3 AI Prompts: Turn research into a scope · Create an outline · Draft &amp; review</text>
+        <text x="20" y="74" fill="#ffffff" font-family="'DM Sans', sans-serif" font-size="13.5" font-weight="600">✓ Listing Template, Publishing Checklist &amp; 3 Threads Post Starters</text>
+        <text x="20" y="95" fill="#b8ccb9" font-family="'Manrope', sans-serif" font-size="12" font-weight="700">✓ Launch Experiment: Track Views → Relevant Visits → Signups or Purchases</text>
+      </g>
+    </g>
+  </g>
+</svg>
