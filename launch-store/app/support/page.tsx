@@ -2,11 +2,13 @@ import Link from 'next/link';
 import {ArrowUpRight,BookOpen,Check,CreditCard,HelpCircle,KeyRound,Layers,Mail,MessageSquare,ShieldAlert} from 'lucide-react';
 import SiteHeader from '../site-header';
 import SiteFooter from '../site-footer';
+import {currentUser} from '@/lib/supabase/server';
 
 export const metadata={title:'Support — Hamza Idrishi'};
 
-export default function Page(){
+export default async function Page(){
  const email=process.env.SUPPORT_EMAIL;
+ const user=await currentUser();
  return (
   <div className="page-shell">
    <SiteHeader backHref="/" backLabel="Storefront"/>
@@ -30,9 +32,15 @@ export default function Page(){
       <Link className="button outline" href="/library">
        <BookOpen size={16}/> Open my library
       </Link>
-      <Link className="button outline" href="/login?mode=login">
-       <KeyRound size={16}/> Sign in / Reset password
-      </Link>
+      {user ? (
+       <Link className="button outline" href="/account/password">
+        <KeyRound size={16}/> Password settings
+       </Link>
+      ) : (
+       <Link className="button outline" href="/login?mode=login">
+        <KeyRound size={16}/> Sign in / Reset password
+       </Link>
+      )}
      </div>
     </section>
 

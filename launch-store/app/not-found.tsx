@@ -1,9 +1,11 @@
 import Link from 'next/link';
-import {ArrowLeft,BookOpen,Compass,LogIn} from 'lucide-react';
+import {ArrowLeft,BookOpen,Compass,KeyRound,LogIn} from 'lucide-react';
 import SiteHeader from './site-header';
 import SiteFooter from './site-footer';
+import {currentUser} from '@/lib/supabase/server';
 
-export default function NotFound(){
+export default async function NotFound(){
+ const user=await currentUser();
  return (
   <div className="page-shell">
    <SiteHeader/>
@@ -19,9 +21,15 @@ export default function NotFound(){
       <Link className="button outline" href="/library">
        <BookOpen size={16}/> Open my library
       </Link>
-      <Link className="button outline" href="/login?mode=login">
-       <LogIn size={16}/> Sign in
-      </Link>
+      {user ? (
+       <Link className="button outline" href="/account/password">
+        <KeyRound size={16}/> Password settings
+       </Link>
+      ) : (
+       <Link className="button outline" href="/login?mode=login">
+        <LogIn size={16}/> Sign in
+       </Link>
+      )}
      </div>
     </div>
    </main>

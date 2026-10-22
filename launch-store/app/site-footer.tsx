@@ -1,9 +1,15 @@
 import Link from 'next/link';
-import {ArrowUpRight} from 'lucide-react';
+import {ArrowUpRight,BookOpen,KeyRound,LayoutDashboard,LogIn,LogOut,UserPlus} from 'lucide-react';
 import BrandMark from './brand-mark';
 import {guide,studio,social} from '@/lib/catalog';
+import {currentUser} from '@/lib/supabase/server';
+import {isSalesAdmin} from '@/lib/platform-policy.mjs';
 
-export default function SiteFooter(){
+export default async function SiteFooter(){
+ const user=await currentUser();
+ const isLoggedIn=Boolean(user?.email);
+ const isAdmin=Boolean(user?.email&&isSalesAdmin(user.email));
+
  return (
   <footer className="site-footer-shell">
    <div className="footer wrap">
@@ -27,10 +33,31 @@ export default function SiteFooter(){
 
      <div className="footer-col">
       <h4>Your Account</h4>
-      <Link href="/login?mode=login">Sign in</Link>
-      <Link href="/login?mode=signup">Create account</Link>
-      <Link href="/library">My library</Link>
-      <Link href="/account/password">Password settings</Link>
+      {isLoggedIn ? (
+       <>
+        <span className="footer-user-pill" title={user?.email||''}>
+         <span className="header-user-dot" aria-hidden="true"/>
+         <span className="footer-user-email">{user?.email}</span>
+        </span>
+        <Link href="/library"><BookOpen size={13}/> My library</Link>
+        <Link href="/account/password"><KeyRound size={13}/> Password settings</Link>
+        {isAdmin && (
+         <Link href="/sales"><LayoutDashboard size={13}/> Sales dashboard</Link>
+        )}
+        <form action="/auth/logout" method="post" className="footer-logout-form">
+         <button type="submit" className="footer-logout-btn">
+          <LogOut size={13}/> Sign out
+         </button>
+        </form>
+       </>
+      ) : (
+       <>
+        <Link href="/login?mode=login"><LogIn size={13}/> Sign in</Link>
+        <Link href="/login?mode=signup"><UserPlus size={13}/> Create account</Link>
+        <Link href="/library">My library</Link>
+        <Link href="/account/password">Password settings</Link>
+       </>
+      )}
      </div>
 
      <div className="footer-col">
@@ -38,7 +65,7 @@ export default function SiteFooter(){
       <Link href="/support">Help & Support</Link>
       <Link href="/privacy">Privacy policy</Link>
       <Link href="/terms">Product terms</Link>
-      <Link href="/sales">Sales dashboard</Link>
+      {isAdmin && <Link href="/sales">Sales dashboard</Link>}
       <a href={social.threads} target="_blank" rel="noreferrer">Threads <ArrowUpRight size={13}/></a>
      </div>
     </div>
