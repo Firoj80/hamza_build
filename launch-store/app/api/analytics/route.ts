@@ -15,17 +15,34 @@ export async function POST(request:NextRequest){
   const secret=process.env.SUPABASE_SECRET_KEY;
   if(!secret)return json({error:'Analytics unavailable'},503);
   const forwarded=request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||request.headers.get('x-real-ip')||'unknown';
-  const rawHash=createHmac('sha256',secret).update(`${forwarded}|${request.headers.get('user-agent')||''}`).digest('hex');
+  const serverUa=request.headers.get('user-agent')||'';
+  const clientUa=typeof body?.userAgent==='string'?body.userAgent:'';
+  const rawHash=createHmac('sha256',secret).update(`${forwarded}|${serverUa||clientUa}`).digest('hex');
+  const rawSourceParam=typeof body?.source==='string'?body.source:'';
   const sourceKey=classifyTrafficSource({
-   sourceParam:typeof body?.source==='string'?body.source:'',
+   sourceParam:rawSourceParam!=='direct'?rawSourceParam:'',
+   search:typeof body?.search==='string'?body.search:'',
    referrer:typeof body?.referrer==='string'&&body.referrer?body.referrer:(request.headers.get('referer')||''),
+   userAgent:serverUa||clientUa,
    currentOrigin:request.nextUrl?.origin||''
   });
   const visitorHash=encodeVisitorHashWithSource(rawHash,sourceKey);
   const db=adminClient();
+  if(sourceKey!=='direct'){
+   const todayUtc=new Date().toISOString().slice(0,10);
+   const directHashV2=encodeVisitorHashWithSource(rawHash,'direct');
+   const directHashV1=`${rawHash.slice(0,58)}f7a900`;
+   await db
+    .from('site_pageviews')
+    .delete()
+    .eq('viewed_on',todayUtc)
+    .eq('path',path)
+    .in('visitor_hash',[directHashV2,directHashV1,rawHash]);
+  }
   const {error}=await db.rpc('record_site_pageview',{p_path:path,p_visitor_hash:visitorHash});
   if(error)return json({error:'Analytics unavailable'},503);
   return json({ok:true,source:sourceKey},201);
  }catch{return json({error:'Analytics unavailable'},503)}
 }
+
 

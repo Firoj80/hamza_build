@@ -65,7 +65,13 @@
 .snapshotTabs{display:inline-flex;align-items:center;gap:4px;background:#eef1ea;padding:3px;border-radius:999px}
 .snapshotTabs button{border:0;background:transparent;color:#4f5d54;border-radius:999px;padding:5px 10px;font:600 11px 'DM Sans',sans-serif;cursor:pointer}
 .snapshotPreview{margin:0;background:#fafbf8;border:1px solid #dce3d6;border-radius:11px;padding:13px 15px;font:500 12.5px/1.55 'DM Sans',sans-serif;color:#1d2925;white-space:pre-wrap;word-break:break-word}
-.trafficGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.trackedLinksBar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid #e4e8e1;border-radius:10px;padding:10px 13px}
+.trackedLinksLeft{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.trackedLinksLabel{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#284739}
+.trackedLinksBtns{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.trackedLinkBtn{display:inline-flex;align-items:center;gap:6px;border:1px solid #d5ddd2;background:#f7f9f5;color:#1d2925;border-radius:7px;padding:6px 10px;font:600 11.5px 'DM Sans',sans-serif;cursor:pointer}
+.trackedLinkBtn:hover{background:#eaf0e6;border-color:#b8c7b4}
+.trafficGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
 .trafficCard{background:#fff;border:1px solid #e4e8e1;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px;box-shadow:0 4px 16px #203c2906}
 .trafficTop{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;font-weight:700;color:#1d2925}
 .trafficCard strong{font-size:22px;letter-spacing:-.03em;color:#1d2925}

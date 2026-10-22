@@ -7,7 +7,8 @@ import ShareSnapshot from './share-snapshot';
 import CustomerAdmin,{type CustomerRecord,type PaymentExportRow} from './customer-admin';
 import DashboardShell from './dashboard-shell';
 import {isSalesAdmin} from '@/lib/platform-policy.mjs';
-import {TRAFFIC_SOURCES,decodeSourceFromVisitorHash} from '@/lib/traffic-source.mjs';
+import {configuredSiteOrigin} from '@/lib/payment-policy.mjs';
+import {TRAFFIC_SOURCES,resolvePageviewTrafficSource} from '@/lib/traffic-source.mjs';
 import styles from './sales.module.css';
 
 export const dynamic='force-dynamic';
@@ -95,7 +96,7 @@ export default async function Sales(){
  const totalViews=Math.max(allPageviews.length,analytics.total_visitors);
  const todayViews=Math.max(allPageviews.filter(p=>p.viewed_on===todayUtc).length,analytics.today_visitors);
  const trafficStatsAll=TRAFFIC_SOURCES.map(src=>{
-  const matching=allPageviews.filter(pv=>decodeSourceFromVisitorHash(pv.visitor_hash)===src.key);
+  const matching=allPageviews.filter(pv=>resolvePageviewTrafficSource(pv.visitor_hash)===src.key);
   const matchingToday=matching.filter(pv=>pv.viewed_on===todayUtc);
   const visitors=new Set(matching.map(pv=>pv.visitor_hash)).size;
   const todayVisitors=new Set(matchingToday.map(pv=>pv.visitor_hash)).size;
@@ -423,7 +424,7 @@ export default async function Sales(){
 
   <section className={styles.trafficSection}>
    <div className={styles.sectionTitle}>
-    <div><div className={styles.eyebrow}>TRAFFIC ATTRIBUTION · CHANNELS</div><h2>Traffic sources (Threads, X, Pinterest, Medium, Google & Direct)</h2></div>
+    <div><div className={styles.eyebrow}>TRAFFIC ATTRIBUTION · CHANNELS</div><h2>Traffic sources (Threads, X, Facebook, Pinterest, Medium, Google & Direct)</h2></div>
     <span>{totalViews.toLocaleString()} total views · {todayViews.toLocaleString()} today</span>
    </div>
    <div className={styles.trafficGrid}>
@@ -448,7 +449,7 @@ export default async function Sales(){
    <div className={styles.sectionTitle}>
     <div><div className={styles.eyebrow}>SHAREABLE SNAPSHOT · SOCIAL READY</div><h2>Copy Threads summary & product performance</h2></div>
    </div>
-   <ShareSnapshot text={shareText} templates={shareTemplates}/>
+   <ShareSnapshot text={shareText} templates={shareTemplates} siteOrigin={configuredSiteOrigin()}/>
    <div className={styles.tableWrap}><table className={`${styles.table} ${styles.shareTable}`}><thead><tr><th>Product</th><th>Visitors</th><th>Checkouts</th><th>Paid sales</th><th>Checkout conv.</th><th>Unrecovered</th><th>Collected</th></tr></thead><tbody>
     <tr>
      <td><strong>{studio.name}</strong><small>$9 · one-time</small></td>
@@ -476,7 +477,7 @@ export default async function Sales(){
    {rows.length===0?<p className={styles.empty}>No payments recorded yet. Completed Dodo checkouts will appear here.</p>:<div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Customer</th><th>Product</th><th>Date</th><th>Status</th><th>Amount charged</th></tr></thead><tbody>{rows.slice(0,20).map(row=><tr key={row.payment_id}><td><strong>{shortUser(row.user_id,emailMap)}</strong></td><td>{products[row.product_key]}</td><td>{date(row.updated_at)}</td><td><span className={`${styles.badge} ${styles[row.access_status]}`}>{row.access_status==='active'?'Paid':row.access_status==='pending'?'Pending':'Revoked'}</span></td><td>{money(row.amount_cents,row.currency)}</td></tr>)}</tbody></table></div>}
   </section>
 
-  <p className={styles.note}>Visitor counts deduplicate a browser/IP and product per day using a one-way token. Traffic sources automatically detect referrals from Threads, X, Pinterest, Medium, Google, and Direct visits (or ?utm_source=threads / x / pinterest / medium / google).{amountUnknown>0?' * '+amountUnknown+' legacy paid purchase(s) with unavailable amounts are excluded from collected totals.':''}</p>
+  <p className={styles.note}>Visitor counts deduplicate a browser/IP and product per day using a one-way token. Traffic sources automatically detect referrals, mobile in-app browsers, and click IDs (fbclid, twclid) from Threads, X, Facebook, Pinterest, Medium, Google, and Direct visits (or ?via=threads / x / fb).{amountUnknown>0?' * '+amountUnknown+' legacy paid purchase(s) with unavailable amounts are excluded from collected totals.':''}</p>
  </>;
 
  const funnelView=<>
