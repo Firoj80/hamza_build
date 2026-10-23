@@ -8,7 +8,6 @@ import {
 } from '@/lib/dodo';
 import { currentUser } from '@/lib/supabase/server';
 import { adminClient } from '@/lib/supabase/admin';
-import { ownedProducts } from '@/lib/access';
 import { trustedRequestOrigin, allowedCheckoutUrl } from '@/lib/payment-policy.mjs';
 import {
   findProductBySlugOrKey,
@@ -40,10 +39,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unknown product' }, { status: 400 });
     }
 
-    // Step 1: Fetch catalog product and current user in parallel
+    // Step 1: Fetch catalog product and optional signed-in user in parallel (guest checkout allowed!)
     const [catalogProduct, user] = await Promise.all([
       findProductBySlugOrKey(rawKey),
-      currentUser()
+      currentUser().catch(() => null)
     ]);
 
     if (!catalogProduct || catalogProduct.status === 'archived') {
@@ -51,12 +50,6 @@ export async function POST(request: NextRequest) {
     }
 
     const key = catalogProduct.key;
-    if (!user) {
-      return NextResponse.json(
-        { loginUrl: '/login?next=' + encodeURIComponent('/library?buy=' + key) },
-        { status: 401 }
-      );
-    }
 
     // Resolve user's preferred or geo-detected currency & country for Dodo Adaptive Checkout
     const headerCountry =
@@ -101,35 +94,14 @@ export async function POST(request: NextRequest) {
     }
 
     const admin = adminClient();
-    const since = new Date(Date.now() - 60 * 1000).toISOString();
-
-    // Step 2: Check ownership, rate limit, and Dodo product metadata in parallel
-    const [{ products: owned }, { count, error: limitError }, product] = await Promise.all([
-      ownedProducts(user),
-      admin
-        .from('platform_checkout_attempts')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', since),
-      retrieveDodoProductCached(productId)
-    ]);
-
-    if (owned.includes(key)) {
-      return NextResponse.json({ libraryUrl: '/library' });
-    }
-
-    if (limitError) throw new Error('Checkout service unavailable');
-    if ((count || 0) >= 5) {
-      return NextResponse.json(
-        { error: 'Please wait a minute before opening another checkout.' },
-        { status: 429 }
-      );
-    }
+    const product = await retrieveDodoProductCached(productId);
 
     const validCents =
       key === 'studio'
         ? Array.from(new Set([expectedCents, 900, 1900]))
-        : [expectedCents];
+        : key === 'bundle'
+          ? Array.from(new Set([expectedCents, 1200, 1400]))
+          : [expectedCents];
 
     if (
       product.price.type !== 'one_time_price' ||
@@ -146,7 +118,7 @@ export async function POST(request: NextRequest) {
     // Step 3: Record the checkout attempt and create the Dodo checkout session in parallel
     const recordAttemptTask = (async () => {
       let dbError: unknown = null;
-      if (isStandardKey && isStandardCents) {
+      if (user && isStandardKey && isStandardCents) {
         const res = await admin.from('platform_checkout_attempts').insert({
           id: attempt,
           user_id: user.id,
@@ -165,7 +137,7 @@ export async function POST(request: NextRequest) {
           });
           dbError = retry.error;
         }
-      } else {
+      } else if (user) {
         const directRes = await admin.from('platform_checkout_attempts').insert({
           id: attempt,
           user_id: user.id,
@@ -176,13 +148,14 @@ export async function POST(request: NextRequest) {
         dbError = directRes.error;
       }
 
-      if (!isStandardKey || !isStandardCents || dbError) {
+      if (!user || !isStandardKey || !isStandardCents || dbError) {
         await saveProductCatalogState((curr) => ({
           ...curr,
           customAttempts: [
             {
               id: attempt,
-              user_id: user.id,
+              user_id: user ? user.id : 'guest',
+              customer_email: user?.email?.toLowerCase() || undefined,
               product_key: key,
               provider_product_id: productId || 'unconfigured',
               expected_cents: expectedCents,
@@ -194,6 +167,9 @@ export async function POST(request: NextRequest) {
       }
     })();
 
+    const returnUrl = `${origin}/order?product=${encodeURIComponent(key)}&attempt=${encodeURIComponent(attempt)}`;
+    const customerPayload = user?.email ? { customer: { email: user.email } } : {};
+
     const createSessionTask = (async () => {
       const { client } = paymentConfig();
       const canPassBillingCurrency =
@@ -203,17 +179,18 @@ export async function POST(request: NextRequest) {
         try {
           const created = await client.checkoutSessions.create({
             product_cart: [{ product_id: productId, quantity: 1 }],
-            customer: { email: user.email! },
+            ...customerPayload,
             billing_currency: billingCurrency,
             billing_address: { country: billingCountry },
             feature_flags: {
               allow_currency_selection: true,
               allow_customer_editing_country: true
             },
-            return_url: origin + '/order',
+            return_url: returnUrl,
             metadata: {
               platform_attempt: attempt,
               product_key: key,
+              checkout_mode: user ? 'account' : 'guest',
               preferred_currency: billingCurrency,
               preferred_country: billingCountry
             }
@@ -228,16 +205,17 @@ export async function POST(request: NextRequest) {
       try {
         return await client.checkoutSessions.create({
           product_cart: [{ product_id: productId, quantity: 1 }],
-          customer: { email: user.email! },
+          ...customerPayload,
           billing_address: { country: billingCountry },
           feature_flags: {
             allow_currency_selection: true,
             allow_customer_editing_country: true
           },
-          return_url: origin + '/order',
+          return_url: returnUrl,
           metadata: {
             platform_attempt: attempt,
             product_key: key,
+            checkout_mode: user ? 'account' : 'guest',
             preferred_currency: billingCurrency,
             preferred_country: billingCountry
           }
@@ -245,11 +223,12 @@ export async function POST(request: NextRequest) {
       } catch {
         return await client.checkoutSessions.create({
           product_cart: [{ product_id: productId, quantity: 1 }],
-          customer: { email: user.email! },
-          return_url: origin + '/order',
+          ...customerPayload,
+          return_url: returnUrl,
           metadata: {
             platform_attempt: attempt,
-            product_key: key
+            product_key: key,
+            checkout_mode: user ? 'account' : 'guest'
           }
         });
       }
@@ -262,7 +241,12 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { url: session.checkout_url, currency: billingCurrency, country: billingCountry },
+      {
+        url: session.checkout_url,
+        currency: billingCurrency,
+        country: billingCountry,
+        guestCheckout: !user
+      },
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch {
@@ -275,4 +259,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

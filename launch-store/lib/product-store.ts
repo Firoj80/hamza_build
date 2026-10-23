@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { adminClient } from './supabase/admin';
 import { isSalesAdmin } from './platform-policy.mjs';
-import { guide, productDetails, studio } from './catalog';
+import { bundle, guide, productDetails, studio } from './catalog';
 
 export type ManagedProductSection = {
   title: string;
@@ -11,10 +11,10 @@ export type ManagedProductSection = {
 };
 
 export type ManagedProduct = {
-  key: string; // e.g. 'fieldguide', 'studio', or custom slug/key
+  key: string; // e.g. 'fieldguide', 'studio', 'bundle', or custom slug/key
   slug: string; // URL slug under /products/[slug]
   name: string;
-  price: number; // Price in USD dollars, e.g. 5, 9, 19
+  price: number; // Price in USD dollars, e.g. 5, 9, 12
   compareAtPrice?: number | null; // Optional original price for strikethrough
   currency: 'USD';
   status: 'active' | 'draft' | 'archived';
@@ -30,9 +30,9 @@ export type ManagedProduct = {
   badgeTheme: 'default' | 'green' | 'amber';
   cardTag: string; // e.g. '01 / THE FOUNDATION'
   ctaLabel: string; // e.g. 'Get the Fieldguide · $5'
-  formatNote: string; // e.g. '7-page fieldguide · Account access · Taxes shown at checkout'
+  formatNote: string; // e.g. 'Instant PDF download · No signup required'
   // Descriptions & SEO
-  shortDescription: string; // Shown on homepage & library cards
+  shortDescription: string; // Shown on homepage cards
   description: string; // Shown on product detail hero
   shareTitle: string;
   shareDescription: string;
@@ -44,7 +44,7 @@ export type ManagedProduct = {
   coverTheme: 'light' | 'dark';
   galleryImages: string[];
   // Lists & Sections
-  cardBullets: string[]; // 3-4 bullets on homepage & library card
+  cardBullets: string[]; // 3-4 bullets on homepage card
   includes: string[]; // 'What You Get' bullets on product detail page
   sections: ManagedProductSection[]; // 3 numbered stages on product detail page
   // Expectations & Cross-sell
@@ -53,7 +53,7 @@ export type ManagedProduct = {
   nextStep: string;
   nextHref: string;
   // Buyer Delivery / Access
-  deliveryType: 'fieldguide_reader' | 'studio_workspace' | 'hosted_reader' | 'external_url';
+  deliveryType: 'fieldguide_reader' | 'studio_workspace' | 'bundle_both' | 'hosted_reader' | 'external_url';
   readerHref: string; // '/fieldguide', '/studio', or '/products/<slug>/access'
   externalAccessUrl?: string; // Optional external Notion/Drive/Figma/Download link for buyers
   hostedContent?: string; // Markdown/text content shown to buyers on /products/<slug>/access
@@ -63,6 +63,7 @@ export type ManagedProduct = {
 export type CustomCheckoutAttempt = {
   id: string;
   user_id: string;
+  customer_email?: string;
   product_key: string;
   provider_product_id: string;
   expected_cents: number;
@@ -73,6 +74,8 @@ export type CustomPurchaseRecord = {
   payment_id: string;
   attempt_id: string;
   user_id: string;
+  customer_email?: string;
+  customer_name?: string;
   product_key: string;
   access_status: 'active' | 'pending' | 'revoked';
   provider_status: string;
@@ -111,9 +114,9 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     badgeTheme: 'default',
     cardTag: '01 / THE FOUNDATION',
     ctaLabel: 'Get the Fieldguide · $5',
-    formatNote: '7-page fieldguide · Account access · Taxes shown at checkout',
+    formatNote: 'Instant PDF download + Web reader · Direct checkout',
     shortDescription:
-      'A practical seven-page guide to finding one useful problem, checking demand, and planning your first launch.',
+      'A practical seven-page guide to finding one useful problem, checking real demand, and planning your first profitable launch.',
     description: productDetails['first-product-fieldguide'].description,
     shareTitle: productDetails['first-product-fieldguide'].shareTitle,
     shareDescription: productDetails['first-product-fieldguide'].shareDescription,
@@ -124,9 +127,9 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     coverTheme: 'light',
     galleryImages: [],
     cardBullets: [
-      'Five customer-research questions',
-      'A worked example and idea worksheet',
-      'AI prompts and a launch checklist'
+      'Instant downloadable 7-page PDF guide + online reader',
+      '15-point idea validation scorecard & 5 buyer research questions',
+      'Worked example, fill-in offer brief, AI prompts & launch checklist'
     ],
     includes: [...productDetails['first-product-fieldguide'].includes],
     sections: productDetails['first-product-fieldguide'].sections.map((s) => ({
@@ -148,7 +151,7 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     slug: studio.slug,
     name: productDetails['launchpad-studio'].name,
     price: productDetails['launchpad-studio'].price,
-    compareAtPrice: null,
+    compareAtPrice: 29,
     currency: 'USD',
     status: 'active',
     featured: true,
@@ -157,13 +160,13 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     dodoEnvVar: 'DODO_STUDIO_PRODUCT_ID',
     eyebrow: productDetails['launchpad-studio'].eyebrow,
     headline: productDetails['launchpad-studio'].headline,
-    badge: '$9 · FLAGSHIP WORKSPACE',
+    badge: '$9 · COMPLETE LAUNCH SYSTEM',
     badgeTheme: 'green',
-    cardTag: '02 / THE WORKSPACE',
+    cardTag: '02 / THE WORKSPACE + HTML APP',
     ctaLabel: 'Get Launchpad Studio · $9',
-    formatNote: 'Online workspace · Login required · Taxes shown at checkout',
+    formatNote: 'Instant HTML app download (use offline anytime) · Direct checkout',
     shortDescription:
-      'Your online workspace for turning a product idea into editable prompts, listing drafts, and a content plan.',
+      'Your complete 5-stage launch system: downloadable offline HTML app with 15-point idea scorecard, 8 AI prompt engines, 30 Threads post starters, and revenue calculator.',
     description: productDetails['launchpad-studio'].description,
     shareTitle: productDetails['launchpad-studio'].shareTitle,
     shareDescription: productDetails['launchpad-studio'].shareDescription,
@@ -174,9 +177,10 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     coverTheme: 'dark',
     galleryImages: [],
     cardBullets: [
-      '30 distinct, editable post starters',
-      'Your own links, notes and listing drafts',
-      'Scenario calculator and copyable plan'
+      'Downloadable standalone HTML app (works offline forever on any device)',
+      '15-Point Idea Scorecard + 8-Mode AI Master Prompt Builder',
+      '30-Day Threads Content Engine, Hook Swapper & Revenue Calculator',
+      '1-Click Markdown Launch Plan & JSON Project Backup export'
     ],
     includes: [...productDetails['launchpad-studio'].includes],
     sections: productDetails['launchpad-studio'].sections.map((s) => ({
@@ -188,6 +192,57 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     nextStep: productDetails['launchpad-studio'].nextStep,
     nextHref: productDetails['launchpad-studio'].nextHref,
     deliveryType: 'studio_workspace',
+    readerHref: '/studio',
+    externalAccessUrl: '',
+    hostedContent: '',
+    updatedAt: '2025-02-20T00:00:00.000Z'
+  },
+  {
+    key: 'bundle',
+    slug: bundle.slug,
+    name: productDetails['complete-creator-bundle'].name,
+    price: productDetails['complete-creator-bundle'].price,
+    compareAtPrice: 14,
+    currency: 'USD',
+    status: 'active',
+    featured: true,
+    sortOrder: 3,
+    dodoProductId: '',
+    dodoEnvVar: 'DODO_BUNDLE_PRODUCT_ID',
+    eyebrow: productDetails['complete-creator-bundle'].eyebrow,
+    headline: productDetails['complete-creator-bundle'].headline,
+    badge: '$12 · FULL BUNDLE (SAVE $2)',
+    badgeTheme: 'amber',
+    cardTag: '03 / COMPLETE BUNDLE · PDF + HTML',
+    ctaLabel: 'Get Complete Bundle · $12',
+    formatNote: 'Includes both the $5 Fieldguide PDF + $9 Launchpad Studio HTML app · Save $2',
+    shortDescription:
+      'Get both tools in one package: the 7-page Idea-to-Income Fieldguide PDF ($5) + the standalone Launchpad Studio 5-stage HTML app ($9) for $12.',
+    description: productDetails['complete-creator-bundle'].description,
+    shareTitle: productDetails['complete-creator-bundle'].shareTitle,
+    shareDescription: productDetails['complete-creator-bundle'].shareDescription,
+    image: productDetails['complete-creator-bundle'].image,
+    ogImage: productDetails['complete-creator-bundle'].ogImage,
+    imageAlt: productDetails['complete-creator-bundle'].imageAlt,
+    imageLabel: productDetails['complete-creator-bundle'].imageLabel,
+    coverTheme: 'dark',
+    galleryImages: [],
+    cardBullets: [
+      'Both files included: Idea-to-Income-Fieldguide.pdf ($5) + Launchpad-Studio.html ($9)',
+      '7-page validation framework + 24 niche blueprints & 15-point scorecard',
+      '8-Mode AI Master Prompt Studio + 30-Day Threads Content Engine',
+      'Save $2 with one-time checkout & instant dual-file download'
+    ],
+    includes: [...productDetails['complete-creator-bundle'].includes],
+    sections: productDetails['complete-creator-bundle'].sections.map((s) => ({
+      title: s.title,
+      body: s.body
+    })),
+    access: productDetails['complete-creator-bundle'].access,
+    limitation: productDetails['complete-creator-bundle'].limitation,
+    nextStep: productDetails['complete-creator-bundle'].nextStep,
+    nextHref: productDetails['complete-creator-bundle'].nextHref,
+    deliveryType: 'bundle_both',
     readerHref: '/studio',
     externalAccessUrl: '',
     hostedContent: '',
@@ -228,7 +283,7 @@ export function normalizeManagedProduct(
     badgeTheme: 'default' as const,
     cardTag: `0${index + 1} / DIGITAL PRODUCT`,
     ctaLabel: '',
-    formatNote: 'Digital access · One-time purchase · Taxes shown at checkout',
+    formatNote: 'Instant download · One-time purchase · Taxes shown at checkout',
     shortDescription: 'A focused resource designed to help you execute faster with clarity.',
     description: 'A practical resource to help you validate, build, and launch with clarity.',
     shareTitle: '',
@@ -242,12 +297,12 @@ export function normalizeManagedProduct(
     cardBullets: [
       'Actionable templates and frameworks',
       'Worked examples and step-by-step guidance',
-      'Instant access inside your personal library'
+      'Instant file download right after checkout'
     ],
     includes: [
       'Complete guide and structured templates',
       'Worked examples you can adapt immediately',
-      'Lifetime access inside your Hamza Idrishi account library'
+      'Instant download right after Dodo checkout'
     ],
     sections: [
       {
@@ -260,10 +315,10 @@ export function normalizeManagedProduct(
       },
       {
         title: 'Put it into action',
-        body: 'Access your resource anytime from your account library on desktop or mobile.'
+        body: 'Download and use your resource anytime on desktop or mobile.'
       }
     ],
-    access: 'Private access in your Hamza Idrishi account. One-time payment in USD. Open anytime through your library.',
+    access: 'Instant file download right after Dodo checkout. One-time payment in USD.',
     limitation: 'Provides structured frameworks, templates, and examples. Results depend on your execution and market validation.',
     nextStep: 'Looking for our full 5-stage workspace? Explore Launchpad Studio.',
     nextHref: '/products/launchpad-studio',
@@ -275,7 +330,7 @@ export function normalizeManagedProduct(
   };
 
   const key =
-    raw.key === 'fieldguide' || raw.key === 'studio'
+    raw.key === 'fieldguide' || raw.key === 'studio' || raw.key === 'bundle'
       ? raw.key
       : sanitizeSlug(typeof raw.key === 'string' && raw.key.trim() ? raw.key : raw.slug || raw.name || base.key) || base.key;
 
@@ -293,7 +348,9 @@ export function normalizeManagedProduct(
     Number.isFinite(Number(rawCompare)) &&
     Number(rawCompare) > price
       ? Math.round(Number(rawCompare) * 100) / 100
-      : null;
+      : key === 'bundle' && (rawCompare === undefined || rawCompare === null)
+        ? 14
+        : null;
 
   const status =
     raw.status === 'active' || raw.status === 'draft' || raw.status === 'archived'
@@ -313,14 +370,16 @@ export function normalizeManagedProduct(
       ? 'fieldguide_reader'
       : key === 'studio'
         ? 'studio_workspace'
-        : raw.deliveryType === 'external_url' || raw.deliveryType === 'hosted_reader'
-          ? raw.deliveryType
-          : base.deliveryType;
+        : key === 'bundle'
+          ? 'bundle_both'
+          : raw.deliveryType === 'external_url' || raw.deliveryType === 'hosted_reader' || raw.deliveryType === 'bundle_both'
+            ? raw.deliveryType
+            : base.deliveryType;
 
   const defaultReaderHref =
     key === 'fieldguide'
       ? '/fieldguide'
-      : key === 'studio'
+      : key === 'studio' || key === 'bundle'
         ? '/studio'
         : `/products/${slug}/access`;
 
@@ -380,13 +439,15 @@ export function normalizeManagedProduct(
           ? 'DODO_FIELDGUIDE_PRODUCT_ID'
           : key === 'studio'
             ? 'DODO_STUDIO_PRODUCT_ID'
-            : base.dodoEnvVar,
+            : key === 'bundle'
+              ? 'DODO_BUNDLE_PRODUCT_ID'
+              : base.dodoEnvVar,
     eyebrow: typeof raw.eyebrow === 'string' && raw.eyebrow.trim() ? raw.eyebrow.trim() : base.eyebrow,
     headline,
     badge:
       typeof raw.badge === 'string' && raw.badge.trim()
         ? raw.badge.trim()
-        : `$${price} · ${key === 'studio' ? 'FLAGSHIP WORKSPACE' : 'START HERE'}`,
+        : `$${price} · ${key === 'studio' ? 'FLAGSHIP WORKSPACE' : key === 'bundle' ? 'FULL BUNDLE (SAVE $2)' : 'START HERE'}`,
     badgeTheme,
     cardTag: typeof raw.cardTag === 'string' && raw.cardTag.trim() ? raw.cardTag.trim() : base.cardTag,
     ctaLabel:
@@ -394,7 +455,10 @@ export function normalizeManagedProduct(
         ? raw.ctaLabel.trim()
         : `Get ${name} · $${price}`,
     formatNote:
-      typeof raw.formatNote === 'string' && raw.formatNote.trim()
+      typeof raw.formatNote === 'string' &&
+      raw.formatNote.trim() &&
+      !raw.formatNote.includes('Login required') &&
+      !raw.formatNote.includes('7-page fieldguide · Account access')
         ? raw.formatNote.trim()
         : base.formatNote,
     shortDescription,
@@ -428,9 +492,12 @@ export function normalizeManagedProduct(
     includes,
     sections: sections.length > 0 ? sections : base.sections,
     access:
-      typeof raw.access === 'string' && raw.access.trim()
+      typeof raw.access === 'string' &&
+      raw.access.trim() &&
+      !raw.access.includes('No app ZIP or HTML download') &&
+      !raw.access.includes('Private seven-page reader in your Hamza Idrishi account')
         ? raw.access.trim()
-        : `Private access in your Hamza Idrishi account. One-time payment of $${price} USD. Open anytime through your library.`,
+        : base.access,
     limitation:
       typeof raw.limitation === 'string' && raw.limitation.trim()
         ? raw.limitation.trim()
@@ -710,7 +777,9 @@ export function resolveDodoProductId(
       ? 'DODO_FIELDGUIDE_PRODUCT_ID'
       : product.key === 'studio'
         ? 'DODO_STUDIO_PRODUCT_ID'
-        : '');
+        : product.key === 'bundle'
+          ? 'DODO_BUNDLE_PRODUCT_ID'
+          : '');
 
   if (envVarName && env[envVarName]?.trim()) {
     return {

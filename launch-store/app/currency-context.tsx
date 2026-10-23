@@ -238,7 +238,7 @@ export function PriceTag({
         <span>
           {q.currency} · pay once
           <br />
-          {q.isConverted && showUsdSubtext ? `≈ ${q.formattedUsdPrice} USD · Account access` : 'Account access'}
+          {q.isConverted && showUsdSubtext ? `≈ ${q.formattedUsdPrice} USD · Instant download` : 'Instant download'}
         </span>
       </div>
     );

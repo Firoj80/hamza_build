@@ -508,7 +508,8 @@ export default function ProductManagerAdmin({
           }}
         >
           {products.map((prod) => {
-            const isBuiltin = prod.key === 'fieldguide' || prod.key === 'studio';
+            const isBuiltin =
+              prod.key === 'fieldguide' || prod.key === 'studio' || prod.key === 'bundle';
             return (
               <article
                 key={prod.key}
@@ -1411,15 +1412,19 @@ export default function ProductManagerAdmin({
               </div>
               <p style={{ margin: '0 0 12px', fontSize: '12px', color: '#5c6861' }}>
                 {editingProduct.key === 'fieldguide'
-                  ? 'This product unlocks the interactive 7-page Fieldguide Reader (/fieldguide) in the customer library.'
+                  ? 'This product delivers the downloadable 7-page PDF (Idea-to-Income-Fieldguide.pdf) + online reader (/fieldguide) immediately after Dodo checkout.'
                   : editingProduct.key === 'studio'
-                    ? 'This product unlocks the interactive 5-stage Launchpad Studio Workspace (/studio) in the customer library.'
-                    : 'When a customer buys this product, they unlock its dedicated Buyer Access page (/products/' +
-                      (editingProduct.slug || 'slug') +
-                      '/access) in their personal library with the link and content below.'}
+                    ? 'This product delivers the standalone HTML app (Launchpad-Studio.html) + online 5-stage workspace (/studio) immediately after Dodo checkout.'
+                    : editingProduct.key === 'bundle'
+                      ? 'This bundle delivers BOTH the 7-page Fieldguide PDF (Idea-to-Income-Fieldguide.pdf) AND the standalone Launchpad Studio HTML app (Launchpad-Studio.html) immediately after $12 Dodo checkout.'
+                      : 'When a customer buys this product, they unlock its dedicated Buyer Access page (/products/' +
+                        (editingProduct.slug || 'slug') +
+                        '/access) with the link and content below.'}
               </p>
 
-              {editingProduct.key !== 'fieldguide' && editingProduct.key !== 'studio' && (
+              {editingProduct.key !== 'fieldguide' &&
+                editingProduct.key !== 'studio' &&
+                editingProduct.key !== 'bundle' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                   <label style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '12px', fontWeight: 600 }}>
                     <span>External Resource / Download / Notion / Drive Link for Buyers (Optional)</span>

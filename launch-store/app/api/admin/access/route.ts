@@ -32,43 +32,46 @@ export async function POST(request: NextRequest) {
 
   const db = adminClient();
   let targetUserId = typeof body.userId === 'string' ? body.userId.trim() : '';
-  const targetEmail =
+  let targetEmail =
     typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
 
-  if (!targetUserId && targetEmail) {
-    const { data: usersData, error: usersErr } = await db.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000
-    });
-    if (usersErr) {
-      return NextResponse.json({ error: 'Could not look up accounts' }, { status: 500 });
+  if (targetUserId.startsWith('dodo:') && !targetEmail) {
+    const remainder = targetUserId.slice(5);
+    if (remainder.includes('@')) {
+      targetEmail = remainder.toLowerCase();
     }
+  }
+
+  if ((!targetUserId || targetUserId.startsWith('dodo:')) && targetEmail) {
+    const { data: usersData } = await db.auth.admin
+      .listUsers({
+        page: 1,
+        perPage: 1000
+      })
+      .catch(() => ({ data: { users: [] } }));
     const found = (usersData?.users || []).find(
       (u) => (u.email || '').toLowerCase() === targetEmail
     );
-    if (!found) {
-      return NextResponse.json(
-        {
-          error: `No registered account found for ${targetEmail}. Ask them to sign in once first.`
-        },
-        { status: 404 }
-      );
+    if (found) {
+      targetUserId = found.id;
+    } else if (!targetUserId) {
+      targetUserId = `dodo:${targetEmail}`;
     }
-    targetUserId = found.id;
   }
 
-  if (!targetUserId) {
+  if (!targetUserId && !targetEmail) {
     return NextResponse.json(
-      { error: 'User ID or email is required' },
+      { error: 'Buyer ID or email is required' },
       { status: 400 }
     );
   }
 
+  const isSupabaseUser = Boolean(targetUserId && !targetUserId.startsWith('dodo:') && targetUserId !== 'guest');
   const isBuiltinKey = productKey === 'studio' || productKey === 'fieldguide';
 
   if (action === 'revoke') {
-    if (isBuiltinKey) {
-      const { error: revokeErr } = await db
+    if (isSupabaseUser && isBuiltinKey) {
+      await db
         .from('platform_purchases')
         .update({
           access_status: 'revoked',
@@ -77,22 +80,25 @@ export async function POST(request: NextRequest) {
         })
         .eq('user_id', targetUserId)
         .eq('product_key', productKey);
-      if (revokeErr) {
-        return NextResponse.json({ error: 'Could not revoke access' }, { status: 500 });
-      }
     }
     await saveProductCatalogState((curr) => ({
       ...curr,
-      customPurchases: curr.customPurchases.map((p) =>
-        p.user_id === targetUserId && p.product_key === productKey
+      customPurchases: curr.customPurchases.map((p) => {
+        const matchesUser =
+          (targetUserId && p.user_id === targetUserId) ||
+          (targetEmail && p.customer_email?.toLowerCase() === targetEmail);
+        const matchesProduct =
+          p.product_key === productKey ||
+          (p.product_key === 'bundle' && (productKey === 'studio' || productKey === 'fieldguide'));
+        return matchesUser && matchesProduct
           ? {
               ...p,
               access_status: 'revoked',
               provider_status: 'admin_revoked',
               updated_at: new Date().toISOString()
             }
-          : p
-      )
+          : p;
+      })
     }));
     return NextResponse.json({
       ok: true,
@@ -103,8 +109,8 @@ export async function POST(request: NextRequest) {
   }
 
   // action === 'grant'
-  const manualPaymentId = `manual_${productKey}_${targetUserId}`;
-  if (isBuiltinKey) {
+  const manualPaymentId = `manual_${productKey}_${targetEmail || targetUserId}`;
+  if (isSupabaseUser && isBuiltinKey) {
     const { data: existingManual } = await db
       .from('platform_purchases')
       .select('payment_id')
@@ -112,7 +118,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existingManual) {
-      const { error: updateErr } = await db
+      await db
         .from('platform_purchases')
         .update({
           access_status: 'active',
@@ -120,56 +126,36 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString()
         })
         .eq('payment_id', manualPaymentId);
-      if (updateErr) {
-        return NextResponse.json(
-          { error: 'Could not reactivate manual access' },
-          { status: 500 }
-        );
-      }
-      return NextResponse.json({
-        ok: true,
-        action: 'grant',
-        productKey,
-        userId: targetUserId
-      });
-    }
+    } else {
+      const expectedCents = productKey === 'studio' ? 900 : 500;
+      const { data: attempt, error: attemptErr } = await db
+        .from('platform_checkout_attempts')
+        .insert({
+          user_id: targetUserId,
+          product_key: productKey,
+          provider_product_id: 'admin_manual_grant',
+          expected_cents: expectedCents
+        })
+        .select('id')
+        .single();
 
-    const expectedCents = productKey === 'studio' ? 900 : 500;
-    const { data: attempt, error: attemptErr } = await db
-      .from('platform_checkout_attempts')
-      .insert({
-        user_id: targetUserId,
-        product_key: productKey,
-        provider_product_id: 'admin_manual_grant',
-        expected_cents: expectedCents
-      })
-      .select('id')
-      .single();
-
-    if (!attemptErr && attempt) {
-      const { error: purchaseErr } = await db.from('platform_purchases').insert({
-        payment_id: manualPaymentId,
-        attempt_id: attempt.id,
-        user_id: targetUserId,
-        product_key: productKey,
-        access_status: 'active',
-        provider_status: 'admin_granted',
-        amount_cents: 0,
-        currency: 'USD',
-        updated_at: new Date().toISOString()
-      });
-      if (!purchaseErr) {
-        return NextResponse.json({
-          ok: true,
-          action: 'grant',
-          productKey,
-          userId: targetUserId
+      if (!attemptErr && attempt) {
+        await db.from('platform_purchases').insert({
+          payment_id: manualPaymentId,
+          attempt_id: attempt.id,
+          user_id: targetUserId,
+          product_key: productKey,
+          access_status: 'active',
+          provider_status: 'admin_granted',
+          amount_cents: 0,
+          currency: 'USD',
+          updated_at: new Date().toISOString()
         });
       }
     }
   }
 
-  // Persist custom product grant in catalog store
+  // Persist grant in customPurchases so guest/Dodo buyers and bundle grants work seamlessly
   await saveProductCatalogState((curr) => {
     const filtered = curr.customPurchases.filter(
       (p) => p.payment_id !== manualPaymentId
@@ -179,8 +165,9 @@ export async function POST(request: NextRequest) {
       customPurchases: [
         {
           payment_id: manualPaymentId,
-          attempt_id: `manual_attempt_${productKey}_${targetUserId}`,
-          user_id: targetUserId,
+          attempt_id: `manual_attempt_${productKey}_${targetEmail || targetUserId}`,
+          user_id: targetUserId || `dodo:${targetEmail}`,
+          customer_email: targetEmail || undefined,
           product_key: productKey,
           access_status: 'active',
           provider_status: 'admin_granted',

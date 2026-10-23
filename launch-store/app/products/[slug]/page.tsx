@@ -2,14 +2,13 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowRight, ArrowUpRight, Check, LogIn, ShieldCheck, UserPlus } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, Download, Package } from 'lucide-react';
 import CheckoutButton from '@/app/checkout-button';
-import { guide, studio } from '@/lib/catalog';
+import { bundle, guide, studio } from '@/lib/catalog';
 import { findProductBySlugOrKey, getActiveCatalogProducts } from '@/lib/product-store';
 import StudioGallery from './studio-gallery';
 import SiteHeader from '@/app/site-header';
 import SiteFooter from '@/app/site-footer';
-import { currentUser } from '@/lib/supabase/server';
 import { PriceTag, LocalizedCtaText } from '@/app/currency-context';
 
 export const dynamic = 'force-dynamic';
@@ -61,20 +60,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const [product, allProducts, user] = await Promise.all([
+  const [product, allProducts] = await Promise.all([
     findProductBySlugOrKey(slug),
-    getActiveCatalogProducts(),
-    currentUser()
+    getActiveCatalogProducts()
   ]);
   if (!product || product.status === 'archived') notFound();
 
   const isGuide = product.key === 'fieldguide';
+  const isStudio = product.key === 'studio';
+  const isBundle = product.key === 'bundle' || product.deliveryType === 'bundle_both';
   const isLightCover = product.coverTheme === 'light';
+
+  const bundleCompanion = allProducts.find((p) => p.key === 'bundle');
   const companion =
+    (!isBundle && bundleCompanion) ||
     allProducts.find((p) => p.key !== product.key) ||
     (isGuide
-      ? { name: studio.name, price: studio.price, slug: studio.slug }
-      : { name: guide.name, price: guide.price, slug: guide.slug });
+      ? { name: bundle.name, price: bundle.price, slug: bundle.slug, key: 'bundle' }
+      : { name: guide.name, price: guide.price, slug: guide.slug, key: 'fieldguide' });
 
   return (
     <div className="product-detail-page">
@@ -99,37 +102,49 @@ export default async function ProductPage({ params }: Props) {
               mode="detail-hero"
             />
             <CheckoutButton product={product.key} usdPrice={product.price} className="button dark">
-              {product.ctaLabel || `Get ${product.name} access · $${product.price}`}
+              {product.ctaLabel || `Get ${product.name} · $${product.price}`}
             </CheckoutButton>
             <div className="detail-access">
-              <ShieldCheck size={16} />
-              {product.access}
+              <Download size={16} />
+              <span>
+                {isBundle
+                  ? 'Instant Dual Download: Idea-to-Income-Fieldguide.pdf ($5) + Launchpad-Studio.html ($9) · No login required.'
+                  : isGuide
+                    ? 'Instant PDF Download (Idea-to-Income-Fieldguide.pdf) + Web Reader · No login required.'
+                    : isStudio
+                      ? 'Instant HTML File Download (Launchpad-Studio.html — works offline forever) + Online Workspace · No login required.'
+                      : product.access}
+              </span>
             </div>
-            <div className="hero-account-bar">
-              {user ? (
-                <>
-                  <span className="hero-account-status">
-                    Signed in as <strong>{user.email}</strong>
-                  </span>
-                  <Link href="/library" className="hero-account-link">
-                    Check my library <ArrowUpRight size={14} />
+
+            {!isBundle && bundleCompanion ? (
+              <div className="hero-account-bar">
+                <span className="hero-account-status">
+                  <Package
+                    size={14}
+                    style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
+                  />
+                  Want both the <strong>$5 Fieldguide PDF</strong> and{' '}
+                  <strong>$9 Launchpad Studio HTML App</strong> together?
+                </span>
+                <div className="hero-account-links">
+                  <Link href={`/products/${bundleCompanion.slug}`} className="hero-account-link">
+                    Get the $12 Bundle (Save $2) <ArrowUpRight size={14} />
                   </Link>
-                </>
-              ) : (
-                <>
-                  <span className="hero-account-status">Already purchased?</span>
-                  <div className="hero-account-links">
-                    <Link href="/login?mode=login" className="hero-account-link">
-                      <LogIn size={14} /> Sign in
-                    </Link>
-                    <span>·</span>
-                    <Link href="/login?mode=signup" className="hero-account-link">
-                      <UserPlus size={14} /> Create account
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
+                </div>
+              </div>
+            ) : isBundle ? (
+              <div className="hero-account-bar">
+                <span className="hero-account-status">
+                  <Check
+                    size={14}
+                    style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
+                  />
+                  <strong>Both files unlocked immediately:</strong> Save $2 compared to buying the $5
+                  PDF and $9 HTML app separately.
+                </span>
+              </div>
+            ) : null}
           </div>
           <div
             className={`product-detail-visual ${isLightCover ? 'is-guide-cover' : 'is-studio-cover'}`}
@@ -144,26 +159,36 @@ export default async function ProductPage({ params }: Props) {
               priority
             />
             <p className="detail-image-note">
-              {isGuide
-                ? 'Editorial cover concept. Purchase access to open the interactive seven-page guide in your account library.'
-                : product.key === 'studio'
-                  ? 'Workspace cover showcase. Explore the five real working app screenshots in the interactive gallery below.'
-                  : `${product.name} showcase. Purchase access to unlock this resource inside your personal account library.`}
+              {isBundle
+                ? 'Instant delivery after checkout: download both the 7-page Fieldguide PDF and the standalone Launchpad-Studio.html app immediately.'
+                : isGuide
+                  ? 'Instant delivery after checkout: download the 7-page PDF file directly to your device or read online in your browser.'
+                  : isStudio
+                    ? 'Instant delivery after checkout: download the standalone Launchpad-Studio.html app to use offline anytime, plus access the online workspace.'
+                    : `${product.name} showcase. Purchase to unlock instant access.`}
             </p>
           </div>
         </section>
 
         <section className="detail-includes wrap">
           <div className="detail-section-heading">
-            <div className="eyebrow">WHAT YOU GET</div>
+            <div className="eyebrow">WHAT YOU RECEIVE IMMEDIATELY</div>
             <h2>
-              {isGuide
-                ? 'A small plan you can put to work.'
-                : 'A calmer way to organise the work.'}
+              {isBundle
+                ? 'Both the 7-page tactical PDF and the 5-stage HTML launch app.'
+                : isGuide
+                  ? 'A 7-page tactical PDF you can put to work today.'
+                  : 'A standalone HTML launch system you own forever.'}
             </h2>
             <p>
-              Built to help you take a useful next step, with clear limits and no
-              promised sales outcomes.
+              Zero registration or login wall. Complete your one-time purchase on Dodo Payments and
+              download your{' '}
+              {isBundle
+                ? 'PDF guide and HTML application files'
+                : isGuide
+                  ? 'PDF guide'
+                  : 'HTML application file'}{' '}
+              immediately on the confirmation screen.
             </p>
           </div>
           <ul>
@@ -176,7 +201,7 @@ export default async function ProductPage({ params }: Props) {
           </ul>
         </section>
 
-        {product.key === 'studio' && (
+        {(isStudio || isBundle) && (
           <div className="wrap">
             <StudioGallery />
           </div>
@@ -233,7 +258,7 @@ export default async function ProductPage({ params }: Props) {
           <div>
             <div className="eyebrow">GOOD TO KNOW</div>
             <h2>
-              Clear access.
+              Instant download.
               <br />
               <em>Honest expectations.</em>
             </h2>
@@ -243,13 +268,21 @@ export default async function ProductPage({ params }: Props) {
             <PriceTag
               usdPrice={product.price}
               productKey={product.key}
+              usdCompareAtPrice={product.compareAtPrice}
               mode="detail-aside"
             />
             <CheckoutButton product={product.key} usdPrice={product.price} className="button lime">
-              {`Get access · $${product.price}`}
+              {isBundle
+                ? `Get Complete Bundle (PDF + HTML) · $${product.price}`
+                : isGuide
+                  ? `Download the Fieldguide PDF · $${product.price}`
+                  : isStudio
+                    ? `Get Launchpad Studio (.HTML App) · $${product.price}`
+                    : `Get instant access · $${product.price}`}
             </CheckoutButton>
             <p>
-              Secure checkout · Account access · No monthly product subscription
+              No registration required · Instant{' '}
+              {isBundle ? 'PDF + HTML' : isGuide ? 'PDF' : 'HTML file'} download · One-time payment
             </p>
           </aside>
         </section>
