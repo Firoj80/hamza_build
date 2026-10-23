@@ -37,5 +37,8 @@ export const metadata:Metadata={
     description:'A seven-page fieldguide and a private online launch workspace. Built for first-time creators.',
     images:['/images/launchpad-studio-og.png'],
   },
+  other:{
+    'p:domain_verify':'8f5e5f223fcb46249353a2b8576fbd75',
+  },
 };
 export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body><AnalyticsTracker/>{children}</body></html>;}
