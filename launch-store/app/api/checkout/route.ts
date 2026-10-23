@@ -10,6 +10,12 @@ import {
   resolveDodoProductId,
   saveProductCatalogState
 } from '@/lib/product-store';
+import {
+  currencyForCountry,
+  getCurrencyInfo,
+  isSupportedCurrency
+} from '@/lib/currency';
+import type { CountryCode, Currency } from 'dodopayments/resources/misc';
 
 export const runtime = 'nodejs';
 
@@ -32,6 +38,35 @@ export async function POST(request: NextRequest) {
     const catalogProduct = await findProductBySlugOrKey(rawKey);
     if (!catalogProduct || catalogProduct.status === 'archived') {
       return NextResponse.json({ error: 'Unknown product' }, { status: 400 });
+    }
+
+    // Resolve user's preferred or geo-detected currency & country for Dodo Adaptive Checkout
+    const headerCountry =
+      request.headers.get('x-vercel-ip-country') ||
+      request.headers.get('cf-ipcountry') ||
+      request.headers.get('x-country-code') ||
+      '';
+    const geo = currencyForCountry(headerCountry);
+    let billingCurrency: Currency = geo.currency;
+    let billingCountry: CountryCode = geo.country;
+
+    const reqCountry = typeof body.country === 'string' ? body.country.trim().toUpperCase() : '';
+    if (/^[A-Z]{2}$/.test(reqCountry)) {
+      const mapped = currencyForCountry(reqCountry);
+      billingCountry = mapped.country;
+      billingCurrency = mapped.currency;
+    }
+
+    const reqCurrency =
+      typeof body.currency === 'string'
+        ? body.currency.trim().toUpperCase()
+        : request.cookies.get('launch_currency')?.value?.trim().toUpperCase() || '';
+
+    if (isSupportedCurrency(reqCurrency)) {
+      billingCurrency = reqCurrency;
+      if (!reqCountry) {
+        billingCountry = getCurrencyInfo(reqCurrency).defaultCountry;
+      }
     }
 
     const key = catalogProduct.key;
@@ -139,29 +174,50 @@ export async function POST(request: NextRequest) {
 
     if (
       product.price.type !== 'one_time_price' ||
-      product.price.currency !== 'USD' ||
-      !validCents.includes(product.price.price) ||
-      product.price.pay_what_you_want
+      product.price.pay_what_you_want ||
+      (product.price.currency === 'USD' && !validCents.includes(product.price.price))
     ) {
       throw new Error('Offer mismatch');
     }
 
-    const session = await client.checkoutSessions.create({
-      product_cart: [{ product_id: productId, quantity: 1 }],
-      customer: { email: user.email! },
-      return_url: origin + '/order',
-      metadata: {
-        platform_attempt: attempt,
-        product_key: key
-      }
-    });
+    let session;
+    try {
+      session = await client.checkoutSessions.create({
+        product_cart: [{ product_id: productId, quantity: 1 }],
+        customer: { email: user.email! },
+        billing_currency: billingCurrency,
+        billing_address: { country: billingCountry },
+        feature_flags: {
+          allow_currency_selection: true,
+          allow_customer_editing_country: true
+        },
+        return_url: origin + '/order',
+        metadata: {
+          platform_attempt: attempt,
+          product_key: key,
+          preferred_currency: billingCurrency,
+          preferred_country: billingCountry
+        }
+      });
+    } catch {
+      // Fallback if Dodo rejects a specific billing_currency or billing_address on the merchant's account
+      session = await client.checkoutSessions.create({
+        product_cart: [{ product_id: productId, quantity: 1 }],
+        customer: { email: user.email! },
+        return_url: origin + '/order',
+        metadata: {
+          platform_attempt: attempt,
+          product_key: key
+        }
+      });
+    }
 
     if (!session.checkout_url || !allowedCheckoutUrl(session.checkout_url)) {
       throw new Error('Invalid provider URL');
     }
 
     return NextResponse.json(
-      { url: session.checkout_url },
+      { url: session.checkout_url, currency: billingCurrency, country: billingCountry },
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch {

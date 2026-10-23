@@ -10,6 +10,7 @@ import StudioGallery from './studio-gallery';
 import SiteHeader from '@/app/site-header';
 import SiteFooter from '@/app/site-footer';
 import { currentUser } from '@/lib/supabase/server';
+import { PriceTag, LocalizedCtaText } from '@/app/currency-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,20 +92,13 @@ export default async function ProductPage({ params }: Props) {
               <em>{product.headline}</em>
             </h1>
             <p>{product.description}</p>
-            <div className="detail-price">
-              {product.compareAtPrice && product.compareAtPrice > product.price && (
-                <s style={{ fontSize: '20px', color: '#8a948d', marginRight: '8px' }}>
-                  ${product.compareAtPrice}
-                </s>
-              )}
-              <strong>${product.price}</strong>
-              <span>
-                {product.currency} · pay once
-                <br />
-                Account access
-              </span>
-            </div>
-            <CheckoutButton product={product.key} className="button dark">
+            <PriceTag
+              usdPrice={product.price}
+              productKey={product.key}
+              usdCompareAtPrice={product.compareAtPrice}
+              mode="detail-hero"
+            />
+            <CheckoutButton product={product.key} usdPrice={product.price} className="button dark">
               {product.ctaLabel || `Get ${product.name} access · $${product.price}`}
             </CheckoutButton>
             <div className="detail-access">
@@ -246,12 +240,13 @@ export default async function ProductPage({ params }: Props) {
             <p>{product.limitation}</p>
           </div>
           <aside>
-            <span className="detail-price">
-              <strong>${product.price}</strong>
-              <small>{product.currency} · one-time purchase</small>
-            </span>
-            <CheckoutButton product={product.key} className="button lime">
-              Get access · ${product.price}
+            <PriceTag
+              usdPrice={product.price}
+              productKey={product.key}
+              mode="detail-aside"
+            />
+            <CheckoutButton product={product.key} usdPrice={product.price} className="button lime">
+              {`Get access · $${product.price}`}
             </CheckoutButton>
             <p>
               Secure checkout · Account access · No monthly product subscription
@@ -265,7 +260,11 @@ export default async function ProductPage({ params }: Props) {
             <p>{product.nextStep}</p>
           </div>
           <Link href={product.nextHref || `/products/${companion.slug}`} className="text-link">
-            Explore {companion.name} · ${companion.price}
+            <LocalizedCtaText
+              label={`Explore ${companion.name} · $${companion.price}`}
+              usdPrice={companion.price}
+              productKey={'key' in companion ? companion.key : undefined}
+            />
             <ArrowRight size={16} />
           </Link>
         </section>

@@ -4,6 +4,7 @@ import BrandMark from './brand-mark';
 import {guide,studio,social} from '@/lib/catalog';
 import {currentUser} from '@/lib/supabase/server';
 import {isSalesAdmin} from '@/lib/platform-policy.mjs';
+import {LocalizedCtaText} from './currency-context';
 
 export default async function SiteFooter(){
  const user=await currentUser();
@@ -25,8 +26,8 @@ export default async function SiteFooter(){
     <div className="footer-links-grid">
      <div className="footer-col">
       <h4>The Collection</h4>
-      <Link href={guide.href}>Idea-to-Income Fieldguide · $5</Link>
-      <Link href={studio.href}>Launchpad Studio · $9</Link>
+      <Link href={guide.href}><LocalizedCtaText label={`Idea-to-Income Fieldguide · $${guide.price}`} usdPrice={guide.price} productKey="fieldguide"/></Link>
+      <Link href={studio.href}><LocalizedCtaText label={`Launchpad Studio · $${studio.price}`} usdPrice={studio.price} productKey="studio"/></Link>
       <Link href="/review">Rate &amp; Review a tool</Link>
       <Link href="/#inside">How the workflow fits</Link>
       <Link href="/#questions">Common questions</Link>

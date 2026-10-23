@@ -8,6 +8,7 @@ import {redirect} from 'next/navigation';
 import CheckoutButton from '../checkout-button';
 import BrandMark from '../brand-mark';
 import SiteFooter from '../site-footer';
+import {PriceTag,LocalizedCtaText} from '../currency-context';
 
 export const dynamic='force-dynamic';
 export const metadata={title:'Your library — Hamza Idrishi',robots:{index:false,follow:false}};
@@ -73,11 +74,13 @@ export default async function Library({searchParams}:{searchParams?:Promise<Reco
      <section className="order-box" style={{marginBottom:'24px',border:'2px solid #173b31',background:'#f4f8f2',display:'flex',alignItems:'center',justifyContent:'space-between',gap:'18px',flexWrap:'wrap'}}>
       <div>
        <div className="eyebrow" style={{marginBottom:'6px'}}><span/> STEP 2 OF 2 · ACCOUNT CONNECTED</div>
-       <h2 style={{margin:'0 0 6px',fontSize:'clamp(20px,2.4vw,26px)'}}>Continuing to your {selectedCatalogItem.name} (${selectedCatalogItem.price}) checkout…</h2>
+       <h2 style={{margin:'0 0 6px',fontSize:'clamp(20px,2.4vw,26px)'}}>
+        Continuing to your {selectedCatalogItem.name} (<PriceTag usdPrice={selectedCatalogItem.price} productKey={selectedCatalogItem.key} mode="inline" showUsdSubtext={false}/>) checkout…
+       </h2>
        <p style={{margin:0,color:'#4a5851',fontSize:'14px'}}>Your account (<strong>{user.email}</strong>) is ready. If Dodo checkout does not open automatically in a moment, click the button to continue.</p>
       </div>
-      <CheckoutButton product={selectedCatalogItem.key} autoStart className="button dark">
-       Continue to ${selectedCatalogItem.price} checkout
+      <CheckoutButton product={selectedCatalogItem.key} usdPrice={selectedCatalogItem.price} autoStart className="button dark">
+       {`Continue to $${selectedCatalogItem.price} checkout`}
       </CheckoutButton>
      </section>
     )}
@@ -116,7 +119,7 @@ export default async function Library({searchParams}:{searchParams?:Promise<Reco
           </span>
          ) : (
           <span className="library-status-pill locked">
-           <Lock size={13}/> ONE-TIME PURCHASE · ${p.price} USD
+           <Lock size={13}/> ONE-TIME PURCHASE · <LocalizedCtaText label={`$${p.price} USD`} usdPrice={p.price} productKey={p.key}/>
           </span>
          )}
         </div>
@@ -138,8 +141,8 @@ export default async function Library({searchParams}:{searchParams?:Promise<Reco
           </Link>
          ) : (
           <>
-           <CheckoutButton product={p.key} className="button dark">
-            Unlock {p.name} · ${p.price}
+           <CheckoutButton product={p.key} usdPrice={p.price} className="button dark">
+            {`Unlock ${p.name} · $${p.price}`}
            </CheckoutButton>
            <Link href={p.detailPath} className="library-detail-link">
             Preview what’s inside first <ArrowUpRight size={14}/>

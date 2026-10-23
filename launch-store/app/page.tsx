@@ -9,6 +9,7 @@ import SiteFooter from './site-footer';
 import {currentUser} from '@/lib/supabase/server';
 import {loadEmailStudioState} from '@/lib/email-reviews-store';
 import {getActiveCatalogProducts} from '@/lib/product-store';
+import {PriceTag,LocalizedCtaText} from './currency-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,13 @@ export default async function Home(){
   <a className="skip-link" href="#main">Skip to content</a>
   <div className="announcement">
    <span>A small first step can become something useful.</span>
-   <a href="#tools">{primaryProduct?`${primaryProduct.ctaLabel||`Get ${primaryProduct.name} · $${primaryProduct.price}`}`:'Get the Fieldguide · $5'} <ArrowRight size={13}/></a>
+   <a href="#tools">
+    <LocalizedCtaText
+     label={primaryProduct?`${primaryProduct.ctaLabel||`Get ${primaryProduct.name} · $${primaryProduct.price}`}`:'Get the Fieldguide · $5'}
+     usdPrice={primaryProduct?primaryProduct.price:5}
+     productKey={primaryProduct?primaryProduct.key:'fieldguide'}
+    /> <ArrowRight size={13}/>
+   </a>
   </div>
   <SiteHeader/>
   <main id="main">
@@ -35,7 +42,7 @@ export default async function Home(){
      <h1>Your first product.<br/>A clearer <em>way<br className="desktop-break"/> forward.</em></h1>
      <p>You don’t need another big idea.<br/>You need a small, useful one—and a plan to bring it to life.</p>
      <div className="hero-actions">
-      <CheckoutButton product={primaryProduct?primaryProduct.key:'fieldguide'} className="button dark">
+      <CheckoutButton product={primaryProduct?primaryProduct.key:'fieldguide'} usdPrice={primaryProduct?primaryProduct.price:5} className="button dark">
        {primaryProduct?primaryProduct.ctaLabel:`Get the Fieldguide · $5`}
       </CheckoutButton>
       <a className="text-link" href="#tools">Explore the tools <ArrowRight size={16}/></a>
@@ -109,12 +116,12 @@ export default async function Home(){
          <div className="product-number">{item.cardTag || `0${idx + 1} / DIGITAL TOOL`}</div>
          <div className="product-title">
           <Link href={href} className="product-title-link"><h3>{item.name}</h3></Link>
-          <span>
-           {item.compareAtPrice && item.compareAtPrice > item.price && (
-            <s style={{fontSize:'14px',color:'#8a948d',marginRight:'6px',fontWeight:500}}>${item.compareAtPrice}</s>
-           )}
-           ${item.price}<small>{item.currency} · pay once</small>
-          </span>
+          <PriceTag
+           usdPrice={item.price}
+           productKey={item.key}
+           usdCompareAtPrice={item.compareAtPrice}
+           mode="card"
+          />
          </div>
          <p>{item.shortDescription || item.description}</p>
          <ul>
@@ -123,7 +130,7 @@ export default async function Home(){
           ))}
          </ul>
          <Link href={href} className="product-detail-link">See everything inside <ArrowUpRight size={15}/></Link>
-         <CheckoutButton product={item.key} className={buttonStyle}>
+         <CheckoutButton product={item.key} usdPrice={item.price} className={buttonStyle}>
           {item.ctaLabel || `Get ${item.name} · $${item.price}`}
          </CheckoutButton>
          <small className="format-note">{item.formatNote}</small>
@@ -240,10 +247,17 @@ export default async function Home(){
     <div className="eyebrow">YOUR NEXT SMALL STEP</div>
     <h2>You don’t have to see<br/>the whole path to <em>begin.</em></h2>
     <p>Start with one person. One problem. One useful thing.</p>
-    <CheckoutButton product={primaryProduct?primaryProduct.key:'fieldguide'} className="button lime">
+    <CheckoutButton product={primaryProduct?primaryProduct.key:'fieldguide'} usdPrice={primaryProduct?primaryProduct.price:5} className="button lime">
      {primaryProduct?primaryProduct.ctaLabel:'Get the Fieldguide · $5'}
     </CheckoutButton>
-    <span>{primaryProduct?`One-time purchase · $${primaryProduct.price} USD.`:'Seven practical pages · $5 one-time purchase.'}</span>
+    <span>
+     One-time purchase ·{' '}
+     <PriceTag
+      usdPrice={primaryProduct?primaryProduct.price:5}
+      productKey={primaryProduct?primaryProduct.key:'fieldguide'}
+      mode="inline"
+     />.
+    </span>
    </section>
   </main>
   <SiteFooter/>

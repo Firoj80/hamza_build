@@ -486,7 +486,14 @@ export default function ProductManagerAdmin({
                 <strong style={{ display: 'block', color: '#173b31', marginBottom: '4px' }}>
                   Important Price Matching Rule
                 </strong>
-                For security, our checkout server verifies that your Dodo product is a <strong>One-Time purchase in USD</strong> and that the <strong>price in Dodo matches the price set on the product card</strong> (for example, if you set <strong>$15</strong> here, set <strong>$15.00 USD</strong> in Dodo Payments).
+                For security, our checkout server verifies that your Dodo product is a <strong>One-Time purchase</strong> and that the base USD price in Dodo matches the price set on the product card (for example, if you set <strong>$15</strong> here, set <strong>$15.00 USD</strong> in Dodo Payments).
+              </div>
+
+              <div style={{ background: '#fff', border: '1px solid #dce3d6', borderRadius: '10px', padding: '13px' }}>
+                <strong style={{ display: 'block', color: '#173b31', marginBottom: '4px' }}>
+                  Dodo Auto Currency Converter (Multi-Currency)
+                </strong>
+                Your storefront automatically detects each visitor’s country/currency (e.g., <code>INR ₹</code>, <code>EUR €</code>, <code>GBP £</code>, <code>CAD</code>, <code>AUD</code>), previews live converted prices via Dodo’s <code>checkoutSessions.preview</code> API, and passes <code>billing_currency</code> + <code>billing_address.country</code> into Dodo Checkout. To let Dodo charge in local currency at checkout, make sure <strong>Adaptive Currency / Pricing</strong> is toggled ON in your <strong>Dodo Dashboard → Settings → Business</strong>.
               </div>
             </div>
           </div>

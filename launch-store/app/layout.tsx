@@ -41,4 +41,5 @@ export const metadata:Metadata={
     'p:domain_verify':'8f5e5f223fcb46249353a2b8576fbd75',
   },
 };
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body><AnalyticsTracker/>{children}</body></html>;}
+import {CurrencyProvider} from './currency-context';
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body><CurrencyProvider><AnalyticsTracker/>{children}</CurrencyProvider></body></html>;}
