@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { CountryCode, Currency } from 'dodopayments/resources/misc';
-import { paymentConfig } from '@/lib/dodo';
+import {
+  isBillingCurrencyOverrideSupported,
+  markBillingCurrencyOverrideSupported,
+  paymentConfig
+} from '@/lib/dodo';
 import { getActiveCatalogProducts, resolveDodoProductId } from '@/lib/product-store';
 import {
   FALLBACK_USD_RATES,
@@ -112,7 +116,11 @@ export async function GET(request: NextRequest) {
     >();
     let dodoAdaptiveActive = false;
 
-    if (targetCurrency !== 'USD' && dodoProductMap.size > 0) {
+    if (
+      targetCurrency !== 'USD' &&
+      dodoProductMap.size > 0 &&
+      isBillingCurrencyOverrideSupported()
+    ) {
       try {
         const { client } = paymentConfig();
         const uniqueProductIds = Array.from(new Set(dodoProductMap.values()));
@@ -129,6 +137,7 @@ export async function GET(request: NextRequest) {
 
         if (preview && preview.currency === targetCurrency && Array.isArray(preview.product_cart)) {
           dodoAdaptiveActive = true;
+          markBillingCurrencyOverrideSupported(true);
           const currencyInfo = getCurrencyInfo(preview.currency);
           const divisor = currencyInfo.zeroDecimal ? 1 : 100;
           for (const cartItem of preview.product_cart) {
@@ -146,7 +155,7 @@ export async function GET(request: NextRequest) {
           }
         }
       } catch {
-        // Dodo preview unavailable or Adaptive Currency not enabled in Dodo Business settings; fall back to live FX rate
+        markBillingCurrencyOverrideSupported(false);
       }
     }
 

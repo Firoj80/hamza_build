@@ -5,8 +5,10 @@ import { loadProductCatalogState } from './product-store';
 
 export type ProductKey = 'studio' | 'fieldguide' | string;
 
-export async function ownedProducts() {
-  const user = await currentUser();
+export async function ownedProducts(
+  existingUser?: Awaited<ReturnType<typeof currentUser>>
+) {
+  const user = existingUser !== undefined ? existingUser : await currentUser();
   if (!user) return { user: null, products: [] as string[] };
   const db = await authClient();
   const [{ data, error }, catalogState] = await Promise.all([

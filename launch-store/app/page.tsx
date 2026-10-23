@@ -94,10 +94,25 @@ export default async function Home(){
    <section className="tools wrap section-space" id="tools">
     <div className="section-heading">
      <div>
-      <div className="eyebrow">THE STARTER COLLECTION</div>
+      <div className="eyebrow">PRODUCT CATALOG · DIGITAL STORE</div>
       <h2>{catalogProducts.length===2?'One idea. Two useful companions.':`One idea. ${catalogProducts.length} useful companions.`}</h2>
      </div>
      <p>Start with clarity. Add a workspace when<br/>you’re ready to organise the launch.</p>
+    </div>
+
+    <div className="catalog-listing-bar" aria-label="Store catalog summary">
+     <div className="catalog-listing-count">
+      <strong>{catalogProducts.length} Listed {catalogProducts.length === 1 ? 'Product' : 'Products'}</strong>
+      <span>·</span>
+      <span>Available for immediate account unlock</span>
+     </div>
+     <div className="catalog-listing-meta">
+      <span>Digital delivery</span>
+      <span>·</span>
+      <span>One-time payment</span>
+      <span>·</span>
+      <span>No subscription</span>
+     </div>
     </div>
 
     <div className="product-grid">
@@ -105,34 +120,85 @@ export default async function Home(){
       const href = `/products/${item.slug}`;
       const isDarkCover = item.coverTheme === 'dark';
       const isGreenBadge = item.badgeTheme === 'green';
-      const buttonStyle = idx === 0 && catalogProducts.length > 1 ? 'button outline' : 'button dark';
+      const isGuideProduct = item.key === 'fieldguide' || item.deliveryType === 'fieldguide_reader';
+      const isStudioProduct = item.key === 'studio' || item.deliveryType === 'studio_workspace';
+      const formatLabel = isGuideProduct
+       ? '7-Page Interactive Guide'
+       : isStudioProduct
+         ? '5-Stage Online Workspace'
+         : 'Digital Resource & Guide';
+      const deliverySpec = isGuideProduct
+       ? 'Web Reader'
+       : isStudioProduct
+         ? 'Web Application'
+         : 'Account Reader';
+
       return (
-       <article className="product-card" key={item.key}>
+       <article className={`product-card ${isStudioProduct ? 'is-featured-listing' : ''}`} key={item.key}>
+        <div className="product-listing-topbar">
+         <span className="product-number">{item.cardTag || `0${idx + 1} / DIGITAL PRODUCT`}</span>
+         <span className="product-listing-status">
+          {isStudioProduct ? 'FLAGSHIP WORKSPACE' : 'STARTER EDITION'} · IN STOCK
+         </span>
+        </div>
+
         <Link href={href} className={`product-photo ${isDarkCover ? 'cover-showcase-dark' : 'cover-showcase-light'}`} aria-label={`View ${item.name} details`}>
          <Image src={item.image} alt={item.imageAlt} width={1600} height={1100} unoptimized/>
          <span className={`product-badge ${isGreenBadge ? 'green' : ''}`}>{item.badge}</span>
+         <span className="product-photo-cta">View product page <ArrowUpRight size={14}/></span>
         </Link>
+
         <div className="product-body">
-         <div className="product-number">{item.cardTag || `0${idx + 1} / DIGITAL TOOL`}</div>
          <div className="product-title">
-          <Link href={href} className="product-title-link"><h3>{item.name}</h3></Link>
-          <PriceTag
-           usdPrice={item.price}
-           productKey={item.key}
-           usdCompareAtPrice={item.compareAtPrice}
-           mode="card"
-          />
+          <div className="product-title-group">
+           <span className="product-category-kicker">{formatLabel} · Instant Account Access</span>
+           <Link href={href} className="product-title-link"><h3>{item.name}</h3></Link>
+          </div>
+          <div className="product-price-box">
+           <PriceTag
+            usdPrice={item.price}
+            productKey={item.key}
+            usdCompareAtPrice={item.compareAtPrice}
+            mode="card"
+           />
+          </div>
          </div>
-         <p>{item.shortDescription || item.description}</p>
-         <ul>
-          {item.cardBullets.map((b) => (
-           <li key={b}><Check/>{b}</li>
-          ))}
-         </ul>
-         <Link href={href} className="product-detail-link">See everything inside <ArrowUpRight size={15}/></Link>
-         <CheckoutButton product={item.key} usdPrice={item.price} className={buttonStyle}>
-          {item.ctaLabel || `Get ${item.name} · $${item.price}`}
-         </CheckoutButton>
+
+         <p className="product-listing-summary">{item.shortDescription || item.description}</p>
+
+         <div className="product-includes-panel">
+          <div className="product-includes-label">Included in this product</div>
+          <ul>
+           {item.cardBullets.map((b) => (
+            <li key={b}><Check/><span>{b}</span></li>
+           ))}
+          </ul>
+         </div>
+
+         <div className="product-spec-strip" aria-label="Product specifications">
+          <div>
+           <small>FORMAT</small>
+           <strong>{deliverySpec}</strong>
+          </div>
+          <div>
+           <small>DELIVERY</small>
+           <strong>Account Library</strong>
+          </div>
+          <div>
+           <small>BILLING</small>
+           <strong>One-Time Buy</strong>
+          </div>
+         </div>
+
+         <div className="product-card-actions">
+          <CheckoutButton product={item.key} usdPrice={item.price} className="button dark">
+           {item.ctaLabel || `Get ${item.name} · $${item.price}`}
+          </CheckoutButton>
+          <Link href={href} className="product-detail-link">
+           <span>View full product details &amp; preview</span>
+           <ArrowUpRight size={15}/>
+          </Link>
+         </div>
          <small className="format-note">{item.formatNote}</small>
         </div>
        </article>

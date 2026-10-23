@@ -518,28 +518,57 @@ async function writeLocalFallback(state: ProductCatalogPersistedState): Promise<
   }
 }
 
-async function resolveAdminAnchorUserId(): Promise<{
+const CATALOG_CACHE_TTL_MS = 25 * 1000;
+const ADMIN_USER_CACHE_TTL_MS = 10 * 60 * 1000;
+
+let cachedCatalogState: ProductCatalogPersistedState | null = null;
+let cachedCatalogAt = 0;
+let cachedAdminUserId: string | null = null;
+let cachedAdminUserAt = 0;
+
+export function invalidateProductCatalogCache(): void {
+  cachedCatalogState = null;
+  cachedCatalogAt = 0;
+}
+
+async function resolveAdminAnchorUserId(
+  skipWorkspaceFetch = false
+): Promise<{
   db: ReturnType<typeof adminClient>;
   userId: string | null;
   existingWorkspaceState: Record<string, unknown>;
 }> {
   const db = adminClient();
-  const configuredAdminEmail = process.env.SALES_DASHBOARD_ADMIN_EMAIL;
-  const { data: usersData } = await db.auth.admin
-    .listUsers({ page: 1, perPage: 1000 })
-    .catch(() => ({ data: { users: [] } }));
-  const users = usersData?.users || [];
-  const adminUser =
-    users.find((u) => u.email && isSalesAdmin(u.email, configuredAdminEmail)) || users[0] || null;
+  const now = Date.now();
+  let userId = cachedAdminUserId;
 
-  if (!adminUser?.id) {
+  if (!userId || now - cachedAdminUserAt > ADMIN_USER_CACHE_TTL_MS) {
+    const configuredAdminEmail = process.env.SALES_DASHBOARD_ADMIN_EMAIL;
+    const { data: usersData } = await db.auth.admin
+      .listUsers({ page: 1, perPage: 200 })
+      .catch(() => ({ data: { users: [] } }));
+    const users = usersData?.users || [];
+    const adminUser =
+      users.find((u) => u.email && isSalesAdmin(u.email, configuredAdminEmail)) || users[0] || null;
+    userId = adminUser?.id || null;
+    if (userId) {
+      cachedAdminUserId = userId;
+      cachedAdminUserAt = now;
+    }
+  }
+
+  if (!userId) {
     return { db, userId: null, existingWorkspaceState: {} };
+  }
+
+  if (skipWorkspaceFetch) {
+    return { db, userId, existingWorkspaceState: {} };
   }
 
   const { data: wsRow } = await db
     .from('platform_workspace')
     .select('state')
-    .eq('user_id', adminUser.id)
+    .eq('user_id', userId)
     .maybeSingle();
 
   const existingWorkspaceState =
@@ -549,12 +578,23 @@ async function resolveAdminAnchorUserId(): Promise<{
 
   return {
     db,
-    userId: adminUser.id,
+    userId,
     existingWorkspaceState
   };
 }
 
-export async function loadProductCatalogState(): Promise<ProductCatalogPersistedState> {
+export async function loadProductCatalogState(options?: {
+  forceRefresh?: boolean;
+}): Promise<ProductCatalogPersistedState> {
+  const now = Date.now();
+  if (
+    !options?.forceRefresh &&
+    cachedCatalogState &&
+    now - cachedCatalogAt < CATALOG_CACHE_TTL_MS
+  ) {
+    return cachedCatalogState;
+  }
+
   try {
     const { userId, existingWorkspaceState } = await resolveAdminAnchorUserId();
     if (
@@ -562,38 +602,72 @@ export async function loadProductCatalogState(): Promise<ProductCatalogPersisted
       existingWorkspaceState[STATE_KEY] &&
       typeof existingWorkspaceState[STATE_KEY] === 'object'
     ) {
-      return normalizeCatalogState(
+      const normalized = normalizeCatalogState(
         existingWorkspaceState[STATE_KEY] as Partial<ProductCatalogPersistedState>
       );
+      cachedCatalogState = normalized;
+      cachedCatalogAt = Date.now();
+      return normalized;
     }
   } catch {
     // Fallback to local state if Supabase is not reachable
   }
   const local = await readLocalFallback();
-  return normalizeCatalogState(local);
+  const normalized = normalizeCatalogState(local);
+  cachedCatalogState = normalized;
+  cachedCatalogAt = Date.now();
+  return normalized;
 }
 
 export async function saveProductCatalogState(
   updater: (current: ProductCatalogPersistedState) => ProductCatalogPersistedState
 ): Promise<ProductCatalogPersistedState> {
-  const current = await loadProductCatalogState();
+  let dbInstance: ReturnType<typeof adminClient> | null = null;
+  let anchorUserId: string | null = null;
+  let existingWorkspaceState: Record<string, unknown> = {};
+  let current: ProductCatalogPersistedState;
+
+  try {
+    const resolved = await resolveAdminAnchorUserId();
+    dbInstance = resolved.db;
+    anchorUserId = resolved.userId;
+    existingWorkspaceState = resolved.existingWorkspaceState;
+    if (
+      anchorUserId &&
+      existingWorkspaceState[STATE_KEY] &&
+      typeof existingWorkspaceState[STATE_KEY] === 'object'
+    ) {
+      current = normalizeCatalogState(
+        existingWorkspaceState[STATE_KEY] as Partial<ProductCatalogPersistedState>
+      );
+    } else {
+      const local = await readLocalFallback();
+      current = cachedCatalogState || normalizeCatalogState(local);
+    }
+  } catch {
+    const local = await readLocalFallback();
+    current = cachedCatalogState || normalizeCatalogState(local);
+  }
+
   const next = normalizeCatalogState({
     ...updater(current),
     updatedAt: new Date().toISOString()
   });
 
+  cachedCatalogState = next;
+  cachedCatalogAt = Date.now();
+
   await writeLocalFallback(next);
 
   try {
-    const { db, userId, existingWorkspaceState } = await resolveAdminAnchorUserId();
-    if (userId) {
+    if (dbInstance && anchorUserId) {
       const mergedWorkspace = {
         ...existingWorkspaceState,
         [STATE_KEY]: next
       };
-      await db.from('platform_workspace').upsert(
+      await dbInstance.from('platform_workspace').upsert(
         {
-          user_id: userId,
+          user_id: anchorUserId,
           state: mergedWorkspace,
           updated_at: new Date().toISOString()
         },

@@ -42,4 +42,22 @@ export const metadata:Metadata={
   },
 };
 import {CurrencyProvider} from './currency-context';
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body><CurrencyProvider><AnalyticsTracker/>{children}</CurrencyProvider></body></html>;}
+export default function RootLayout({children}:{children:React.ReactNode}){
+  return (
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://checkout.dodopayments.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://checkout.dodopayments.com" />
+        <link rel="preconnect" href="https://test.checkout.dodopayments.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://test.checkout.dodopayments.com" />
+      </head>
+      <body>
+        <CurrencyProvider>
+          <AnalyticsTracker/>
+          {children}
+        </CurrencyProvider>
+      </body>
+    </html>
+  );
+}
+

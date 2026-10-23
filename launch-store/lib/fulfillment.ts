@@ -20,8 +20,12 @@ export async function reconcilePayment(paymentId: string, expectedUser?: string)
     .eq('id', attemptId)
     .maybeSingle();
 
-  const catalogState = await loadProductCatalogState();
-  const customAttempt = catalogState.customAttempts.find((a) => a.id === attemptId);
+  let catalogState = await loadProductCatalogState();
+  let customAttempt = catalogState.customAttempts.find((a) => a.id === attemptId);
+  if (!attempt && !customAttempt) {
+    catalogState = await loadProductCatalogState({ forceRefresh: true });
+    customAttempt = catalogState.customAttempts.find((a) => a.id === attemptId);
+  }
 
   const effectiveAttempt = customAttempt || attempt;
   if (!effectiveAttempt || (expectedUser && effectiveAttempt.user_id !== expectedUser)) {
