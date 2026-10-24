@@ -488,11 +488,20 @@ export function normalizeManagedProduct(
       typeof raw.shareDescription === 'string' && raw.shareDescription.trim()
         ? raw.shareDescription.trim()
         : description,
-    image: typeof raw.image === 'string' && raw.image.trim() ? raw.image.trim() : base.image,
+    image:
+      typeof raw.image === 'string' &&
+      raw.image.trim() &&
+      !(key === 'bundle' && raw.image.trim() === '/images/launchpad-studio-cover.svg')
+        ? raw.image.trim()
+        : base.image,
     ogImage:
-      typeof raw.ogImage === 'string' && raw.ogImage.trim()
+      typeof raw.ogImage === 'string' &&
+      raw.ogImage.trim() &&
+      !(key === 'bundle' && raw.ogImage.trim() === '/images/launchpad-studio-og.png')
         ? raw.ogImage.trim()
-        : typeof raw.image === 'string' && raw.image.trim()
+        : typeof raw.image === 'string' &&
+            raw.image.trim() &&
+            !(key === 'bundle' && raw.image.trim() === '/images/launchpad-studio-cover.svg')
           ? raw.image.trim()
           : base.ogImage,
     imageAlt:

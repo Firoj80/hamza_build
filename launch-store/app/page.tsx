@@ -1,8 +1,6 @@
 import Image from 'next/image';
 import {
   ArrowUpRight,
-  ArrowRight,
-  Check,
   MousePointer2,
   FileText,
   Layers,
@@ -10,8 +8,7 @@ import {
   ShieldCheck,
   Plus,
   Star,
-  Download,
-  Package
+  Download
 } from 'lucide-react';
 import StudioPreview from './studio-preview';
 import Link from 'next/link';
@@ -46,172 +43,116 @@ export default async function Home() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <div className="announcement">
-        <span>
-          <LocalizedCtaText
-            label="Launch Discount Active: Fieldguide $5 (Was $9) · Launchpad Studio $9 (Was $19) · Complete Bundle $12 (Was $25)"
-            usdPrice={12}
-            productKey="bundle"
-          />
-        </span>
-        <a href="#tools">
-          <LocalizedCtaText
-            label={
-              bundleProduct
-                ? 'Claim the $12 Bundle & Save $13 (52% Off)'
-                : primaryProduct
-                  ? `${primaryProduct.ctaLabel || `Get ${primaryProduct.name} · $${primaryProduct.price}`}`
-                  : 'Get the Fieldguide · $5 (Was $9)'
-            }
-            usdPrice={bundleProduct ? bundleProduct.price : primaryProduct ? primaryProduct.price : 5}
-            productKey={bundleProduct ? bundleProduct.key : primaryProduct ? primaryProduct.key : 'fieldguide'}
-          />{' '}
-          <ArrowRight size={13} />
-        </a>
-      </div>
       <SiteHeader />
       <main id="main">
-        <section className="hero wrap">
-          <div className="hero-copy">
-            <div className="eyebrow">
-              <span /> SMALL TOOLS. REAL PROGRESS.
+        {/* Gumroad-Style Creator Storefront Header */}
+        <header className="gr-storefront-header">
+          <div className="wrap gr-storefront-header-inner">
+            <div className="gr-storefront-brand">
+              <div className="gr-storefront-avatar" aria-hidden="true">
+                hi.
+              </div>
+              <div>
+                <h1 className="gr-storefront-title">Digital Products &amp; Creator Tools</h1>
+                <p className="gr-storefront-sub">
+                  Practical frameworks &amp; offline-ready tools to validate, build, and launch your first digital product.
+                </p>
+              </div>
             </div>
-            <h1>
-              Your first product.
-              <br />A clearer{' '}
-              <em>
-                way
-                <br className="desktop-break" /> forward.
-              </em>
-            </h1>
-            <p>
-              You don’t need a 40-hour course or another blank page.
-              <br />
-              Start with our 7-page{' '}
-              <strong>
-                <LocalizedCtaText
-                  label="Idea-to-Income Fieldguide PDF ($5, was $9)"
-                  usdPrice={5}
-                  productKey="fieldguide"
-                />
-              </strong>
-              , the complete{' '}
-              <strong>
-                <LocalizedCtaText
-                  label="Launchpad Studio HTML App ($9, was $19)"
-                  usdPrice={9}
-                  productKey="studio"
-                />
-              </strong>
-              , or grab the{' '}
-              <strong>
-                <LocalizedCtaText
-                  label="Complete Creator Bundle ($12, was $25)"
-                  usdPrice={12}
-                  productKey="bundle"
-                />
-              </strong>{' '}
-              and start shipping your first product today.
-            </p>
-            <div className="hero-actions">
-              <CheckoutButton
-                product={primaryProduct ? primaryProduct.key : 'fieldguide'}
-                usdPrice={primaryProduct ? primaryProduct.price : 5}
-                className="button dark"
-              >
-                {primaryProduct
-                  ? primaryProduct.ctaLabel
-                  : 'Get the Fieldguide · $5 (Was $9)'}
-              </CheckoutButton>
-              <a className="text-link" href="#tools">
-                <LocalizedCtaText
-                  label="Explore the $12 Bundle (Save $13)"
-                  usdPrice={12}
-                  productKey="bundle"
-                />{' '}
-                <ArrowRight size={16} />
-              </a>
-            </div>
-            <div className="hero-fine">
-              <Check size={14} />{' '}
+            <div className="gr-storefront-pill">
               <LocalizedCtaText
-                label="Limited-time launch pricing · Save up to 52% ($13 off the $25 Bundle)"
+                label="Launch Offer: Save up to 53% · Bundle $12 (Was $25)"
                 usdPrice={12}
                 productKey="bundle"
               />
             </div>
-            {bundleProduct && (
-              <div className="hero-account-bar">
-                <span className="hero-account-status">
-                  <Package
-                    size={14}
-                    style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
-                  />
-                  <strong>
-                    <LocalizedCtaText
-                      label="Best Value — $12 (Was $25):"
-                      usdPrice={12}
-                      productKey="bundle"
-                    />
-                  </strong>{' '}
-                  <LocalizedCtaText
-                    label="Get both the Fieldguide PDF ($5) + Launchpad Studio HTML App ($9) & save $13:"
-                    usdPrice={12}
-                    productKey="bundle"
-                  />
-                </span>
-                <div className="hero-account-links">
-                  <Link href={`/products/${bundleProduct.slug}`} className="hero-account-link">
-                    <LocalizedCtaText
-                      label="Claim $12 Bundle (Save $13)"
-                      usdPrice={12}
-                      productKey="bundle"
-                    />{' '}
-                    <ArrowUpRight size={14} />
-                  </Link>
-                </div>
-              </div>
-            )}
           </div>
-          <div className="hero-visual">
-            <div className="image-label">
-              <span className="mini-dot" /> INSTANT DOWNLOAD · USE ANYTIME ON ANY DEVICE
-            </div>
-            <div className="hero-cover-frame">
-              <Image
-                src={
-                  primaryProduct
-                    ? primaryProduct.image
-                    : '/images/idea-to-income-fieldguide-cover.svg'
-                }
-                alt={
-                  primaryProduct
-                    ? primaryProduct.imageAlt
-                    : 'Idea-to-Income Fieldguide hardcover monograph concept and customer validation scorecard sheet'
-                }
-                width={1600}
-                height={1100}
-                unoptimized
-                priority
-              />
-            </div>
-            <div className="visual-caption">
-              <span>
-                01 /{' '}
-                {primaryProduct
-                  ? primaryProduct.name.toUpperCase()
-                  : 'IDEA-TO-INCOME FIELDGUIDE'}
-              </span>
-              <span>INSTANT PDF DOWNLOAD + WEB READER</span>
-            </div>
-            <div className="floating-note">
-              <span className="note-star">✳</span>
-              <div>
-                A little less overthinking.
-                <br />
-                <b>A little more making.</b>
-              </div>
-            </div>
+        </header>
+
+        {/* Gumroad-Style Product Listing Grid */}
+        <section className="wrap gr-catalog-section" id="tools" aria-label="Products">
+          <div className="gr-product-grid">
+            {catalogProducts.map((item) => {
+              const href = `/products/${item.slug}`;
+              const isGuideProduct =
+                item.key === 'fieldguide' || item.deliveryType === 'fieldguide_reader';
+              const isStudioProduct =
+                item.key === 'studio' || item.deliveryType === 'studio_workspace';
+              const isBundleProduct =
+                item.key === 'bundle' || item.deliveryType === 'bundle_both';
+
+              const cardDisplayTitle = isGuideProduct
+                ? `${item.name}: 7-Page Validation & First Launch Guide (PDF)`
+                : isStudioProduct
+                  ? `${item.name}: 5-Stage Interactive Launch System (HTML App)`
+                  : isBundleProduct
+                    ? `${item.name}: Fieldguide PDF + Launchpad Studio HTML App`
+                    : `${item.name}: ${item.headline}`;
+
+              const thumbTag = isBundleProduct
+                ? '2-IN-1 BUNDLE'
+                : isStudioProduct
+                  ? 'HTML APP'
+                  : isGuideProduct
+                    ? '7-PAGE PDF'
+                    : 'DIGITAL TOOL';
+
+              const saveBadge =
+                item.compareAtPrice && item.compareAtPrice > item.price
+                  ? `SAVE ${Math.round(((item.compareAtPrice - item.price) / item.compareAtPrice) * 100)}%`
+                  : null;
+
+              return (
+                <article className="gr-product-card" key={item.key}>
+                  <Link
+                    href={href}
+                    className="gr-card-thumb"
+                    aria-label={`Open ${item.name} product page`}
+                  >
+                    <span className="gr-thumb-tag">{thumbTag}</span>
+                    {saveBadge && <span className="gr-thumb-save">{saveBadge}</span>}
+                    <Image
+                      src={item.image}
+                      alt={item.imageAlt}
+                      width={1200}
+                      height={1200}
+                      unoptimized
+                      priority
+                    />
+                  </Link>
+
+                  <div className="gr-card-body">
+                    <div>
+                      <Link href={href} className="gr-card-title-link">
+                        <h2 className="gr-card-title">{cardDisplayTitle}</h2>
+                      </Link>
+                      <p className="gr-card-subtitle">
+                        <LocalizedCtaText
+                          label={item.shortDescription || item.description}
+                          usdPrice={item.price}
+                          productKey={item.key}
+                        />
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="gr-card-footer">
+                    <Link
+                      href={href}
+                      className="gr-card-price-link"
+                      aria-label={`View ${item.name} details and pricing`}
+                    >
+                      <PriceTag
+                        usdPrice={item.price}
+                        productKey={item.key}
+                        usdCompareAtPrice={item.compareAtPrice}
+                        mode="gumroad-ribbon"
+                      />
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -227,259 +168,6 @@ export default async function Home() {
             <Layers size={17} /> One-time purchase · Own it forever
           </p>
         </div>
-
-        <section className="tools wrap section-space" id="tools">
-          <div className="section-heading">
-            <div>
-              <div className="eyebrow">PRODUCT CATALOG · LAUNCH DISCOUNT</div>
-              <h2>
-                {catalogProducts.length === 3
-                  ? 'Pick your starting tool. Or save 52% with the complete bundle.'
-                  : `One idea. ${catalogProducts.length} practical companions.`}
-              </h2>
-            </div>
-            <p>
-              Lock in our launch discount today and download your
-              <br />
-              tactical PDF or standalone offline HTML workspace immediately.
-            </p>
-          </div>
-
-          <div className="catalog-listing-bar" aria-label="Store catalog summary">
-            <div className="catalog-listing-count">
-              <strong>
-                {catalogProducts.length} Launch{' '}
-                {catalogProducts.length === 1 ? 'Offer' : 'Offers'}
-              </strong>
-              <span>·</span>
-              <span>Save up to 53% off original prices</span>
-            </div>
-            <div className="catalog-listing-meta">
-              <span>
-                <LocalizedCtaText
-                  label="Fieldguide $5 (Was $9)"
-                  usdPrice={5}
-                  productKey="fieldguide"
-                />
-              </span>
-              <span>·</span>
-              <span>
-                <LocalizedCtaText
-                  label="Studio $9 (Was $19)"
-                  usdPrice={9}
-                  productKey="studio"
-                />
-              </span>
-              <span>·</span>
-              <span>
-                <LocalizedCtaText
-                  label="Bundle $12 (Was $25)"
-                  usdPrice={12}
-                  productKey="bundle"
-                />
-              </span>
-            </div>
-          </div>
-
-          <div className="product-grid">
-            {catalogProducts.map((item, idx) => {
-              const href = `/products/${item.slug}`;
-              const isDarkCover = item.coverTheme === 'dark';
-              const isGreenBadge = item.badgeTheme === 'green' || item.badgeTheme === 'amber';
-              const isGuideProduct =
-                item.key === 'fieldguide' || item.deliveryType === 'fieldguide_reader';
-              const isStudioProduct =
-                item.key === 'studio' || item.deliveryType === 'studio_workspace';
-              const isBundleProduct =
-                item.key === 'bundle' || item.deliveryType === 'bundle_both';
-
-              const formatLabel = isBundleProduct
-                ? 'Complete 2-in-1 Bundle: PDF Guide + Offline HTML App'
-                : isGuideProduct
-                  ? '7-Page Tactical PDF + Web Reader'
-                  : isStudioProduct
-                    ? 'Standalone Offline HTML App + Workspace'
-                    : 'Digital Resource & Guide';
-              const deliverySpec = isBundleProduct
-                ? 'Both .PDF + .HTML'
-                : isGuideProduct
-                  ? 'PDF File + Reader'
-                  : isStudioProduct
-                    ? '.HTML App + Studio'
-                    : 'Instant Download';
-              const originalValueLabel = isBundleProduct
-                ? 'Was $25 · Now $12'
-                : isGuideProduct
-                  ? 'Was $9 · Now $5'
-                  : isStudioProduct
-                    ? 'Was $19 · Now $9'
-                    : `$${item.price}`;
-              const savingsLabel = isBundleProduct
-                ? 'Save $13 (52% Off)'
-                : isGuideProduct
-                  ? 'Save $4 (44% Off)'
-                  : isStudioProduct
-                    ? 'Save $10 (53% Off)'
-                    : 'Instant Access';
-
-              return (
-                <article
-                  className={`product-card ${
-                    isStudioProduct || isBundleProduct ? 'is-featured-listing' : ''
-                  }`}
-                  key={item.key}
-                >
-                  <div className="product-listing-topbar">
-                    <span className="product-number">
-                      {item.cardTag || `0${idx + 1} / DIGITAL PRODUCT`}
-                    </span>
-                    <span className="product-listing-status">
-                      <LocalizedCtaText
-                        label={
-                          isBundleProduct
-                            ? 'BEST VALUE · $12 (WAS $25 · SAVE $13)'
-                            : isStudioProduct
-                              ? 'LAUNCH OFFER · $9 (WAS $19 · SAVE $10)'
-                              : 'STARTER OFFER · $5 (WAS $9 · SAVE $4)'
-                        }
-                        usdPrice={item.price}
-                        productKey={item.key}
-                      />
-                    </span>
-                  </div>
-
-                  <Link
-                    href={href}
-                    className={`product-photo ${
-                      isDarkCover ? 'cover-showcase-dark' : 'cover-showcase-light'
-                    }`}
-                    aria-label={`View ${item.name} details`}
-                  >
-                    <Image
-                      src={item.image}
-                      alt={item.imageAlt}
-                      width={1600}
-                      height={1100}
-                      unoptimized
-                    />
-                    <span className={`product-badge ${isGreenBadge ? 'green' : ''}`}>
-                      <LocalizedCtaText
-                        label={item.badge}
-                        usdPrice={item.price}
-                        productKey={item.key}
-                      />
-                    </span>
-                    <span className="product-photo-cta">
-                      View product page <ArrowUpRight size={14} />
-                    </span>
-                  </Link>
-
-                  <div className="product-body">
-                    <div className="product-title">
-                      <div className="product-title-group">
-                        <span className="product-category-kicker">{formatLabel}</span>
-                        <Link href={href} className="product-title-link">
-                          <h3>{item.name}</h3>
-                        </Link>
-                      </div>
-                      <div className="product-price-box">
-                        <PriceTag
-                          usdPrice={item.price}
-                          productKey={item.key}
-                          usdCompareAtPrice={item.compareAtPrice}
-                          mode="card"
-                        />
-                      </div>
-                    </div>
-
-                    <p className="product-listing-summary">
-                      <LocalizedCtaText
-                        label={item.shortDescription || item.description}
-                        usdPrice={item.price}
-                        productKey={item.key}
-                      />
-                    </p>
-
-                    <div className="product-includes-panel">
-                      <div className="product-includes-label">
-                        Included with your instant download
-                      </div>
-                      <ul>
-                        {item.cardBullets.map((b) => (
-                          <li key={b}>
-                            <Check />
-                            <span>
-                              <LocalizedCtaText
-                                label={b}
-                                usdPrice={item.price}
-                                productKey={item.key}
-                              />
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="product-spec-strip" aria-label="Product specifications">
-                      <div>
-                        <small>FORMAT</small>
-                        <strong>{deliverySpec}</strong>
-                      </div>
-                      <div>
-                        <small>LAUNCH PRICE</small>
-                        <strong>
-                          <LocalizedCtaText
-                            label={originalValueLabel}
-                            usdPrice={item.price}
-                            productKey={item.key}
-                          />
-                        </strong>
-                      </div>
-                      <div>
-                        <small>YOUR DISCOUNT</small>
-                        <strong>
-                          <LocalizedCtaText
-                            label={savingsLabel}
-                            usdPrice={item.price}
-                            productKey={item.key}
-                          />
-                        </strong>
-                      </div>
-                    </div>
-
-                    <div className="product-card-actions">
-                      <CheckoutButton
-                        product={item.key}
-                        usdPrice={item.price}
-                        className="button dark"
-                      >
-                        {item.ctaLabel || `Get ${item.name} · $${item.price}`}
-                      </CheckoutButton>
-                      <Link href={href} className="product-detail-link">
-                        <span>View full product details &amp; preview</span>
-                        <ArrowUpRight size={15} />
-                      </Link>
-                    </div>
-                    <small className="format-note">
-                      <LocalizedCtaText
-                        label={item.formatNote}
-                        usdPrice={item.price}
-                        productKey={item.key}
-                      />
-                    </small>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-          <p className="mockup-note">
-            <LocalizedCtaText
-              label="Special launch pricing: Get the 7-page Fieldguide PDF for $5 (was $9), the standalone Launchpad Studio HTML app for $9 (was $19), or grab both together in the Complete Creator Bundle for $12 (was $25 — save $13)."
-              usdPrice={12}
-              productKey="bundle"
-            />
-          </p>
-        </section>
 
         <section className="process-section" id="inside">
           <div className="wrap section-space">
@@ -536,81 +224,62 @@ export default async function Home() {
           <section className="wrap section-space" id="reviews">
             <div className="section-heading">
               <div>
-                <div className="eyebrow">READER &amp; BUILDER NOTES · ★ {avgRating} / 5.0</div>
-                <h2>What early creators are saying.</h2>
+                <div className="eyebrow">VERIFIED CREATOR REVIEWS · ★ {avgRating} / 5.0 RATING</div>
+                <h2>
+                  Trusted by early creators
+                  <br />
+                  shipping their <em>first product.</em>
+                </h2>
               </div>
               <div>
                 <p style={{ marginBottom: '10px' }}>
-                  Real notes from readers and Launchpad Studio builders.
+                  <LocalizedCtaText
+                    label="Honest feedback from builders who used the $5 Fieldguide PDF, $9 Launchpad Studio HTML app, and $12 Complete Bundle."
+                    usdPrice={12}
+                    productKey="bundle"
+                  />
                 </p>
                 <Link className="text-link" href="/review">
                   Purchased a tool? Leave a rating &amp; review <ArrowUpRight size={16} />
                 </Link>
               </div>
             </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
-                gap: '18px'
-              }}
-            >
+            <div className="reviews-grid">
               {publishedReviews.slice(0, 3).map((rev) => (
-                <article
-                  key={rev.id}
-                  style={{
-                    background: '#fff',
-                    border: '1px solid #e2e7df',
-                    borderRadius: '16px',
-                    padding: '22px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px'
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '8px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', gap: '3px', color: '#d49b00' }}>
+                <article key={rev.id} className="review-card">
+                  <div className="review-card-top">
+                    <div className="review-stars" aria-label={`${rev.rating} out of 5 stars`}>
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star key={i} size={15} fill={i < rev.rating ? '#d49b00' : 'none'} />
                       ))}
                     </div>
                     {rev.verifiedBuyer && (
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          background: '#e7f3ea',
-                          color: '#285934',
-                          padding: '3px 9px',
-                          borderRadius: '999px'
-                        }}
-                      >
-                        Verified Buyer
-                      </span>
+                      <span className="review-verified-badge">Verified Buyer</span>
                     )}
                   </div>
-                  <h3 style={{ margin: 0, fontSize: '16.5px', lineHeight: 1.35, color: '#173b31' }}>
-                    {rev.headline}
+                  <h3 className="review-headline">
+                    <LocalizedCtaText
+                      label={rev.headline}
+                      usdPrice={rev.productKey === 'both' ? 12 : rev.productKey === 'studio' ? 9 : 5}
+                      productKey={rev.productKey === 'both' ? 'bundle' : rev.productKey}
+                    />
                   </h3>
-                  <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.55, color: '#4a5851', flex: 1 }}>
-                    {rev.comment}
+                  <p className="review-comment">
+                    <LocalizedCtaText
+                      label={rev.comment}
+                      usdPrice={rev.productKey === 'both' ? 12 : rev.productKey === 'studio' ? 9 : 5}
+                      productKey={rev.productKey === 'both' ? 'bundle' : rev.productKey}
+                    />
                   </p>
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: '#768178',
-                      paddingTop: '8px',
-                      borderTop: '1px solid #f0f2ee'
-                    }}
-                  >
-                    <strong>{rev.name}</strong> · {rev.role}
+                  <div className="review-author-footer">
+                    <strong>{rev.name}</strong>
+                    <span>
+                      <LocalizedCtaText
+                        label={rev.role}
+                        usdPrice={rev.productKey === 'both' ? 12 : rev.productKey === 'studio' ? 9 : 5}
+                        productKey={rev.productKey === 'both' ? 'bundle' : rev.productKey}
+                      />
+                    </span>
                   </div>
                 </article>
               ))}

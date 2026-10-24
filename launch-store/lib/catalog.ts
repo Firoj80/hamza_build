@@ -76,8 +76,8 @@ export const productDetails = {
     description: 'Get both the 7-page Idea-to-Income Fieldguide PDF ($9 original price) and the complete 5-stage Launchpad Studio HTML application ($19 original price) in one instant download package for $12—saving $13 off the $25 original price.',
     shareTitle: 'Complete Creator Launch Bundle ($12, was $25) — Fieldguide PDF + Launchpad Studio HTML App.',
     shareDescription: 'Save $13 off the $25 original price and get both tools immediately: the 7-page Idea-to-Income Fieldguide PDF + the standalone offline-ready Launchpad Studio HTML application.',
-    image: '/images/launchpad-studio-cover.svg',
-    ogImage: '/images/launchpad-studio-og.png',
+    image: '/images/complete-creator-bundle-cover.svg',
+    ogImage: '/complete-creator-bundle-dodo.png',
     imageAlt: 'Complete Creator Launch Bundle combining the Idea-to-Income Fieldguide PDF and Launchpad Studio HTML application',
     imageLabel: 'EDITION 03 · COMPLETE BUNDLE (PDF + HTML APP)',
     includes: [

@@ -76,9 +76,14 @@ function normalizeState(raw?: Partial<EmailStudioPersistedState> | null): EmailS
     ? raw!.sentLogs.filter((l) => l && typeof l.to === 'string').slice(0, 300)
     : [];
 
-  const reviews = Array.isArray(raw?.reviews) && raw!.reviews.length > 0
-    ? raw!.reviews.filter((r) => r && typeof r.comment === 'string').slice(0, 200)
-    : INITIAL_PRODUCT_REVIEWS;
+  const seedMap = new Map(INITIAL_PRODUCT_REVIEWS.map((s) => [s.id, s]));
+  const reviews =
+    Array.isArray(raw?.reviews) && raw!.reviews.length > 0
+      ? raw!.reviews
+          .filter((r) => r && typeof r.comment === 'string')
+          .map((r) => (seedMap.has(r.id) ? { ...seedMap.get(r.id)!, published: r.published ?? true } : r))
+          .slice(0, 200)
+      : INITIAL_PRODUCT_REVIEWS;
 
   return {
     templates: mergedTemplates,

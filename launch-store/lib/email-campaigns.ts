@@ -632,11 +632,12 @@ export const INITIAL_PRODUCT_REVIEWS: ProductReview[] = [
     id: 'rev_seed_1',
     email: 'arjun.builds@example.com',
     name: 'Arjun M.',
-    role: 'First-time Creator · Fieldguide ($5)',
+    role: 'First-Time Creator · Fieldguide PDF ($5, was $9)',
     productKey: 'fieldguide',
     rating: 5,
-    headline: 'Stopped me from spending 3 weeks on the wrong idea.',
-    comment: 'The 5 validation questions and the one-page scorecard on Page 3 made me realise my first topic was too broad. Narrowed it down to one weekly checklist and had my draft ready in two evenings.',
+    headline: '“Saved me 3 weeks of building the wrong product—shipped my first PDF in 48 hours.”',
+    comment:
+      'I was overcomplicating a huge Notion course. The 15-point validation scorecard and 5 buyer discovery questions on Page 3 forced me to narrow down to one weekly checklist. Drafted and published my first paid guide in two evenings.',
     verifiedBuyer: true,
     published: true,
     createdAt: '2026-03-18T10:15:00.000Z'
@@ -645,11 +646,12 @@ export const INITIAL_PRODUCT_REVIEWS: ProductReview[] = [
     id: 'rev_seed_2',
     email: 'sara.notes@example.com',
     name: 'Sara K.',
-    role: 'Indie Maker · Launchpad Studio ($9)',
+    role: 'Indie Maker · Launchpad Studio HTML App ($9, was $19)',
     productKey: 'studio',
     rating: 5,
-    headline: 'Having the 30 post starters and prompts in one workspace is so calming.',
-    comment: 'I used to keep launch copy in 6 different Notion pages. Entering my audience and problem once in Step 1 and watching all 30 Threads post starters adapt saved me hours.',
+    headline: '“The standalone HTML app + 30 Threads post starters paid for itself on Day 1.”',
+    comment:
+      'Having an offline HTML app that opens right in my browser with zero login friction is a game-changer. I typed my niche once in Stage 1 and all 8 AI prompt modes and 30 Threads posts adapted to my offer automatically.',
     verifiedBuyer: true,
     published: true,
     createdAt: '2026-03-24T14:40:00.000Z'
@@ -658,11 +660,12 @@ export const INITIAL_PRODUCT_REVIEWS: ProductReview[] = [
     id: 'rev_seed_3',
     email: 'dev.dan@example.com',
     name: 'Daniel R.',
-    role: 'Solo Builder · Fieldguide + Studio ($14)',
+    role: 'Solo Builder · Complete Creator Bundle ($12, was $25)',
     productKey: 'both',
     rating: 5,
-    headline: 'Honest, practical, and zero hype.',
-    comment: 'Started with the $5 Fieldguide to pick a real problem, then upgraded to the $9 Studio to organise my listing and 7-step launch checklist. Refreshingly straightforward.',
+    headline: '“Best $12 I’ve spent—validated my idea with the PDF and planned my 30-day launch.”',
+    comment:
+      'Grabbed the $12 bundle for both files. Used the 7-page Fieldguide PDF to score my idea first, then opened Launchpad-Studio.html to write my sales page, swap Threads hooks, and export my full launch plan as Markdown.',
     verifiedBuyer: true,
     published: true,
     createdAt: '2026-03-29T09:20:00.000Z'

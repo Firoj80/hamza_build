@@ -212,7 +212,7 @@ export function PriceTag({
   productKey?: string;
   usdCompareAtPrice?: number | null;
   showUsdSubtext?: boolean;
-  mode?: 'card' | 'detail-hero' | 'detail-aside' | 'inline';
+  mode?: 'card' | 'gumroad-ribbon' | 'detail-hero' | 'detail-aside' | 'inline';
 }) {
   const { getQuote, formatUsdPrice } = useCurrency();
   const q = getQuote(usdPrice, productKey, usdCompareAtPrice);
@@ -235,6 +235,22 @@ export function PriceTag({
       : 0;
   const saveUsd = hasDiscount && usdCompareAtPrice ? Math.round(usdCompareAtPrice - usdPrice) : 0;
   const formattedSaveAmount = hasDiscount ? formatUsdPrice(saveUsd) : '';
+
+  if (mode === 'gumroad-ribbon') {
+    return (
+      <span className="gr-price-row">
+        <span className="gr-price-ribbon">
+          <span className="gr-price-current">{q.formattedPrice}</span>
+        </span>
+        {hasDiscount && (
+          <span className="gr-price-compare-group">
+            <s className="gr-price-original">{q.formattedCompareAtPrice}</s>
+            <span className="gr-price-off">-{savePercent}%</span>
+          </span>
+        )}
+      </span>
+    );
+  }
 
   if (mode === 'detail-hero') {
     return (
