@@ -16,11 +16,17 @@ export default async function SiteFooter() {
         <div className="footer-brand-col">
           <BrandMark href="/" className="wordmark" icon />
           <p>
-            Small, practical tools for people making their first useful digital product. Direct
-            one-time checkout with instant PDF &amp; HTML file delivery—no account signup required.
+            Small, practical tools for people making their first useful digital product. Grab individual
+            tools or save 52% with the Complete Creator Launch Bundle.
           </p>
           <div className="footer-trust-pills">
-            <span>Pay once · No subscription</span>
+            <span>
+              <LocalizedCtaText
+                label="Launch Offer: Save up to 53%"
+                usdPrice={12}
+                productKey="bundle"
+              />
+            </span>
             <span>Instant PDF &amp; HTML download</span>
           </div>
         </div>
@@ -30,21 +36,21 @@ export default async function SiteFooter() {
             <h4>The Collection</h4>
             <Link href={guide.href}>
               <LocalizedCtaText
-                label={`Idea-to-Income Fieldguide · $${guide.price}`}
+                label={`Idea-to-Income Fieldguide · $${guide.price} (Was $${guide.compareAtPrice})`}
                 usdPrice={guide.price}
                 productKey="fieldguide"
               />
             </Link>
             <Link href={studio.href}>
               <LocalizedCtaText
-                label={`Launchpad Studio · $${studio.price}`}
+                label={`Launchpad Studio · $${studio.price} (Was $${studio.compareAtPrice})`}
                 usdPrice={studio.price}
                 productKey="studio"
               />
             </Link>
             <Link href={bundle.href}>
               <LocalizedCtaText
-                label={`Complete Creator Bundle · $${bundle.price} (Save $2)`}
+                label={`Complete Creator Bundle · $${bundle.price} (Was $${bundle.compareAtPrice})`}
                 usdPrice={bundle.price}
                 productKey="bundle"
               />
@@ -56,13 +62,28 @@ export default async function SiteFooter() {
           <div className="footer-col">
             <h4>Instant Delivery</h4>
             <Link href={guide.href}>
-              <Download size={13} /> Fieldguide (.PDF File)
+              <Download size={13} />{' '}
+              <LocalizedCtaText
+                label={`Fieldguide PDF · $${guide.price} (Save $4)`}
+                usdPrice={guide.price}
+                productKey="fieldguide"
+              />
             </Link>
             <Link href={studio.href}>
-              <Download size={13} /> Launchpad Studio (.HTML App)
+              <Download size={13} />{' '}
+              <LocalizedCtaText
+                label={`Launchpad Studio HTML · $${studio.price} (Save $10)`}
+                usdPrice={studio.price}
+                productKey="studio"
+              />
             </Link>
             <Link href={bundle.href}>
-              <Download size={13} /> Complete Bundle (PDF + HTML)
+              <Download size={13} />{' '}
+              <LocalizedCtaText
+                label={`Complete Bundle · $${bundle.price} (Save $13)`}
+                usdPrice={bundle.price}
+                productKey="bundle"
+              />
             </Link>
             <Link href="/review">Rate &amp; Review a tool</Link>
             <Link href="/support">Lost your download? Get help</Link>

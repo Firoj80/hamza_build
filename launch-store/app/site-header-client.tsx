@@ -11,6 +11,7 @@ import {
   X
 } from 'lucide-react';
 import BrandMark from './brand-mark';
+import { LocalizedCtaText } from './currency-context';
 
 type Props = {
   email?: string | null;
@@ -41,7 +42,9 @@ export default function SiteHeaderClient({
 
         <nav className="desktop-nav" aria-label="Main navigation">
           <Link href="/#tools">Products</Link>
-          <Link href="/products/complete-creator-bundle">Bundle ($12)</Link>
+          <Link href="/products/complete-creator-bundle">
+            <LocalizedCtaText label="Bundle ($12, Was $25)" usdPrice={12} productKey="bundle" />
+          </Link>
           <Link href="/#inside">How it works</Link>
           <Link href="/#questions">FAQ</Link>
           <Link href="/support">Support</Link>
@@ -85,10 +88,18 @@ export default function SiteHeaderClient({
         <div className="mobile-nav-drawer wrap" role="dialog" aria-label="Mobile navigation">
           <div className="mobile-nav-links">
             <Link href="/#tools" onClick={() => setMenuOpen(false)}>
-              Products ($5 · $9 · $12 Bundle)
+              <LocalizedCtaText
+                label="Products ($5 · $9 · $12 Bundle)"
+                usdPrice={12}
+                productKey="bundle"
+              />
             </Link>
             <Link href="/products/complete-creator-bundle" onClick={() => setMenuOpen(false)}>
-              Complete Creator Bundle ($12)
+              <LocalizedCtaText
+                label="Complete Creator Bundle ($12, Was $25)"
+                usdPrice={12}
+                productKey="bundle"
+              />
             </Link>
             <Link href="/#inside" onClick={() => setMenuOpen(false)}>
               How it works
