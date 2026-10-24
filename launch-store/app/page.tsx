@@ -54,7 +54,7 @@ export default async function Home() {
           <LocalizedCtaText
             label={
               bundleProduct
-                ? 'Save $2: Get Both Tools in the $12 Bundle'
+                ? 'Save $13: Get Both Tools in the $12 Bundle (Was $25)'
                 : primaryProduct
                   ? `${primaryProduct.ctaLabel || `Get ${primaryProduct.name} · $${primaryProduct.price}`}`
                   : 'Get the Fieldguide · $5'
@@ -83,10 +83,19 @@ export default async function Home() {
             <p>
               You don’t need a 40-hour course or another blank page.
               <br />
-              Start with our 7-page <strong>Idea-to-Income Fieldguide PDF ($5)</strong>, the
-              complete <strong>Launchpad Studio HTML App ($9)</strong>, or grab the{' '}
-              <strong>Complete Creator Bundle ($12)</strong>—delivered immediately after checkout
-              with zero login friction.
+              Start with our 7-page{' '}
+              <strong>
+                Idea-to-Income Fieldguide PDF ($5 <s>$9</s>)
+              </strong>
+              , the complete{' '}
+              <strong>
+                Launchpad Studio HTML App ($9 <s>$19</s>)
+              </strong>
+              , or grab the{' '}
+              <strong>
+                Complete Creator Bundle ($12 <s>$25</s>)
+              </strong>
+              —delivered immediately after checkout with zero login friction.
             </p>
             <div className="hero-actions">
               <CheckoutButton
@@ -111,12 +120,14 @@ export default async function Home() {
                     size={14}
                     style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
                   />
-                  <strong>Best Value ($12 vs $14):</strong> Get both the Fieldguide PDF ($5) +
-                  Launchpad Studio HTML App ($9) together:
+                  <strong>
+                    Best Value ($12 <s>$25</s>):
+                  </strong>{' '}
+                  Get both the Fieldguide PDF ($5) + Launchpad Studio HTML App ($9) together:
                 </span>
                 <div className="hero-account-links">
                   <Link href={`/products/${bundleProduct.slug}`} className="hero-account-link">
-                    View $12 Bundle (Save $2) <ArrowUpRight size={14} />
+                    View $12 Bundle (Was $25) <ArrowUpRight size={14} />
                   </Link>
                 </div>
               </div>
@@ -204,11 +215,11 @@ export default async function Home() {
               <span>Direct Dodo checkout (no login required)</span>
             </div>
             <div className="catalog-listing-meta">
-              <span>Instant PDF &amp; HTML download</span>
+              <span>Fieldguide $5 (was $9)</span>
               <span>·</span>
-              <span>One-time payment</span>
+              <span>Studio $9 (was $19)</span>
               <span>·</span>
-              <span>Save $2 with the $12 Bundle</span>
+              <span>Bundle $12 (was $25)</span>
             </div>
           </div>
 
@@ -239,11 +250,11 @@ export default async function Home() {
                     ? '.HTML App + Studio'
                     : 'Instant Download';
               const accessSpec = isBundleProduct
-                ? 'Save $2 ($14 Value)'
+                ? '$12 (Was $25 · Save $13)'
                 : isGuideProduct
-                  ? 'Direct PDF Download'
+                  ? '$5 (Was $9 · Save $4)'
                   : isStudioProduct
-                    ? 'Use Offline Anytime'
+                    ? '$9 (Was $19 · Save $10)'
                     : 'Instant Access';
 
               return (
@@ -259,10 +270,10 @@ export default async function Home() {
                     </span>
                     <span className="product-listing-status">
                       {isBundleProduct
-                        ? 'BEST VALUE · BOTH TOOLS ($12)'
+                        ? 'BEST VALUE · $12 (WAS $25)'
                         : isStudioProduct
-                          ? 'COMPLETE $9 SYSTEM'
-                          : 'STARTER PDF EDITION'}{' '}
+                          ? 'LAUNCH SYSTEM · $9 (WAS $19)'
+                          : 'STARTER PDF · $5 (WAS $9)'}{' '}
                       · INSTANT DOWNLOAD
                     </span>
                   </div>

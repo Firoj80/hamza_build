@@ -226,19 +226,58 @@ export function PriceTag({
     );
   }
 
+  const hasDiscount = Boolean(
+    usdCompareAtPrice && usdCompareAtPrice > usdPrice && q.formattedCompareAtPrice
+  );
+  const savePercent =
+    hasDiscount && usdCompareAtPrice
+      ? Math.round(((usdCompareAtPrice - usdPrice) / usdCompareAtPrice) * 100)
+      : 0;
+  const saveUsd = hasDiscount && usdCompareAtPrice ? Math.round(usdCompareAtPrice - usdPrice) : 0;
+
   if (mode === 'detail-hero') {
     return (
       <div className="detail-price">
-        {usdCompareAtPrice && usdCompareAtPrice > usdPrice && q.formattedCompareAtPrice && (
-          <s style={{ fontSize: '20px', color: '#8a948d', marginRight: '8px' }}>
+        {hasDiscount && (
+          <s
+            style={{
+              fontSize: '22px',
+              color: '#8a948d',
+              marginRight: '10px',
+              fontWeight: 500,
+              textDecorationThickness: '2px'
+            }}
+          >
             {q.formattedCompareAtPrice}
           </s>
         )}
         <strong>{q.formattedPrice}</strong>
+        {hasDiscount && (
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              background: '#e6f4ea',
+              color: '#173b31',
+              border: '1px solid #b7dfc2',
+              borderRadius: '999px',
+              padding: '4px 10px',
+              fontSize: '12px',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              marginLeft: '10px',
+              verticalAlign: 'middle'
+            }}
+          >
+            SAVE ${saveUsd} ({savePercent}% OFF)
+          </span>
+        )}
         <span>
-          {q.currency} · pay once
+          {q.currency} · pay once{hasDiscount ? ` (was $${usdCompareAtPrice} USD)` : ''}
           <br />
-          {q.isConverted && showUsdSubtext ? `≈ ${q.formattedUsdPrice} USD · Instant download` : 'Instant download'}
+          {q.isConverted && showUsdSubtext
+            ? `≈ ${q.formattedUsdPrice} USD · Instant download`
+            : 'Instant download'}
         </span>
       </div>
     );
@@ -247,9 +286,21 @@ export function PriceTag({
   if (mode === 'detail-aside') {
     return (
       <span className="detail-price">
+        {hasDiscount && (
+          <s
+            style={{
+              fontSize: '18px',
+              color: '#8a948d',
+              marginRight: '8px',
+              fontWeight: 500
+            }}
+          >
+            {q.formattedCompareAtPrice}
+          </s>
+        )}
         <strong>{q.formattedPrice}</strong>
         <small>
-          {q.currency} · one-time purchase
+          {q.currency} · one-time{hasDiscount ? ` · Save $${saveUsd}` : ''}
           {q.isConverted && showUsdSubtext ? ` (≈ ${q.formattedUsdPrice} USD)` : ''}
         </small>
       </span>
@@ -259,14 +310,23 @@ export function PriceTag({
   // Default: 'card' mode inside product-title
   return (
     <span>
-      {usdCompareAtPrice && usdCompareAtPrice > usdPrice && q.formattedCompareAtPrice && (
-        <s style={{ fontSize: '14px', color: '#8a948d', marginRight: '6px', fontWeight: 500 }}>
+      {hasDiscount && (
+        <s
+          style={{
+            fontSize: '15px',
+            color: '#8a948d',
+            marginRight: '6px',
+            fontWeight: 500,
+            textDecorationThickness: '1.5px'
+          }}
+        >
           {q.formattedCompareAtPrice}
         </s>
       )}
       {q.formattedPrice}
       <small>
-        {q.currency} · pay once{q.isConverted && showUsdSubtext ? ` (${q.formattedUsdPrice})` : ''}
+        {hasDiscount ? `Save $${saveUsd} (${savePercent}% off)` : `${q.currency} · pay once`}
+        {q.isConverted && showUsdSubtext ? ` · ${q.formattedUsdPrice}` : ''}
       </small>
     </span>
   );

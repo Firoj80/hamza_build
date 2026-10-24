@@ -101,7 +101,7 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     slug: guide.slug,
     name: productDetails['first-product-fieldguide'].name,
     price: productDetails['first-product-fieldguide'].price,
-    compareAtPrice: null,
+    compareAtPrice: 9,
     currency: 'USD',
     status: 'active',
     featured: true,
@@ -110,7 +110,7 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     dodoEnvVar: 'DODO_FIELDGUIDE_PRODUCT_ID',
     eyebrow: productDetails['first-product-fieldguide'].eyebrow,
     headline: productDetails['first-product-fieldguide'].headline,
-    badge: '$5 · START HERE',
+    badge: '$5 · WAS $9 (SAVE 44%)',
     badgeTheme: 'default',
     cardTag: '01 / THE FOUNDATION',
     ctaLabel: 'Get the Fieldguide · $5',
@@ -151,7 +151,7 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     slug: studio.slug,
     name: productDetails['launchpad-studio'].name,
     price: productDetails['launchpad-studio'].price,
-    compareAtPrice: 29,
+    compareAtPrice: 19,
     currency: 'USD',
     status: 'active',
     featured: true,
@@ -160,7 +160,7 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     dodoEnvVar: 'DODO_STUDIO_PRODUCT_ID',
     eyebrow: productDetails['launchpad-studio'].eyebrow,
     headline: productDetails['launchpad-studio'].headline,
-    badge: '$9 · COMPLETE LAUNCH SYSTEM',
+    badge: '$9 · WAS $19 (SAVE $10)',
     badgeTheme: 'green',
     cardTag: '02 / THE WORKSPACE + HTML APP',
     ctaLabel: 'Get Launchpad Studio · $9',
@@ -202,7 +202,7 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     slug: bundle.slug,
     name: productDetails['complete-creator-bundle'].name,
     price: productDetails['complete-creator-bundle'].price,
-    compareAtPrice: 14,
+    compareAtPrice: 25,
     currency: 'USD',
     status: 'active',
     featured: true,
@@ -211,13 +211,13 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     dodoEnvVar: 'DODO_BUNDLE_PRODUCT_ID',
     eyebrow: productDetails['complete-creator-bundle'].eyebrow,
     headline: productDetails['complete-creator-bundle'].headline,
-    badge: '$12 · FULL BUNDLE (SAVE $2)',
+    badge: '$12 · WAS $25 (SAVE $13)',
     badgeTheme: 'amber',
     cardTag: '03 / COMPLETE BUNDLE · PDF + HTML',
     ctaLabel: 'Get Complete Bundle · $12',
-    formatNote: 'Includes both the $5 Fieldguide PDF + $9 Launchpad Studio HTML app · Save $2',
+    formatNote: 'Includes both the Fieldguide PDF + Launchpad Studio HTML app · $25 Value for $12',
     shortDescription:
-      'Get both tools in one package: the 7-page Idea-to-Income Fieldguide PDF ($5) + the standalone Launchpad Studio 5-stage HTML app ($9) for $12.',
+      'Get both tools in one package: the 7-page Idea-to-Income Fieldguide PDF + the standalone Launchpad Studio 5-stage HTML app for $12 (original price $25).',
     description: productDetails['complete-creator-bundle'].description,
     shareTitle: productDetails['complete-creator-bundle'].shareTitle,
     shareDescription: productDetails['complete-creator-bundle'].shareDescription,
@@ -228,10 +228,10 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     coverTheme: 'dark',
     galleryImages: [],
     cardBullets: [
-      'Both files included: Idea-to-Income-Fieldguide.pdf ($5) + Launchpad-Studio.html ($9)',
+      'Both files included: Idea-to-Income-Fieldguide.pdf + Launchpad-Studio.html',
       '7-page validation framework + 24 niche blueprints & 15-point scorecard',
       '8-Mode AI Master Prompt Studio + 30-Day Threads Content Engine',
-      'Save $2 with one-time checkout & instant dual-file download'
+      'Save $13 off the $25 original price with instant dual-file download'
     ],
     includes: [...productDetails['complete-creator-bundle'].includes],
     sections: productDetails['complete-creator-bundle'].sections.map((s) => ({
@@ -342,15 +342,22 @@ export function normalizeManagedProduct(
   const price = Number.isFinite(numericPrice) && numericPrice >= 0 ? Math.round(numericPrice * 100) / 100 : base.price;
 
   const rawCompare = raw.compareAtPrice;
-  const compareAtPrice =
+  const parsedCompare =
     rawCompare !== null &&
     rawCompare !== undefined &&
     Number.isFinite(Number(rawCompare)) &&
     Number(rawCompare) > price
       ? Math.round(Number(rawCompare) * 100) / 100
-      : key === 'bundle' && (rawCompare === undefined || rawCompare === null)
-        ? 14
-        : null;
+      : null;
+
+  const compareAtPrice =
+    key === 'fieldguide' && (parsedCompare === null || parsedCompare === 0)
+      ? 9
+      : key === 'studio' && (parsedCompare === null || parsedCompare === 29)
+        ? 19
+        : key === 'bundle' && (parsedCompare === null || parsedCompare === 14)
+          ? 25
+          : parsedCompare ?? base.compareAtPrice ?? null;
 
   const status =
     raw.status === 'active' || raw.status === 'draft' || raw.status === 'archived'
@@ -445,9 +452,13 @@ export function normalizeManagedProduct(
     eyebrow: typeof raw.eyebrow === 'string' && raw.eyebrow.trim() ? raw.eyebrow.trim() : base.eyebrow,
     headline,
     badge:
-      typeof raw.badge === 'string' && raw.badge.trim()
+      typeof raw.badge === 'string' &&
+      raw.badge.trim() &&
+      raw.badge.trim() !== '$5 · START HERE' &&
+      raw.badge.trim() !== '$9 · COMPLETE LAUNCH SYSTEM' &&
+      raw.badge.trim() !== '$12 · FULL BUNDLE (SAVE $2)'
         ? raw.badge.trim()
-        : `$${price} · ${key === 'studio' ? 'FLAGSHIP WORKSPACE' : key === 'bundle' ? 'FULL BUNDLE (SAVE $2)' : 'START HERE'}`,
+        : base.badge,
     badgeTheme,
     cardTag: typeof raw.cardTag === 'string' && raw.cardTag.trim() ? raw.cardTag.trim() : base.cardTag,
     ctaLabel:

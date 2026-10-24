@@ -124,12 +124,12 @@ export default async function ProductPage({ params }: Props) {
                     size={14}
                     style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
                   />
-                  Want both the <strong>$5 Fieldguide PDF</strong> and{' '}
-                  <strong>$9 Launchpad Studio HTML App</strong> together?
+                  Want both the <strong>Fieldguide PDF ($5, was $9)</strong> and{' '}
+                  <strong>Launchpad Studio HTML App ($9, was $19)</strong> together?
                 </span>
                 <div className="hero-account-links">
                   <Link href={`/products/${bundleCompanion.slug}`} className="hero-account-link">
-                    Get the $12 Bundle (Save $2) <ArrowUpRight size={14} />
+                    Get the $12 Bundle (Was $25 · Save $13) <ArrowUpRight size={14} />
                   </Link>
                 </div>
               </div>
@@ -140,8 +140,8 @@ export default async function ProductPage({ params }: Props) {
                     size={14}
                     style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
                   />
-                  <strong>Both files unlocked immediately:</strong> Save $2 compared to buying the $5
-                  PDF and $9 HTML app separately.
+                  <strong>Both files unlocked immediately:</strong> Save $13 off the $25 original
+                  price when you get the PDF and HTML app together.
                 </span>
               </div>
             ) : null}
