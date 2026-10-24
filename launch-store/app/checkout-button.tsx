@@ -20,7 +20,7 @@ export default function CheckoutButton({
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
  const startedRef=useRef(false);
- const {currency,country,getQuote}=useCurrency();
+ const {currency,country,getQuote,formatUsdPrice}=useCurrency();
 
  async function checkout(){
   if(busy)return;
@@ -57,13 +57,18 @@ export default function CheckoutButton({
  if(typeof children==='string'&&currency!=='USD'){
   if(typeof usdPrice==='number'){
    const q=getQuote(usdPrice,product);
-   const replaced=children.replace(/\$\d+(?:\.\d{1,2})?/g,q.formattedPrice);
+   const replaced=children.replace(/\$(\d+(?:\.\d{1,2})?)/g,(full,numStr)=>{
+    const num=parseFloat(numStr);
+    if(!Number.isFinite(num))return full;
+    if(Math.abs(num-usdPrice)<0.001)return q.formattedPrice;
+    return formatUsdPrice(num);
+   });
    renderedChildren=replaced!==children?replaced:`${children} (${q.formattedPrice})`;
   }else{
    renderedChildren=children.replace(/\$(\d+(?:\.\d{1,2})?)/g,(_,numStr)=>{
     const num= parseFloat(numStr);
     if(!Number.isFinite(num))return `$${numStr}`;
-    return getQuote(num,product).formattedPrice;
+    return formatUsdPrice(num);
    });
   }
  }

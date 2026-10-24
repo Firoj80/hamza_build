@@ -214,7 +214,7 @@ export function PriceTag({
   showUsdSubtext?: boolean;
   mode?: 'card' | 'detail-hero' | 'detail-aside' | 'inline';
 }) {
-  const { getQuote } = useCurrency();
+  const { getQuote, formatUsdPrice } = useCurrency();
   const q = getQuote(usdPrice, productKey, usdCompareAtPrice);
 
   if (mode === 'inline') {
@@ -234,6 +234,7 @@ export function PriceTag({
       ? Math.round(((usdCompareAtPrice - usdPrice) / usdCompareAtPrice) * 100)
       : 0;
   const saveUsd = hasDiscount && usdCompareAtPrice ? Math.round(usdCompareAtPrice - usdPrice) : 0;
+  const formattedSaveAmount = hasDiscount ? formatUsdPrice(saveUsd) : '';
 
   if (mode === 'detail-hero') {
     return (
@@ -269,15 +270,15 @@ export function PriceTag({
               verticalAlign: 'middle'
             }}
           >
-            SAVE ${saveUsd} ({savePercent}% OFF)
+            SAVE {formattedSaveAmount} ({savePercent}% OFF)
           </span>
         )}
         <span>
-          {q.currency} · pay once{hasDiscount ? ` (was $${usdCompareAtPrice} USD)` : ''}
+          {q.currency} · pay once{hasDiscount ? ` · Original price ${q.formattedCompareAtPrice}` : ''}
           <br />
           {q.isConverted && showUsdSubtext
             ? `≈ ${q.formattedUsdPrice} USD · Instant download`
-            : 'Instant download'}
+            : 'Limited-time launch price · Instant download'}
         </span>
       </div>
     );
@@ -300,7 +301,7 @@ export function PriceTag({
         )}
         <strong>{q.formattedPrice}</strong>
         <small>
-          {q.currency} · one-time{hasDiscount ? ` · Save $${saveUsd}` : ''}
+          {q.currency} · one-time{hasDiscount ? ` · Save ${formattedSaveAmount} (${savePercent}% off)` : ''}
           {q.isConverted && showUsdSubtext ? ` (≈ ${q.formattedUsdPrice} USD)` : ''}
         </small>
       </span>
@@ -325,7 +326,7 @@ export function PriceTag({
       )}
       {q.formattedPrice}
       <small>
-        {hasDiscount ? `Save $${saveUsd} (${savePercent}% off)` : `${q.currency} · pay once`}
+        {hasDiscount ? `Save ${formattedSaveAmount} (${savePercent}% off)` : `${q.currency} · pay once`}
         {q.isConverted && showUsdSubtext ? ` · ${q.formattedUsdPrice}` : ''}
       </small>
     </span>
@@ -341,12 +342,19 @@ export function LocalizedCtaText({
   usdPrice: number;
   productKey?: string;
 }) {
-  const { getQuote } = useCurrency();
+  const { getQuote, formatUsdPrice } = useCurrency();
   const q = getQuote(usdPrice, productKey);
   if (!q.isConverted) return <>{label}</>;
 
-  // Replace $X or $X.XX in the CTA label with the localized formatted price
-  const replaced = label.replace(/\$\d+(?:\.\d{1,2})?/g, q.formattedPrice);
+  // Replace each $X or $X.XX in the label according to its own numeric USD value
+  const replaced = label.replace(/\$(\d+(?:\.\d{1,2})?)/g, (_fullMatch, numStr) => {
+    const numericUsd = Number(numStr);
+    if (!Number.isFinite(numericUsd)) return _fullMatch;
+    if (Math.abs(numericUsd - usdPrice) < 0.001) {
+      return q.formattedPrice;
+    }
+    return formatUsdPrice(numericUsd);
+  });
   if (replaced !== label) {
     return <>{replaced}</>;
   }

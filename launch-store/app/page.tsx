@@ -48,16 +48,20 @@ export default async function Home() {
       </a>
       <div className="announcement">
         <span>
-          Direct checkout · No login or registration · Download your PDF or HTML app immediately.
+          <LocalizedCtaText
+            label="Launch Discount Active: Fieldguide $5 (Was $9) · Launchpad Studio $9 (Was $19) · Complete Bundle $12 (Was $25)"
+            usdPrice={12}
+            productKey="bundle"
+          />
         </span>
         <a href="#tools">
           <LocalizedCtaText
             label={
               bundleProduct
-                ? 'Save $13: Get Both Tools in the $12 Bundle (Was $25)'
+                ? 'Claim the $12 Bundle & Save $13 (52% Off)'
                 : primaryProduct
                   ? `${primaryProduct.ctaLabel || `Get ${primaryProduct.name} · $${primaryProduct.price}`}`
-                  : 'Get the Fieldguide · $5'
+                  : 'Get the Fieldguide · $5 (Was $9)'
             }
             usdPrice={bundleProduct ? bundleProduct.price : primaryProduct ? primaryProduct.price : 5}
             productKey={bundleProduct ? bundleProduct.key : primaryProduct ? primaryProduct.key : 'fieldguide'}
@@ -85,17 +89,29 @@ export default async function Home() {
               <br />
               Start with our 7-page{' '}
               <strong>
-                Idea-to-Income Fieldguide PDF ($5 <s>$9</s>)
+                <LocalizedCtaText
+                  label="Idea-to-Income Fieldguide PDF ($5, was $9)"
+                  usdPrice={5}
+                  productKey="fieldguide"
+                />
               </strong>
               , the complete{' '}
               <strong>
-                Launchpad Studio HTML App ($9 <s>$19</s>)
+                <LocalizedCtaText
+                  label="Launchpad Studio HTML App ($9, was $19)"
+                  usdPrice={9}
+                  productKey="studio"
+                />
               </strong>
               , or grab the{' '}
               <strong>
-                Complete Creator Bundle ($12 <s>$25</s>)
-              </strong>
-              —delivered immediately after checkout with zero login friction.
+                <LocalizedCtaText
+                  label="Complete Creator Bundle ($12, was $25)"
+                  usdPrice={12}
+                  productKey="bundle"
+                />
+              </strong>{' '}
+              and start shipping your first product today.
             </p>
             <div className="hero-actions">
               <CheckoutButton
@@ -103,15 +119,26 @@ export default async function Home() {
                 usdPrice={primaryProduct ? primaryProduct.price : 5}
                 className="button dark"
               >
-                {primaryProduct ? primaryProduct.ctaLabel : 'Get the Fieldguide · $5'}
+                {primaryProduct
+                  ? primaryProduct.ctaLabel
+                  : 'Get the Fieldguide · $5 (Was $9)'}
               </CheckoutButton>
               <a className="text-link" href="#tools">
-                Compare tools &amp; $12 bundle <ArrowRight size={16} />
+                <LocalizedCtaText
+                  label="Explore the $12 Bundle (Save $13)"
+                  usdPrice={12}
+                  productKey="bundle"
+                />{' '}
+                <ArrowRight size={16} />
               </a>
             </div>
             <div className="hero-fine">
-              <Check size={14} /> Instant PDF &amp; HTML file delivery <span>·</span> No account or
-              login required
+              <Check size={14} />{' '}
+              <LocalizedCtaText
+                label="Limited-time launch pricing · Save up to 52% ($13 off the $25 Bundle)"
+                usdPrice={12}
+                productKey="bundle"
+              />
             </div>
             {bundleProduct && (
               <div className="hero-account-bar">
@@ -121,13 +148,26 @@ export default async function Home() {
                     style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
                   />
                   <strong>
-                    Best Value ($12 <s>$25</s>):
+                    <LocalizedCtaText
+                      label="Best Value — $12 (Was $25):"
+                      usdPrice={12}
+                      productKey="bundle"
+                    />
                   </strong>{' '}
-                  Get both the Fieldguide PDF ($5) + Launchpad Studio HTML App ($9) together:
+                  <LocalizedCtaText
+                    label="Get both the Fieldguide PDF ($5) + Launchpad Studio HTML App ($9) & save $13:"
+                    usdPrice={12}
+                    productKey="bundle"
+                  />
                 </span>
                 <div className="hero-account-links">
                   <Link href={`/products/${bundleProduct.slug}`} className="hero-account-link">
-                    View $12 Bundle (Was $25) <ArrowUpRight size={14} />
+                    <LocalizedCtaText
+                      label="Claim $12 Bundle (Save $13)"
+                      usdPrice={12}
+                      productKey="bundle"
+                    />{' '}
+                    <ArrowUpRight size={14} />
                   </Link>
                 </div>
               </div>
@@ -191,35 +231,53 @@ export default async function Home() {
         <section className="tools wrap section-space" id="tools">
           <div className="section-heading">
             <div>
-              <div className="eyebrow">PRODUCT CATALOG · DIGITAL STORE</div>
+              <div className="eyebrow">PRODUCT CATALOG · LAUNCH DISCOUNT</div>
               <h2>
                 {catalogProducts.length === 3
-                  ? 'Two focused tools. Or grab the complete $12 bundle.'
+                  ? 'Pick your starting tool. Or save 52% with the complete bundle.'
                   : `One idea. ${catalogProducts.length} practical companions.`}
               </h2>
             </div>
             <p>
-              Checkout in seconds with zero account registration.
+              Lock in our launch discount today and download your
               <br />
-              Download your PDF or standalone HTML file immediately after payment.
+              tactical PDF or standalone offline HTML workspace immediately.
             </p>
           </div>
 
           <div className="catalog-listing-bar" aria-label="Store catalog summary">
             <div className="catalog-listing-count">
               <strong>
-                {catalogProducts.length} Listed{' '}
-                {catalogProducts.length === 1 ? 'Product' : 'Products'}
+                {catalogProducts.length} Launch{' '}
+                {catalogProducts.length === 1 ? 'Offer' : 'Offers'}
               </strong>
               <span>·</span>
-              <span>Direct Dodo checkout (no login required)</span>
+              <span>Save up to 53% off original prices</span>
             </div>
             <div className="catalog-listing-meta">
-              <span>Fieldguide $5 (was $9)</span>
+              <span>
+                <LocalizedCtaText
+                  label="Fieldguide $5 (Was $9)"
+                  usdPrice={5}
+                  productKey="fieldguide"
+                />
+              </span>
               <span>·</span>
-              <span>Studio $9 (was $19)</span>
+              <span>
+                <LocalizedCtaText
+                  label="Studio $9 (Was $19)"
+                  usdPrice={9}
+                  productKey="studio"
+                />
+              </span>
               <span>·</span>
-              <span>Bundle $12 (was $25)</span>
+              <span>
+                <LocalizedCtaText
+                  label="Bundle $12 (Was $25)"
+                  usdPrice={12}
+                  productKey="bundle"
+                />
+              </span>
             </div>
           </div>
 
@@ -236,9 +294,9 @@ export default async function Home() {
                 item.key === 'bundle' || item.deliveryType === 'bundle_both';
 
               const formatLabel = isBundleProduct
-                ? 'Complete Bundle: PDF Guide + Offline HTML App'
+                ? 'Complete 2-in-1 Bundle: PDF Guide + Offline HTML App'
                 : isGuideProduct
-                  ? '7-Page Tactical PDF + Reader'
+                  ? '7-Page Tactical PDF + Web Reader'
                   : isStudioProduct
                     ? 'Standalone Offline HTML App + Workspace'
                     : 'Digital Resource & Guide';
@@ -249,12 +307,19 @@ export default async function Home() {
                   : isStudioProduct
                     ? '.HTML App + Studio'
                     : 'Instant Download';
-              const accessSpec = isBundleProduct
-                ? '$12 (Was $25 · Save $13)'
+              const originalValueLabel = isBundleProduct
+                ? 'Was $25 · Now $12'
                 : isGuideProduct
-                  ? '$5 (Was $9 · Save $4)'
+                  ? 'Was $9 · Now $5'
                   : isStudioProduct
-                    ? '$9 (Was $19 · Save $10)'
+                    ? 'Was $19 · Now $9'
+                    : `$${item.price}`;
+              const savingsLabel = isBundleProduct
+                ? 'Save $13 (52% Off)'
+                : isGuideProduct
+                  ? 'Save $4 (44% Off)'
+                  : isStudioProduct
+                    ? 'Save $10 (53% Off)'
                     : 'Instant Access';
 
               return (
@@ -269,12 +334,17 @@ export default async function Home() {
                       {item.cardTag || `0${idx + 1} / DIGITAL PRODUCT`}
                     </span>
                     <span className="product-listing-status">
-                      {isBundleProduct
-                        ? 'BEST VALUE · $12 (WAS $25)'
-                        : isStudioProduct
-                          ? 'LAUNCH SYSTEM · $9 (WAS $19)'
-                          : 'STARTER PDF · $5 (WAS $9)'}{' '}
-                      · INSTANT DOWNLOAD
+                      <LocalizedCtaText
+                        label={
+                          isBundleProduct
+                            ? 'BEST VALUE · $12 (WAS $25 · SAVE $13)'
+                            : isStudioProduct
+                              ? 'LAUNCH OFFER · $9 (WAS $19 · SAVE $10)'
+                              : 'STARTER OFFER · $5 (WAS $9 · SAVE $4)'
+                        }
+                        usdPrice={item.price}
+                        productKey={item.key}
+                      />
                     </span>
                   </div>
 
@@ -293,7 +363,11 @@ export default async function Home() {
                       unoptimized
                     />
                     <span className={`product-badge ${isGreenBadge ? 'green' : ''}`}>
-                      {item.badge}
+                      <LocalizedCtaText
+                        label={item.badge}
+                        usdPrice={item.price}
+                        productKey={item.key}
+                      />
                     </span>
                     <span className="product-photo-cta">
                       View product page <ArrowUpRight size={14} />
@@ -303,9 +377,7 @@ export default async function Home() {
                   <div className="product-body">
                     <div className="product-title">
                       <div className="product-title-group">
-                        <span className="product-category-kicker">
-                          {formatLabel} · Direct Checkout
-                        </span>
+                        <span className="product-category-kicker">{formatLabel}</span>
                         <Link href={href} className="product-title-link">
                           <h3>{item.name}</h3>
                         </Link>
@@ -321,7 +393,11 @@ export default async function Home() {
                     </div>
 
                     <p className="product-listing-summary">
-                      {item.shortDescription || item.description}
+                      <LocalizedCtaText
+                        label={item.shortDescription || item.description}
+                        usdPrice={item.price}
+                        productKey={item.key}
+                      />
                     </p>
 
                     <div className="product-includes-panel">
@@ -332,7 +408,13 @@ export default async function Home() {
                         {item.cardBullets.map((b) => (
                           <li key={b}>
                             <Check />
-                            <span>{b}</span>
+                            <span>
+                              <LocalizedCtaText
+                                label={b}
+                                usdPrice={item.price}
+                                productKey={item.key}
+                              />
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -344,12 +426,24 @@ export default async function Home() {
                         <strong>{deliverySpec}</strong>
                       </div>
                       <div>
-                        <small>DELIVERY</small>
-                        <strong>{accessSpec}</strong>
+                        <small>LAUNCH PRICE</small>
+                        <strong>
+                          <LocalizedCtaText
+                            label={originalValueLabel}
+                            usdPrice={item.price}
+                            productKey={item.key}
+                          />
+                        </strong>
                       </div>
                       <div>
-                        <small>CHECKOUT</small>
-                        <strong>No Login Needed</strong>
+                        <small>YOUR DISCOUNT</small>
+                        <strong>
+                          <LocalizedCtaText
+                            label={savingsLabel}
+                            usdPrice={item.price}
+                            productKey={item.key}
+                          />
+                        </strong>
                       </div>
                     </div>
 
@@ -366,16 +460,24 @@ export default async function Home() {
                         <ArrowUpRight size={15} />
                       </Link>
                     </div>
-                    <small className="format-note">{item.formatNote}</small>
+                    <small className="format-note">
+                      <LocalizedCtaText
+                        label={item.formatNote}
+                        usdPrice={item.price}
+                        productKey={item.key}
+                      />
+                    </small>
                   </div>
                 </article>
               );
             })}
           </div>
           <p className="mockup-note">
-            Every purchase includes instant file delivery right after Dodo checkout: download the
-            7-page PDF for the Fieldguide ($5), the standalone offline-ready HTML file for Launchpad
-            Studio ($9), or both files together in the Complete Creator Bundle ($12).
+            <LocalizedCtaText
+              label="Special launch pricing: Get the 7-page Fieldguide PDF for $5 (was $9), the standalone Launchpad Studio HTML app for $9 (was $19), or grab both together in the Complete Creator Bundle for $12 (was $25 — save $13)."
+              usdPrice={12}
+              productKey="bundle"
+            />
           </p>
         </section>
 
@@ -526,8 +628,8 @@ export default async function Home() {
             </h2>
             <p>
               I’m Hamza Idrishi. I build simple, practical tools and share the experiments behind
-              them. Every tool here is a one-time purchase with instant file delivery—no account
-              signup and no monthly subscription.
+              them. Every tool here is a one-time purchase with instant file delivery and no monthly
+              subscription.
             </p>
             <a className="text-link" href={social.threads} target="_blank" rel="noreferrer">
               Follow the work on Threads <ArrowUpRight size={16} />
@@ -538,9 +640,8 @@ export default async function Home() {
               <Download />
               <h3>Instant PDF &amp; HTML downloads.</h3>
               <p>
-                Buy directly on Dodo Payments with zero registration. Immediately after checkout,
-                download the Fieldguide PDF or the standalone Launchpad Studio HTML file directly to
-                your device.
+                Immediately after checkout, download the 7-page Fieldguide PDF or the standalone
+                Launchpad Studio HTML file directly to your device.
               </p>
             </div>
             <div>
@@ -553,10 +654,19 @@ export default async function Home() {
             </div>
             <div>
               <ShieldCheck />
-              <h3>Save $2 with the $12 Bundle.</h3>
+              <h3>
+                <LocalizedCtaText
+                  label="Save $13 with the $12 Bundle (Was $25)."
+                  usdPrice={12}
+                  productKey="bundle"
+                />
+              </h3>
               <p>
-                Get both the 7-page Idea-to-Income Fieldguide PDF ($5) and the Launchpad Studio HTML
-                App ($9) together for a single $12 one-time payment.
+                <LocalizedCtaText
+                  label="Get both the 7-page Idea-to-Income Fieldguide PDF ($5, was $9) and the Launchpad Studio HTML App ($9, was $19) together for a single $12 one-time payment."
+                  usdPrice={12}
+                  productKey="bundle"
+                />
               </p>
             </div>
           </div>
@@ -573,15 +683,11 @@ export default async function Home() {
           <div>
             {[
               [
-                'Do I need to create an account or sign in to buy?',
-                'No. There is no customer login or signup wall. Click any buy button to go straight to secure Dodo Payments checkout, and download your PDF or HTML file immediately on the confirmation screen.'
-              ],
-              [
                 'How are the Fieldguide ($5), Launchpad Studio ($9), and Bundle ($12) delivered?',
-                'Immediately after payment on Dodo: the Fieldguide ($5) gives you an instant download of Idea-to-Income-Fieldguide.pdf plus online reader access; Launchpad Studio ($9) gives you the standalone offline-ready Launchpad-Studio.html app plus online workspace access; and the Complete Creator Bundle ($12) unlocks both files immediately.'
+                'Immediately after checkout: the Fieldguide ($5, originally $9) gives you an instant download of Idea-to-Income-Fieldguide.pdf plus online reader access; Launchpad Studio ($9, originally $19) gives you the standalone offline-ready Launchpad-Studio.html app plus online workspace access; and the Complete Creator Bundle ($12, originally $25) unlocks both files immediately.'
               ],
               [
-                'What makes Launchpad Studio worth $9?',
+                'What makes Launchpad Studio worth $9 (originally $19)?',
                 'Launchpad Studio is a complete 5-stage launch system: 24 niche product blueprints, an interactive 15-Point Idea Conviction Scorecard, a 1-Sentence Offer & Bio Generator, an 8-Mode AI Master Prompt Studio, 30 editable Threads post starters with 1-click Hook & CTA swappers, a Multi-Tier Revenue & Goal Reverse-Calculator, and 1-click Markdown (.md) and JSON backup exports.'
               ],
               [
@@ -599,10 +705,12 @@ export default async function Home() {
             ].map(([q, a]) => (
               <details key={q}>
                 <summary>
-                  {q}
+                  <LocalizedCtaText label={q} usdPrice={12} productKey="bundle" />
                   <Plus size={18} />
                 </summary>
-                <p>{a}</p>
+                <p>
+                  <LocalizedCtaText label={a} usdPrice={12} productKey="bundle" />
+                </p>
               </details>
             ))}
           </div>
@@ -622,13 +730,17 @@ export default async function Home() {
             className="button lime"
           >
             {bundleProduct
-              ? bundleProduct.ctaLabel || 'Get Complete Bundle · $12'
+              ? bundleProduct.ctaLabel || 'Get Complete Bundle · $12 (Was $25)'
               : primaryProduct
                 ? primaryProduct.ctaLabel
-                : 'Get the Fieldguide · $5'}
+                : 'Get the Fieldguide · $5 (Was $9)'}
           </CheckoutButton>
           <span>
-            One-time purchase · Instant download ·{' '}
+            <LocalizedCtaText
+              label="Save $13 (52% Off $25) · Instant PDF + HTML Download · "
+              usdPrice={bundleProduct ? bundleProduct.price : primaryProduct ? primaryProduct.price : 5}
+              productKey={bundleProduct ? bundleProduct.key : primaryProduct ? primaryProduct.key : 'fieldguide'}
+            />
             <PriceTag
               usdPrice={bundleProduct ? bundleProduct.price : primaryProduct ? primaryProduct.price : 5}
               productKey={bundleProduct ? bundleProduct.key : primaryProduct ? primaryProduct.key : 'fieldguide'}

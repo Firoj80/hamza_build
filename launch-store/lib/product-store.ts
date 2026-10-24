@@ -110,11 +110,11 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     dodoEnvVar: 'DODO_FIELDGUIDE_PRODUCT_ID',
     eyebrow: productDetails['first-product-fieldguide'].eyebrow,
     headline: productDetails['first-product-fieldguide'].headline,
-    badge: '$5 · WAS $9 (SAVE 44%)',
+    badge: '$5 · WAS $9 (SAVE $4)',
     badgeTheme: 'default',
     cardTag: '01 / THE FOUNDATION',
-    ctaLabel: 'Get the Fieldguide · $5',
-    formatNote: 'Instant PDF download + Web reader · Direct checkout',
+    ctaLabel: 'Get the Fieldguide · $5 (Was $9)',
+    formatNote: 'Launch Offer: Save $4 (44% Off $9) · Instant PDF + Web Reader',
     shortDescription:
       'A practical seven-page guide to finding one useful problem, checking real demand, and planning your first profitable launch.',
     description: productDetails['first-product-fieldguide'].description,
@@ -163,8 +163,8 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     badge: '$9 · WAS $19 (SAVE $10)',
     badgeTheme: 'green',
     cardTag: '02 / THE WORKSPACE + HTML APP',
-    ctaLabel: 'Get Launchpad Studio · $9',
-    formatNote: 'Instant HTML app download (use offline anytime) · Direct checkout',
+    ctaLabel: 'Get Launchpad Studio · $9 (Was $19)',
+    formatNote: 'Launch Offer: Save $10 (53% Off $19) · Standalone Offline HTML App',
     shortDescription:
       'Your complete 5-stage launch system: downloadable offline HTML app with 15-point idea scorecard, 8 AI prompt engines, 30 Threads post starters, and revenue calculator.',
     description: productDetails['launchpad-studio'].description,
@@ -214,8 +214,8 @@ export const DEFAULT_MANAGED_PRODUCTS: ManagedProduct[] = [
     badge: '$12 · WAS $25 (SAVE $13)',
     badgeTheme: 'amber',
     cardTag: '03 / COMPLETE BUNDLE · PDF + HTML',
-    ctaLabel: 'Get Complete Bundle · $12',
-    formatNote: 'Includes both the Fieldguide PDF + Launchpad Studio HTML app · $25 Value for $12',
+    ctaLabel: 'Get Complete Bundle · $12 (Was $25)',
+    formatNote: 'Best Value: Save $13 (52% Off $25) · Includes Both PDF + HTML App',
     shortDescription:
       'Get both tools in one package: the 7-page Idea-to-Income Fieldguide PDF + the standalone Launchpad Studio 5-stage HTML app for $12 (original price $25).',
     description: productDetails['complete-creator-bundle'].description,
@@ -462,13 +462,19 @@ export function normalizeManagedProduct(
     badgeTheme,
     cardTag: typeof raw.cardTag === 'string' && raw.cardTag.trim() ? raw.cardTag.trim() : base.cardTag,
     ctaLabel:
-      typeof raw.ctaLabel === 'string' && raw.ctaLabel.trim()
+      typeof raw.ctaLabel === 'string' &&
+      raw.ctaLabel.trim() &&
+      raw.ctaLabel.trim() !== 'Get the Fieldguide · $5' &&
+      raw.ctaLabel.trim() !== 'Get Launchpad Studio · $9' &&
+      raw.ctaLabel.trim() !== 'Get Complete Bundle · $12'
         ? raw.ctaLabel.trim()
-        : `Get ${name} · $${price}`,
+        : base.ctaLabel || `Get ${name} · $${price}`,
     formatNote:
       typeof raw.formatNote === 'string' &&
       raw.formatNote.trim() &&
       !raw.formatNote.includes('Login required') &&
+      !raw.formatNote.includes('Direct checkout') &&
+      !raw.formatNote.includes('Save $2') &&
       !raw.formatNote.includes('7-page fieldguide · Account access')
         ? raw.formatNote.trim()
         : base.formatNote,

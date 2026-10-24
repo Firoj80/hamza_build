@@ -107,13 +107,19 @@ export default async function ProductPage({ params }: Props) {
             <div className="detail-access">
               <Download size={16} />
               <span>
-                {isBundle
-                  ? 'Instant Dual Download: Idea-to-Income-Fieldguide.pdf ($5) + Launchpad-Studio.html ($9) · No login required.'
-                  : isGuide
-                    ? 'Instant PDF Download (Idea-to-Income-Fieldguide.pdf) + Web Reader · No login required.'
-                    : isStudio
-                      ? 'Instant HTML File Download (Launchpad-Studio.html — works offline forever) + Online Workspace · No login required.'
-                      : product.access}
+                <LocalizedCtaText
+                  label={
+                    isBundle
+                      ? 'Instant Dual Download: Fieldguide PDF ($9 value) + Launchpad Studio HTML ($19 value) · Save $13 Today'
+                      : isGuide
+                        ? 'Instant PDF Download (Idea-to-Income-Fieldguide.pdf) + Web Reader · Save $4 Off $9 Today'
+                        : isStudio
+                          ? 'Instant HTML File Download (Launchpad-Studio.html) + Online Workspace · Save $10 Off $19 Today'
+                          : product.access
+                  }
+                  usdPrice={product.price}
+                  productKey={product.key}
+                />
               </span>
             </div>
 
@@ -124,12 +130,20 @@ export default async function ProductPage({ params }: Props) {
                     size={14}
                     style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
                   />
-                  Want both the <strong>Fieldguide PDF ($5, was $9)</strong> and{' '}
-                  <strong>Launchpad Studio HTML App ($9, was $19)</strong> together?
+                  <LocalizedCtaText
+                    label="Want both the Fieldguide PDF ($5, was $9) and Launchpad Studio HTML App ($9, was $19) together?"
+                    usdPrice={bundleCompanion.price}
+                    productKey={bundleCompanion.key}
+                  />
                 </span>
                 <div className="hero-account-links">
                   <Link href={`/products/${bundleCompanion.slug}`} className="hero-account-link">
-                    Get the $12 Bundle (Was $25 · Save $13) <ArrowUpRight size={14} />
+                    <LocalizedCtaText
+                      label="Claim $12 Bundle (Was $25 · Save $13)"
+                      usdPrice={bundleCompanion.price}
+                      productKey={bundleCompanion.key}
+                    />{' '}
+                    <ArrowUpRight size={14} />
                   </Link>
                 </div>
               </div>
@@ -140,8 +154,18 @@ export default async function ProductPage({ params }: Props) {
                     size={14}
                     style={{ verticalAlign: 'text-bottom', marginRight: '5px', color: '#173b31' }}
                   />
-                  <strong>Both files unlocked immediately:</strong> Save $13 off the $25 original
-                  price when you get the PDF and HTML app together.
+                  <strong>
+                    <LocalizedCtaText
+                      label="Best Value ($12 vs $25):"
+                      usdPrice={product.price}
+                      productKey={product.key}
+                    />
+                  </strong>{' '}
+                  <LocalizedCtaText
+                    label="Save $13 (52% off) and unlock both the PDF guide and standalone HTML app immediately."
+                    usdPrice={product.price}
+                    productKey={product.key}
+                  />
                 </span>
               </div>
             ) : null}
@@ -181,8 +205,7 @@ export default async function ProductPage({ params }: Props) {
                   : 'A standalone HTML launch system you own forever.'}
             </h2>
             <p>
-              Zero registration or login wall. Complete your one-time purchase on Dodo Payments and
-              download your{' '}
+              Lock in your launch discount today and download your{' '}
               {isBundle
                 ? 'PDF guide and HTML application files'
                 : isGuide
@@ -195,7 +218,11 @@ export default async function ProductPage({ params }: Props) {
             {product.includes.map((item) => (
               <li key={item}>
                 <Check size={17} />
-                {item}
+                <LocalizedCtaText
+                  label={item}
+                  usdPrice={product.price}
+                  productKey={product.key}
+                />
               </li>
             ))}
           </ul>
@@ -273,16 +300,25 @@ export default async function ProductPage({ params }: Props) {
             />
             <CheckoutButton product={product.key} usdPrice={product.price} className="button lime">
               {isBundle
-                ? `Get Complete Bundle (PDF + HTML) · $${product.price}`
+                ? `Get Complete Bundle · $12 (Was $25)`
                 : isGuide
-                  ? `Download the Fieldguide PDF · $${product.price}`
+                  ? `Get the Fieldguide PDF · $5 (Was $9)`
                   : isStudio
-                    ? `Get Launchpad Studio (.HTML App) · $${product.price}`
+                    ? `Get Launchpad Studio · $9 (Was $19)`
                     : `Get instant access · $${product.price}`}
             </CheckoutButton>
             <p>
-              No registration required · Instant{' '}
-              {isBundle ? 'PDF + HTML' : isGuide ? 'PDF' : 'HTML file'} download · One-time payment
+              <LocalizedCtaText
+                label={
+                  isBundle
+                    ? 'Save $13 (52% off $25) · Instant PDF + HTML download'
+                    : isGuide
+                      ? 'Save $4 (44% off $9) · Instant PDF download'
+                      : 'Save $10 (53% off $19) · Instant HTML app download'
+                }
+                usdPrice={product.price}
+                productKey={product.key}
+              />
             </p>
           </aside>
         </section>
