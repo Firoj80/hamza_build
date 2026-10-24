@@ -6,6 +6,15 @@ export const metadata:Metadata={
   metadataBase:new URL(configuredSiteOrigin()),
   title:'Hamza Idrishi | Threads + AIs + Digital Products= Money Machine 💵',
   description:'Practical tools for your first digital product. Start with the $5 Idea-to-Income Fieldguide PDF, the $9 Launchpad Studio HTML App, or the $12 Complete Creator Launch Bundle.',
+  icons:{
+    icon:[
+      {url:'/assets/aistudio/ik_Vm6tn_d1cf175a.jpg',type:'image/jpeg'},
+    ],
+    shortcut:['/assets/aistudio/ik_Vm6tn_d1cf175a.jpg'],
+    apple:[
+      {url:'/assets/aistudio/ik_Vm6tn_d1cf175a.jpg',type:'image/jpeg'},
+    ],
+  },
   openGraph:{
     type:'website',
     siteName:'Hamza Idrishi · Build_hamza',

@@ -31,10 +31,10 @@ export default function SiteHeaderClient({
           <div className="centered-title-row">
             <Image
               className="brand-icon"
-              src="/icon.svg"
-              alt=""
-              width={34}
-              height={34}
+              src="/assets/aistudio/ik_Vm6tn_d1cf175a.jpg"
+              alt="Hamza Idrishi"
+              width={40}
+              height={40}
               unoptimized
             />
             <span className="centered-site-title">Hamza Idrishi</span>

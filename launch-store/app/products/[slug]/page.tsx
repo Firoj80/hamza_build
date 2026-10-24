@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowRight, ArrowUpRight, Check, Download, Package } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, Download, Package, Star } from 'lucide-react';
 import CheckoutButton from '@/app/checkout-button';
 import { bundle, guide, studio } from '@/lib/catalog';
 import { findProductBySlugOrKey, getActiveCatalogProducts } from '@/lib/product-store';
+import { loadEmailStudioState } from '@/lib/email-reviews-store';
 import StudioGallery from './studio-gallery';
 import SiteHeader from '@/app/site-header';
 import SiteFooter from '@/app/site-footer';
@@ -60,9 +61,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const [product, allProducts] = await Promise.all([
+  const [product, allProducts, emailState] = await Promise.all([
     findProductBySlugOrKey(slug),
-    getActiveCatalogProducts()
+    getActiveCatalogProducts(),
+    loadEmailStudioState()
   ]);
   if (!product || product.status === 'archived') notFound();
 
@@ -70,6 +72,32 @@ export default async function ProductPage({ params }: Props) {
   const isStudio = product.key === 'studio';
   const isBundle = product.key === 'bundle' || product.deliveryType === 'bundle_both';
   const isLightCover = product.coverTheme === 'light';
+
+  const publishedReviews = emailState.reviews.filter((r) => r.published);
+  const directReviews = publishedReviews.filter((r) =>
+    isBundle
+      ? r.productKey === 'both'
+      : isGuide
+        ? r.productKey === 'fieldguide'
+        : isStudio
+          ? r.productKey === 'studio'
+          : true
+  );
+  const matchingReviews = publishedReviews.filter((r) =>
+    isBundle
+      ? true
+      : isGuide
+        ? r.productKey === 'fieldguide' || r.productKey === 'both'
+        : isStudio
+          ? r.productKey === 'studio' || r.productKey === 'both'
+          : true
+  );
+  const displayReviewCount =
+    directReviews.length > 0 ? directReviews.length : publishedReviews.length;
+  const displayRating =
+    directReviews.length > 0
+      ? (directReviews.reduce((s, r) => s + r.rating, 0) / directReviews.length).toFixed(1)
+      : '5.0';
 
   const bundleCompanion = allProducts.find((p) => p.key === 'bundle');
   const companion =
@@ -94,6 +122,18 @@ export default async function ProductPage({ params }: Props) {
               <br />
               <em>{product.headline}</em>
             </h1>
+            <a href="#product-reviews" className="detail-rating-pill">
+              <span className="gr-card-stars" aria-hidden="true">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} size={14} fill="#d49b00" color="#d49b00" />
+                ))}
+              </span>
+              <strong>{displayRating} / 5.0</strong>
+              <span>
+                · {displayReviewCount} verified {displayReviewCount === 1 ? 'review' : 'reviews'} (
+                {publishedReviews.length} total store reviews)
+              </span>
+            </a>
             <p>
               <LocalizedCtaText
                 label={product.description}
@@ -291,6 +331,83 @@ export default async function ProductPage({ params }: Props) {
               <p>{section.body}</p>
             </article>
           ))}
+        </section>
+
+        <section id="product-reviews" className="detail-reviews-section wrap">
+          <div className="section-heading">
+            <div>
+              <div className="eyebrow">
+                <span /> VERIFIED BUYER REVIEWS · {displayRating} ★ ({displayReviewCount}{' '}
+                {displayReviewCount === 1 ? 'REVIEW' : 'REVIEWS'})
+              </div>
+              <h2>
+                What creators say about
+                <br />
+                <em>{product.name}.</em>
+              </h2>
+            </div>
+            <div>
+              <p style={{ marginBottom: '12px' }}>
+                <LocalizedCtaText
+                  label={`Rated ${displayRating}/5.0 across ${displayReviewCount} verified ${displayReviewCount === 1 ? 'review' : 'reviews'} for this tool (${publishedReviews.length} total verified creator reviews across the store).`}
+                  usdPrice={product.price}
+                  productKey={product.key}
+                />
+              </p>
+              <Link href="/review" className="text-link">
+                Bought this tool? Leave a verified review <ArrowUpRight size={15} />
+              </Link>
+            </div>
+          </div>
+
+          <div className="reviews-grid">
+            {matchingReviews.map((review) => (
+              <article key={review.id} className="review-card">
+                <div className="review-card-top">
+                  <div className="review-stars" aria-label={`${review.rating} out of 5 stars`}>
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <Star
+                        key={idx}
+                        size={15}
+                        fill={idx < review.rating ? '#d49b00' : 'none'}
+                        color={idx < review.rating ? '#d49b00' : '#c5cec0'}
+                      />
+                    ))}
+                  </div>
+                  {review.verifiedBuyer && (
+                    <span className="review-verified-badge">Verified Buyer</span>
+                  )}
+                </div>
+
+                <h3 className="review-headline">
+                  <LocalizedCtaText
+                    label={review.headline}
+                    usdPrice={review.productKey === 'both' ? 12 : review.productKey === 'studio' ? 9 : 5}
+                    productKey={review.productKey === 'both' ? 'bundle' : review.productKey}
+                  />
+                </h3>
+
+                <p className="review-comment">
+                  <LocalizedCtaText
+                    label={review.comment}
+                    usdPrice={review.productKey === 'both' ? 12 : review.productKey === 'studio' ? 9 : 5}
+                    productKey={review.productKey === 'both' ? 'bundle' : review.productKey}
+                  />
+                </p>
+
+                <div className="review-author-footer">
+                  <strong>{review.name}</strong>
+                  <span>
+                    <LocalizedCtaText
+                      label={review.role}
+                      usdPrice={review.productKey === 'both' ? 12 : review.productKey === 'studio' ? 9 : 5}
+                      productKey={review.productKey === 'both' ? 'bundle' : review.productKey}
+                    />
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="detail-bottom wrap">

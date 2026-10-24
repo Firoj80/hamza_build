@@ -337,8 +337,9 @@ body{font-size:17px}.product-badge{max-width:calc(100% - 32px);line-height:1.5}.
 .centered-header-back-row{width:100%;display:flex;justify-content:center;margin-bottom:2px}
 .centered-brand-lockup{display:inline-flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:#141311}
 .centered-brand-lockup:hover .centered-site-title{text-decoration:underline;text-underline-offset:4px}
-.centered-title-row{display:inline-flex;align-items:center;justify-content:center;gap:10px}
-.centered-title-row .brand-icon{margin-right:0;width:32px;height:32px}
+.centered-title-row{display:inline-flex;align-items:center;justify-content:center;gap:11px}
+.brand-icon{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:center 18%;border:1.5px solid #141311;box-shadow:2px 2px 0 rgba(20,19,17,0.12);flex-shrink:0}
+.centered-title-row .brand-icon{margin-right:0;width:40px;height:40px}
 .centered-site-title{font-family:Manrope,Arial,sans-serif;font-size:clamp(22px,2.4vw,28px);font-weight:800;letter-spacing:-.7px;line-height:1.1;color:#141311}
 .centered-site-tagline{margin:0;font-family:'DM Sans',Manrope,Arial,sans-serif;font-size:clamp(13.5px,1.5vw,16.5px);font-weight:600;line-height:1.4;color:#2c362e;letter-spacing:-.1px}
 .centered-admin-actions{justify-content:center;flex-wrap:wrap;margin-top:4px}
@@ -367,6 +368,18 @@ body{font-size:17px}.product-badge{max-width:calc(100% - 32px);line-height:1.5}.
 .gr-card-get-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:6px 12px;border-radius:4px;background:#141311;color:#ffffff;border:1.5px solid #141311;font-family:Manrope,Arial,sans-serif;font-size:12.5px;font-weight:800;letter-spacing:.1px;line-height:1.1;white-space:nowrap;transition:background .15s ease,color .15s ease,transform .15s ease,box-shadow .15s ease}
 .gr-card-get-btn:hover{background:#d9f45b;color:#141311;transform:translate(-1px,-1px);box-shadow:2px 2px 0 #141311}
 
+.gr-card-rating-row{padding:8px 14px;border-top:1px solid #e4e8df;background:#fafbf8;display:flex;align-items:center;justify-content:space-between;gap:6px;text-decoration:none;color:#141311;font-family:Manrope,Arial,sans-serif;font-size:12px;transition:background .15s ease}
+.gr-card-rating-row:hover{background:#f1f5ec}
+.gr-card-stars{display:inline-flex;align-items:center;gap:2px;color:#d49b00;flex-shrink:0}
+.gr-card-rating-text{color:#4d5b4f;font-weight:600;line-height:1.2}
+.gr-card-rating-text strong{color:#141311;font-weight:800}
+
+.gr-catalog-rating-strip{margin-top:16px;padding:12px 18px;border:1.5px solid #141311;border-radius:6px;background:#ffffff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:3px 3px 0 rgba(20,19,17,0.06)}
+.gr-catalog-rating-left{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13.5px;color:#3d4b42}
+.gr-catalog-rating-left strong{font-family:Manrope,Arial,sans-serif;font-weight:800;color:#141311}
+.gr-catalog-rating-link{display:inline-flex;align-items:center;gap:5px;font-family:Manrope,Arial,sans-serif;font-size:13px;font-weight:800;color:#173b31;text-decoration:none}
+.gr-catalog-rating-link:hover{text-decoration:underline;text-underline-offset:3px}
+
 .gr-price-row{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
 .gr-price-ribbon{position:relative;display:inline-flex;align-items:center;background:#ff90e8;color:#141311;border:1.5px solid #141311;padding:4px 16px 4px 9px;font-family:Manrope,Arial,sans-serif;font-size:15px;font-weight:800;line-height:1.15;letter-spacing:-.3px;overflow:hidden}
 .gr-price-ribbon::after{content:"";position:absolute;right:-7px;top:50%;width:12px;height:12px;background:#ffffff;border-left:1.5px solid #141311;border-bottom:1.5px solid #141311;transform:translateY(-50%) rotate(45deg)}
@@ -375,8 +388,8 @@ body{font-size:17px}.product-badge{max-width:calc(100% - 32px);line-height:1.5}.
 .gr-price-original{font-family:Manrope,Arial,sans-serif;font-size:13.5px;font-weight:600;color:#7b847c;text-decoration:line-through;text-decoration-thickness:1.5px}
 .gr-price-off{display:inline-flex;align-items:center;padding:2px 6px;border-radius:4px;background:#e8f5e9;border:1px solid #b8dec0;color:#173b31;font-family:Manrope,Arial,sans-serif;font-size:11px;font-weight:800;letter-spacing:.2px}
 
-/* Reformatted Reviews Section */
-.reviews-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+/* Reformatted 2x2 Reviews Grid */
+.reviews-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .review-card{background:#ffffff;border:1.5px solid #141311;border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:3px 3px 0 rgba(20,19,17,0.08)}
 .review-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .review-stars{display:inline-flex;align-items:center;gap:3px;color:#d49b00}
@@ -385,6 +398,13 @@ body{font-size:17px}.product-badge{max-width:calc(100% - 32px);line-height:1.5}.
 .review-comment{margin:0;font-size:14.5px;line-height:1.62;color:#3d4b42;flex:1}
 .review-author-footer{padding-top:12px;border-top:1px solid #e4e8df;display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:#5c695e}
 .review-author-footer strong{color:#141311;font-size:13.5px;font-weight:800}
+
+/* Product Detail Rating Pill & Reviews Section */
+.detail-rating-pill{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 4px;padding:7px 13px;border-radius:6px;background:#ffffff;border:1.5px solid #141311;color:#141311;font-family:Manrope,Arial,sans-serif;font-size:13px;text-decoration:none;box-shadow:2px 2px 0 rgba(20,19,17,0.08);transition:transform .15s ease,box-shadow .15s ease}
+.detail-rating-pill:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 #141311}
+.detail-rating-pill strong{font-weight:800;color:#141311}
+.detail-rating-pill span{color:#4d5b4f;font-weight:600}
+.detail-reviews-section{padding:56px 0 24px}
 
 /* Global Text Formatting, Price Stack & Alignment Fixes */
 .section-heading{align-items:flex-end;gap:32px}
@@ -414,8 +434,11 @@ body{font-size:17px}.product-badge{max-width:calc(100% - 32px);line-height:1.5}.
 
 @media(max-width:980px){
  .gr-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
- .reviews-grid{grid-template-columns:1fr}
+ .reviews-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
  .detail-bottom{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+ .reviews-grid{grid-template-columns:1fr}
 }
 @media(max-width:560px){
  .gr-catalog-section{padding:18px 0 28px}
@@ -426,6 +449,8 @@ body{font-size:17px}.product-badge{max-width:calc(100% - 32px);line-height:1.5}.
  .gr-card-title{font-size:14.5px;line-height:1.3}
  .gr-card-subtitle{font-size:11.5px;margin-top:4px}
  .gr-card-footer{padding:9px 10px;gap:6px}
+ .gr-card-rating-row{padding:6px 10px;font-size:11px}
+ .gr-catalog-rating-strip{padding:10px 12px;font-size:12px}
  .gr-price-ribbon{font-size:13px;padding:3px 13px 3px 6px}
  .gr-price-original{font-size:11.5px}
  .gr-price-off{display:none}

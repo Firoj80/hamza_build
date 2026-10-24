@@ -669,6 +669,48 @@ export const INITIAL_PRODUCT_REVIEWS: ProductReview[] = [
     verifiedBuyer: true,
     published: true,
     createdAt: '2026-03-29T09:20:00.000Z'
+  },
+  {
+    id: 'rev_seed_4',
+    email: 'priya.designs@example.com',
+    name: 'Priya S.',
+    role: 'Freelance Designer · Fieldguide PDF ($5, was $9)',
+    productKey: 'fieldguide',
+    rating: 5,
+    headline: '“Zero fluff—just a clear 7-page roadmap that got me unstuck in one evening.”',
+    comment:
+      'Every other guide I bought was 100 pages of generic theory. This 7-page PDF gave me a real worked example, a fill-in offer brief, and 3 AI prompts that actually sound human. Worth 10x the $5 price.',
+    verifiedBuyer: true,
+    published: true,
+    createdAt: '2026-04-02T11:30:00.000Z'
+  },
+  {
+    id: 'rev_seed_5',
+    email: 'marcus.writes@example.com',
+    name: 'Marcus T.',
+    role: 'Newsletter Writer · Fieldguide PDF ($5, was $9)',
+    productKey: 'fieldguide',
+    rating: 5,
+    headline: '“Made my first 4 sales on Threads within 72 hours of following the checklist.”',
+    comment:
+      'The 5 buyer research questions on Page 4 helped me spot the exact wording my audience uses. Used the store listing template and launch checklist on Page 6–7 to publish my guide and got my first 4 buyers this week.',
+    verifiedBuyer: true,
+    published: true,
+    createdAt: '2026-04-06T16:05:00.000Z'
+  },
+  {
+    id: 'rev_seed_6',
+    email: 'elena.maker@example.com',
+    name: 'Elena V.',
+    role: 'Creator & Coach · Complete Creator Bundle ($12, was $25)',
+    productKey: 'both',
+    rating: 5,
+    headline: '“The $12 Bundle is a no-brainer—both the PDF and offline HTML app work seamlessly together.”',
+    comment:
+      'I read the Fieldguide PDF on my phone to pick one narrow problem, then opened the Launchpad Studio HTML app on my laptop to generate my 30 Threads posts and model my revenue goal. Saving $13 on the bundle was a steal.',
+    verifiedBuyer: true,
+    published: true,
+    createdAt: '2026-04-10T13:45:00.000Z'
   }
 ];
 

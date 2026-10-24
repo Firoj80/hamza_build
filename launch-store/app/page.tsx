@@ -78,6 +78,24 @@ export default async function Home() {
                   ? `SAVE ${Math.round(((item.compareAtPrice - item.price) / item.compareAtPrice) * 100)}%`
                   : null;
 
+              const productReviews = publishedReviews.filter((r) =>
+                isBundleProduct
+                  ? r.productKey === 'both'
+                  : isGuideProduct
+                    ? r.productKey === 'fieldguide'
+                    : isStudioProduct
+                      ? r.productKey === 'studio'
+                      : true
+              );
+              const reviewCount =
+                productReviews.length > 0 ? productReviews.length : publishedReviews.length;
+              const productRating =
+                productReviews.length > 0
+                  ? (
+                      productReviews.reduce((acc, r) => acc + r.rating, 0) / productReviews.length
+                    ).toFixed(1)
+                  : avgRating;
+
               return (
                 <article className="gr-product-card" key={item.key}>
                   <Link
@@ -134,9 +152,42 @@ export default async function Home() {
                       Get
                     </CheckoutButton>
                   </div>
+
+                  <Link
+                    href={`${href}#product-reviews`}
+                    className="gr-card-rating-row"
+                    aria-label={`Rated ${productRating} out of 5 stars from ${reviewCount} reviews`}
+                  >
+                    <span className="gr-card-stars" aria-hidden="true">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} size={13} fill="#d49b00" color="#d49b00" />
+                      ))}
+                    </span>
+                    <span className="gr-card-rating-text">
+                      <strong>{productRating}</strong> ({reviewCount}{' '}
+                      {reviewCount === 1 ? 'review' : 'reviews'})
+                    </span>
+                  </Link>
                 </article>
               );
             })}
+          </div>
+
+          <div className="gr-catalog-rating-strip">
+            <div className="gr-catalog-rating-left">
+              <span className="gr-card-stars" aria-hidden="true">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} size={15} fill="#d49b00" color="#d49b00" />
+                ))}
+              </span>
+              <span>
+                <strong>{avgRating} / 5.0</strong> average rating across{' '}
+                <strong>{publishedReviews.length} verified creator reviews</strong>
+              </span>
+            </div>
+            <a href="#reviews" className="gr-catalog-rating-link">
+              Read all {publishedReviews.length} reviews <ArrowUpRight size={14} />
+            </a>
           </div>
         </section>
 
@@ -222,7 +273,10 @@ export default async function Home() {
           <section className="wrap section-space" id="reviews">
             <div className="section-heading">
               <div>
-                <div className="eyebrow">VERIFIED CREATOR REVIEWS · ★ {avgRating} / 5.0 RATING</div>
+                <div className="eyebrow">
+                  <span /> VERIFIED CREATOR REVIEWS · ★ {avgRating} / 5.0 ({publishedReviews.length}{' '}
+                  REVIEWS)
+                </div>
                 <h2>
                   Trusted by early creators
                   <br />
@@ -243,7 +297,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="reviews-grid">
-              {publishedReviews.slice(0, 3).map((rev) => (
+              {publishedReviews.slice(0, 6).map((rev) => (
                 <article key={rev.id} className="review-card">
                   <div className="review-card-top">
                     <div className="review-stars" aria-label={`${rev.rating} out of 5 stars`}>

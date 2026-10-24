@@ -77,13 +77,17 @@ function normalizeState(raw?: Partial<EmailStudioPersistedState> | null): EmailS
     : [];
 
   const seedMap = new Map(INITIAL_PRODUCT_REVIEWS.map((s) => [s.id, s]));
-  const reviews =
-    Array.isArray(raw?.reviews) && raw!.reviews.length > 0
-      ? raw!.reviews
-          .filter((r) => r && typeof r.comment === 'string')
-          .map((r) => (seedMap.has(r.id) ? { ...seedMap.get(r.id)!, published: r.published ?? true } : r))
-          .slice(0, 200)
-      : INITIAL_PRODUCT_REVIEWS;
+  let reviews: ProductReview[];
+  if (Array.isArray(raw?.reviews) && raw!.reviews.length > 0) {
+    const existing = raw!.reviews
+      .filter((r) => r && typeof r.comment === 'string')
+      .map((r) => (seedMap.has(r.id) ? { ...seedMap.get(r.id)!, published: r.published ?? true } : r));
+    const existingIds = new Set(existing.map((r) => r.id));
+    const missingSeeds = INITIAL_PRODUCT_REVIEWS.filter((s) => !existingIds.has(s.id));
+    reviews = [...existing, ...missingSeeds].slice(0, 200);
+  } else {
+    reviews = INITIAL_PRODUCT_REVIEWS;
+  }
 
   return {
     templates: mergedTemplates,
