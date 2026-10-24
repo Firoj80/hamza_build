@@ -190,6 +190,7 @@ export async function POST(request: NextRequest) {
             metadata: {
               platform_attempt: attempt,
               product_key: key,
+              business_name: 'Hamza Idrishi',
               checkout_mode: user ? 'account' : 'guest',
               preferred_currency: billingCurrency,
               preferred_country: billingCountry
@@ -215,6 +216,7 @@ export async function POST(request: NextRequest) {
           metadata: {
             platform_attempt: attempt,
             product_key: key,
+            business_name: 'Hamza Idrishi',
             checkout_mode: user ? 'account' : 'guest',
             preferred_currency: billingCurrency,
             preferred_country: billingCountry
@@ -228,6 +230,7 @@ export async function POST(request: NextRequest) {
           metadata: {
             platform_attempt: attempt,
             product_key: key,
+            business_name: 'Hamza Idrishi',
             checkout_mode: user ? 'account' : 'guest'
           }
         });
