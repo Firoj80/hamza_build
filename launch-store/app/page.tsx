@@ -125,15 +125,14 @@ export default async function Home() {
                         mode="gumroad-ribbon"
                       />
                     </Link>
-                    <Link
-                      href={href}
-                      className="gr-card-open-hint"
-                      aria-hidden="true"
-                      tabIndex={-1}
+                    <CheckoutButton
+                      product={item.key}
+                      usdPrice={item.price}
+                      compact
+                      className="gr-card-get-btn"
                     >
-                      <span>View</span>
-                      <ArrowUpRight size={14} />
-                    </Link>
+                      Get
+                    </CheckoutButton>
                   </div>
                 </article>
               );

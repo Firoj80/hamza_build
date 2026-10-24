@@ -9,13 +9,15 @@ export default function CheckoutButton({
  children='Get Launchpad Studio',
  product='studio',
  usdPrice,
- autoStart=false
+ autoStart=false,
+ compact=false
 }:{
  className?:string;
  children?:React.ReactNode;
  product?:string;
  usdPrice?:number;
  autoStart?:boolean;
+ compact?:boolean;
 }) {
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
@@ -54,7 +56,7 @@ export default function CheckoutButton({
  },[autoStart]);
 
  let renderedChildren=children;
- if(typeof children==='string'&&currency!=='USD'){
+ if(!compact&&typeof children==='string'&&currency!=='USD'){
   if(typeof usdPrice==='number'){
    const q=getQuote(usdPrice,product);
    const replaced=children.replace(/\$(\d+(?:\.\d{1,2})?)/g,(full,numStr)=>{
@@ -74,10 +76,10 @@ export default function CheckoutButton({
  }
 
  return (
-  <div className="checkout-action">
+  <div className={compact ? 'checkout-action is-compact' : 'checkout-action'}>
    <button type="button" className={className} onClick={checkout} disabled={busy}>
-    {busy?'Opening checkout…':renderedChildren}
-    {busy?<LoaderCircle className="spin" size={17}/>:<ArrowUpRight size={18}/>}
+    <span>{busy ? (compact ? 'Wait…' : 'Opening checkout…') : renderedChildren}</span>
+    {busy ? <LoaderCircle className="spin" size={compact ? 13 : 17}/> : <ArrowUpRight size={compact ? 14 : 18}/>}
    </button>
    {error&&<p className="checkout-error" role="alert">{error} <a href="/support">Get help</a></p>}
   </div>
