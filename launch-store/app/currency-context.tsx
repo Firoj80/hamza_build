@@ -254,73 +254,47 @@ export function PriceTag({
 
   if (mode === 'detail-hero') {
     return (
-      <div className="detail-price">
-        {hasDiscount && (
-          <s
-            style={{
-              fontSize: '22px',
-              color: '#8a948d',
-              marginRight: '10px',
-              fontWeight: 500,
-              textDecorationThickness: '2px'
-            }}
-          >
-            {q.formattedCompareAtPrice}
-          </s>
-        )}
-        <strong>{q.formattedPrice}</strong>
-        {hasDiscount && (
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              background: '#e6f4ea',
-              color: '#173b31',
-              border: '1px solid #b7dfc2',
-              borderRadius: '999px',
-              padding: '4px 10px',
-              fontSize: '12px',
-              fontWeight: 700,
-              letterSpacing: '0.04em',
-              marginLeft: '10px',
-              verticalAlign: 'middle'
-            }}
-          >
-            SAVE {formattedSaveAmount} ({savePercent}% OFF)
-          </span>
-        )}
-        <span>
-          {q.currency} · pay once{hasDiscount ? ` · Original price ${q.formattedCompareAtPrice}` : ''}
-          <br />
+      <div className="detail-price-stack">
+        <div className="detail-price-main">
+          <strong>{q.formattedPrice}</strong>
+          {hasDiscount && (
+            <s className="detail-price-strike">{q.formattedCompareAtPrice}</s>
+          )}
+          {hasDiscount && (
+            <span className="detail-price-save-pill">
+              SAVE {formattedSaveAmount} ({savePercent}% OFF)
+            </span>
+          )}
+        </div>
+        <div className="detail-price-sub">
+          {q.currency} · one-time payment
+          {hasDiscount ? ` · Original price ${q.formattedCompareAtPrice}` : ''}
           {q.isConverted && showUsdSubtext
-            ? `≈ ${q.formattedUsdPrice} USD · Instant download`
-            : 'Limited-time launch price · Instant download'}
-        </span>
+            ? ` (≈ ${q.formattedUsdPrice} USD) · Instant download`
+            : ' · Instant download'}
+        </div>
       </div>
     );
   }
 
   if (mode === 'detail-aside') {
     return (
-      <span className="detail-price">
-        {hasDiscount && (
-          <s
-            style={{
-              fontSize: '18px',
-              color: '#8a948d',
-              marginRight: '8px',
-              fontWeight: 500
-            }}
-          >
-            {q.formattedCompareAtPrice}
-          </s>
-        )}
-        <strong>{q.formattedPrice}</strong>
-        <small>
-          {q.currency} · one-time{hasDiscount ? ` · Save ${formattedSaveAmount} (${savePercent}% off)` : ''}
+      <div className="detail-price-stack is-aside">
+        <div className="detail-price-main">
+          <strong>{q.formattedPrice}</strong>
+          {hasDiscount && (
+            <s className="detail-price-strike is-aside">{q.formattedCompareAtPrice}</s>
+          )}
+          {hasDiscount && (
+            <span className="detail-price-save-pill is-aside">-{savePercent}%</span>
+          )}
+        </div>
+        <small className="detail-price-sub">
+          {q.currency} · one-time
+          {hasDiscount ? ` · Save ${formattedSaveAmount}` : ''}
           {q.isConverted && showUsdSubtext ? ` (≈ ${q.formattedUsdPrice} USD)` : ''}
         </small>
-      </span>
+      </div>
     );
   }
 

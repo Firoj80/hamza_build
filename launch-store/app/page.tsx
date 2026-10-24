@@ -45,30 +45,6 @@ export default async function Home() {
       </a>
       <SiteHeader />
       <main id="main">
-        {/* Gumroad-Style Creator Storefront Header */}
-        <header className="gr-storefront-header">
-          <div className="wrap gr-storefront-header-inner">
-            <div className="gr-storefront-brand">
-              <div className="gr-storefront-avatar" aria-hidden="true">
-                hi.
-              </div>
-              <div>
-                <h1 className="gr-storefront-title">Digital Products &amp; Creator Tools</h1>
-                <p className="gr-storefront-sub">
-                  Practical frameworks &amp; offline-ready tools to validate, build, and launch your first digital product.
-                </p>
-              </div>
-            </div>
-            <div className="gr-storefront-pill">
-              <LocalizedCtaText
-                label="Launch Offer: Save up to 53% · Bundle $12 (Was $25)"
-                usdPrice={12}
-                productKey="bundle"
-              />
-            </div>
-          </div>
-        </header>
-
         {/* Gumroad-Style Product Listing Grid */}
         <section className="wrap gr-catalog-section" id="tools" aria-label="Products">
           <div className="gr-product-grid">
@@ -149,6 +125,15 @@ export default async function Home() {
                         mode="gumroad-ribbon"
                       />
                     </Link>
+                    <Link
+                      href={href}
+                      className="gr-card-open-hint"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                    >
+                      <span>View</span>
+                      <ArrowUpRight size={14} />
+                    </Link>
                   </div>
                 </article>
               );
@@ -159,13 +144,13 @@ export default async function Home() {
         <div className="principles wrap">
           <span>Built around what matters.</span>
           <p>
-            <Compass size={17} /> Validate before you build
+            <Compass size={17} /> <span>Validate before you build</span>
           </p>
           <p>
-            <Download size={17} /> Instant PDF &amp; HTML file delivery
+            <Download size={17} /> <span>Instant PDF &amp; HTML file delivery</span>
           </p>
           <p>
-            <Layers size={17} /> One-time purchase · Own it forever
+            <Layers size={17} /> <span>One-time purchase · Own it forever</span>
           </p>
         </div>
 
@@ -173,7 +158,14 @@ export default async function Home() {
           <div className="wrap section-space">
             <div className="section-heading">
               <div>
-                <div className="eyebrow">INSIDE LAUNCHPAD STUDIO ($9 OR $12 BUNDLE)</div>
+                <div className="eyebrow">
+                  <span />{' '}
+                  <LocalizedCtaText
+                    label="INSIDE LAUNCHPAD STUDIO ($9 OR $12 BUNDLE)"
+                    usdPrice={9}
+                    productKey="studio"
+                  />
+                </div>
                 <h2>
                   From “what if”
                   <br />
@@ -181,9 +173,8 @@ export default async function Home() {
                 </h2>
               </div>
               <p>
-                Download the standalone HTML app to use anytime offline,
-                <br />
-                or work right inside your browser studio.
+                Download the standalone HTML app to use anytime offline, or work right inside your
+                browser studio.
               </p>
             </div>
             <div className="process-grid">
@@ -207,15 +198,23 @@ export default async function Home() {
                 <div key={s.n}>
                   <span>{s.n}</span>
                   <h3>{s.title}</h3>
-                  <p>{s.text}</p>
+                  <p>
+                    <LocalizedCtaText label={s.text} usdPrice={9} productKey="studio" />
+                  </p>
                 </div>
               ))}
             </div>
             <StudioPreview />
             <div className="preview-caption">
-              <MousePointer2 size={15} /> Interactive preview above. When you purchase Launchpad
-              Studio ($9) or the Complete Creator Bundle ($12), you receive the full downloadable{' '}
-              <code>Launchpad-Studio.html</code> file immediately after checkout.
+              <MousePointer2 size={15} />
+              <span>
+                <LocalizedCtaText
+                  label="Interactive preview above. When you purchase Launchpad Studio ($9, was $19) or the Complete Creator Bundle ($12, was $25), you receive the full downloadable "
+                  usdPrice={9}
+                  productKey="studio"
+                />
+                <code>Launchpad-Studio.html</code> file immediately after checkout.
+              </span>
             </div>
           </div>
         </section>

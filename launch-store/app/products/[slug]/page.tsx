@@ -94,7 +94,13 @@ export default async function ProductPage({ params }: Props) {
               <br />
               <em>{product.headline}</em>
             </h1>
-            <p>{product.description}</p>
+            <p>
+              <LocalizedCtaText
+                label={product.description}
+                usdPrice={product.price}
+                productKey={product.key}
+              />
+            </p>
             <PriceTag
               usdPrice={product.price}
               productKey={product.key}
@@ -196,7 +202,9 @@ export default async function ProductPage({ params }: Props) {
 
         <section className="detail-includes wrap">
           <div className="detail-section-heading">
-            <div className="eyebrow">WHAT YOU RECEIVE IMMEDIATELY</div>
+            <div className="eyebrow">
+              <span /> WHAT YOU RECEIVE IMMEDIATELY
+            </div>
             <h2>
               {isBundle
                 ? 'Both the 7-page tactical PDF and the 5-stage HTML launch app.'
@@ -218,11 +226,13 @@ export default async function ProductPage({ params }: Props) {
             {product.includes.map((item) => (
               <li key={item}>
                 <Check size={17} />
-                <LocalizedCtaText
-                  label={item}
-                  usdPrice={product.price}
-                  productKey={product.key}
-                />
+                <span>
+                  <LocalizedCtaText
+                    label={item}
+                    usdPrice={product.price}
+                    productKey={product.key}
+                  />
+                </span>
               </li>
             ))}
           </ul>
@@ -237,7 +247,9 @@ export default async function ProductPage({ params }: Props) {
         {product.galleryImages && product.galleryImages.length > 0 && (
           <section className="wrap" style={{ marginBottom: '42px' }}>
             <div className="detail-section-heading" style={{ marginBottom: '18px' }}>
-              <div className="eyebrow">INSIDE PREVIEW GALLERY</div>
+              <div className="eyebrow">
+                <span /> INSIDE PREVIEW GALLERY
+              </div>
               <h2>Preview screenshots &amp; pages</h2>
             </div>
             <div
@@ -283,7 +295,9 @@ export default async function ProductPage({ params }: Props) {
 
         <section className="detail-bottom wrap">
           <div>
-            <div className="eyebrow">GOOD TO KNOW</div>
+            <div className="eyebrow">
+              <span /> GOOD TO KNOW
+            </div>
             <h2>
               Instant download.
               <br />
@@ -313,8 +327,8 @@ export default async function ProductPage({ params }: Props) {
                   isBundle
                     ? 'Save $13 (52% off $25) · Instant PDF + HTML download'
                     : isGuide
-                      ? 'Save $4 (44% off $9) · Instant PDF download'
-                      : 'Save $10 (53% off $19) · Instant HTML app download'
+                       ? 'Save $4 (44% off $9) · Instant PDF download'
+                       : 'Save $10 (53% off $19) · Instant HTML app download'
                 }
                 usdPrice={product.price}
                 productKey={product.key}
@@ -325,8 +339,16 @@ export default async function ProductPage({ params }: Props) {
 
         <section className="detail-next wrap">
           <div>
-            <div className="eyebrow">THE NEXT USEFUL STEP</div>
-            <p>{product.nextStep}</p>
+            <div className="eyebrow">
+              <span /> THE NEXT USEFUL STEP
+            </div>
+            <p>
+              <LocalizedCtaText
+                label={product.nextStep}
+                usdPrice={companion.price}
+                productKey={'key' in companion ? companion.key : undefined}
+              />
+            </p>
           </div>
           <Link href={product.nextHref || `/products/${companion.slug}`} className="text-link">
             <LocalizedCtaText

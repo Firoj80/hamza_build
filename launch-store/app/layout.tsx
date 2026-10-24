@@ -4,13 +4,13 @@ import {configuredSiteOrigin} from '@/lib/payment-policy.mjs';
 import AnalyticsTracker from './analytics-tracker';
 export const metadata:Metadata={
   metadataBase:new URL(configuredSiteOrigin()),
-  title:'Hamza Idrishi — Start small. Make something useful.',
-  description:'Practical tools for your first digital product. Start with the $5 Idea-to-Income Fieldguide, then organise the launch with Launchpad Studio.',
+  title:'Hamza Idrishi | Threads + AIs + Digital Products= Money Machine 💵',
+  description:'Practical tools for your first digital product. Start with the $5 Idea-to-Income Fieldguide PDF, the $9 Launchpad Studio HTML App, or the $12 Complete Creator Launch Bundle.',
   openGraph:{
     type:'website',
     siteName:'Hamza Idrishi · Build_hamza',
-    title:'Your first product starts with one useful idea.',
-    description:'A seven-page fieldguide and a private online launch workspace. Built for first-time creators.',
+    title:'Hamza Idrishi | Threads + AIs + Digital Products= Money Machine 💵',
+    description:'A seven-page fieldguide PDF and an offline-ready 5-stage HTML launch workspace. Built for creators.',
     url:'/',
     images:[
       {
@@ -33,8 +33,8 @@ export const metadata:Metadata={
     card:'summary_large_image',
     site:'@hamza_build',
     creator:'@hamza_build',
-    title:'Your first product starts with one useful idea.',
-    description:'A seven-page fieldguide and a private online launch workspace. Built for first-time creators.',
+    title:'Hamza Idrishi | Threads + AIs + Digital Products= Money Machine 💵',
+    description:'A seven-page fieldguide PDF and an offline-ready 5-stage HTML launch workspace. Built for creators.',
     images:['/images/launchpad-studio-og.png'],
   },
   other:{

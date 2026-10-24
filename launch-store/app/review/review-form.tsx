@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { CheckCircle2, Loader2, ShieldCheck, Star } from 'lucide-react';
 import { friendlyNameFromEmail, type ProductReview } from '@/lib/email-campaigns';
+import { LocalizedCtaText } from '@/app/currency-context';
 
 export default function ReviewForm({
   initialEmail,
@@ -63,14 +64,18 @@ export default function ReviewForm({
       : '5.0';
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px', alignItems: 'start' }}>
-      <section className="order-box" style={{ background: '#fff', border: '1px solid #dce3d6', borderRadius: '16px', padding: '28px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px', alignItems: 'start' }}>
+      <section className="order-box" style={{ background: '#fff', border: '1.5px solid #141311', borderRadius: '10px', padding: '28px', marginTop: 0 }}>
         <div className="eyebrow" style={{ marginBottom: '8px' }}><span /> SHARE YOUR EXPERIENCE</div>
-        <h2 style={{ fontSize: 'clamp(22px, 2.6vw, 30px)', margin: '0 0 8px', letterSpacing: '-0.03em' }}>
+        <h1 style={{ fontSize: 'clamp(24px, 2.8vw, 32px)', margin: '0 0 10px', letterSpacing: '-0.03em' }}>
           Rate your tool &amp; leave a review
-        </h2>
-        <p style={{ margin: '0 0 22px', color: '#5c6861', fontSize: '14.5px', lineHeight: 1.55 }}>
-          Your honest feedback helps improve the Idea-to-Income Fieldguide ($5) and Launchpad Studio ($9) and helps other first-time creators know what to expect.
+        </h1>
+        <p style={{ margin: '0 0 22px', color: '#5c6861', fontSize: '14.5px', lineHeight: 1.6 }}>
+          <LocalizedCtaText
+            label="Your honest feedback helps improve the Idea-to-Income Fieldguide ($5, was $9), Launchpad Studio ($9, was $19), and Complete Creator Bundle ($12, was $25)."
+            usdPrice={12}
+            productKey="bundle"
+          />
         </p>
 
         {submittedReview ? (
@@ -99,7 +104,7 @@ export default function ReviewForm({
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#46534d', marginBottom: '8px' }}>
                 1. Your overall rating
               </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 {[1, 2, 3, 4, 5].map((star) => {
                   const active = (hoverRating || rating) >= star;
                   return (
@@ -136,7 +141,7 @@ export default function ReviewForm({
 
             <div>
               <label htmlFor="review-product" style={{ display: 'block', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#46534d', marginBottom: '6px' }}>
-                2. Which tool are you reviewing?
+                2. Which product are you reviewing?
               </label>
               <select
                 id="review-product"
@@ -144,13 +149,13 @@ export default function ReviewForm({
                 onChange={(e) => setProductKey(e.target.value as 'fieldguide' | 'studio' | 'both')}
                 style={{ width: '100%', padding: '11px 13px', borderRadius: '9px', border: '1px solid #cfd8cc', background: '#fafbf8', fontSize: '14px', color: '#1d2925' }}
               >
-                <option value="fieldguide">Idea-to-Income Fieldguide ($5)</option>
-                <option value="studio">Launchpad Studio ($9)</option>
-                <option value="both">Both: Fieldguide ($5) + Launchpad Studio ($9)</option>
+                <option value="fieldguide">Idea-to-Income Fieldguide PDF ($5, was $9)</option>
+                <option value="studio">Launchpad Studio HTML App ($9, was $19)</option>
+                <option value="both">Complete Creator Launch Bundle ($12, was $25)</option>
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
               <div>
                 <label htmlFor="review-name" style={{ display: 'block', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#46534d', marginBottom: '6px' }}>
                   Your display name
@@ -167,7 +172,7 @@ export default function ReviewForm({
               </div>
               <div>
                 <label htmlFor="review-email" style={{ display: 'block', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#46534d', marginBottom: '6px' }}>
-                  Account email (verifies purchase)
+                  Checkout email (verifies purchase)
                 </label>
                 <input
                   id="review-email"
@@ -225,10 +230,10 @@ export default function ReviewForm({
       </section>
 
       <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ background: '#173b31', color: '#f6f5e9', borderRadius: '16px', padding: '22px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ background: '#173b31', color: '#f6f5e9', borderRadius: '12px', padding: '22px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', border: '1.5px solid #141311' }}>
           <div>
             <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', color: '#dae5a3', textTransform: 'uppercase' }}>
-              READER &amp; BUILDER FEEDBACK
+              VERIFIED CREATOR FEEDBACK
             </div>
             <div style={{ fontSize: '26px', fontWeight: 700, letterSpacing: '-0.03em', marginTop: '4px' }}>
               {avgRating} / 5.0 average
@@ -245,34 +250,43 @@ export default function ReviewForm({
         </div>
 
         {reviews.map((rev) => (
-          <article
-            key={rev.id}
-            style={{
-              background: '#fff',
-              border: '1px solid #e2e7df',
-              borderRadius: '14px',
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: '3px', color: '#e0a800' }}>
+          <article key={rev.id} className="review-card">
+            <div className="review-card-top">
+              <div className="review-stars">
                 {Array.from({ length: 5 }).map((_, idx) => (
-                  <Star key={idx} size={15} fill={idx < rev.rating ? '#e0a800' : 'none'} />
+                  <Star key={idx} size={15} fill={idx < rev.rating ? '#d49b00' : 'none'} />
                 ))}
               </div>
               {rev.verifiedBuyer && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#e7f3ea', color: '#285934', padding: '3px 9px', borderRadius: '999px', fontSize: '11px', fontWeight: 700 }}>
-                  <ShieldCheck size={12} /> Verified Buyer
+                <span className="review-verified-badge">
+                  <ShieldCheck size={12} style={{ verticalAlign: 'text-bottom', marginRight: '3px' }} />
+                  Verified Buyer
                 </span>
               )}
             </div>
-            <strong style={{ fontSize: '15.5px', color: '#173b31', lineHeight: 1.35 }}>{rev.headline}</strong>
-            <p style={{ margin: 0, fontSize: '14px', color: '#46534d', lineHeight: 1.55 }}>{rev.comment}</p>
-            <div style={{ fontSize: '12px', color: '#768178', paddingTop: '6px', borderTop: '1px solid #f0f2ee', display: 'flex', justifyContent: 'space-between' }}>
-              <span><strong>{rev.name}</strong> · {rev.role}</span>
+            <h3 className="review-headline">
+              <LocalizedCtaText
+                label={rev.headline}
+                usdPrice={rev.productKey === 'both' ? 12 : rev.productKey === 'studio' ? 9 : 5}
+                productKey={rev.productKey === 'both' ? 'bundle' : rev.productKey}
+              />
+            </h3>
+            <p className="review-comment">
+              <LocalizedCtaText
+                label={rev.comment}
+                usdPrice={rev.productKey === 'both' ? 12 : rev.productKey === 'studio' ? 9 : 5}
+                productKey={rev.productKey === 'both' ? 'bundle' : rev.productKey}
+              />
+            </p>
+            <div className="review-author-footer" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <span>
+                <strong>{rev.name}</strong> ·{' '}
+                <LocalizedCtaText
+                  label={rev.role}
+                  usdPrice={rev.productKey === 'both' ? 12 : rev.productKey === 'studio' ? 9 : 5}
+                  productKey={rev.productKey === 'both' ? 'bundle' : rev.productKey}
+                />
+              </span>
               <span>{new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
             </div>
           </article>
